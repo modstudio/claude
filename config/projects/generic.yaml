@@ -1,0 +1,143 @@
+# Generic Project Configuration
+# Fallback for projects not specifically configured
+
+project:
+  name: "Generic"
+  type: "Auto-detect"
+  description: "Generic project with auto-detection"
+  path: null
+  git_remote_pattern: null
+
+issue_tracking:
+  pattern: "{auto-detect}"
+  regex: "[A-Z]+-[0-9]+"
+  system: "Auto-detect"
+  url_template: null
+
+branching:
+  base_branch: "auto-detect"  # Will check: develop, main, master
+  pattern: "auto-detect"
+  types: []
+
+standards:
+  location: "auto-detect"  # Priority: .ai/rules/, CONTRIBUTING.md, docs/
+  files: []
+  main_guide: "auto-detect"
+
+citation_format:
+  architecture: "[ARCH §{section}]"
+  style: "[STYLE: \"{quote}\"]"
+  testing: "[TEST §{section}]"
+  contributing: "[CONTRIBUTING §{section}]"
+  language_standards:
+    php: "[PSR-12 §{section}]"
+    python: "[PEP-8 §{section}]"
+    javascript: "[ESLint: {rule}]"
+    go: "[Effective Go: {section}]"
+  examples:
+    - "[ARCH §Architecture]"
+    - "[PSR-12]"
+    - "[ESLint: no-unused-vars]"
+
+storage:
+  location: ".wip/{ISSUE_KEY}/"  # Fallback: .reviews/ or .claude/reviews/
+  files:
+    external_review: "external-review-fixes.md"
+    specification: "specification.md"
+    notes: "notes.md"
+
+documentation:
+  # Project standards location
+  standards:
+    directory: "auto-detect"  # Priority: .ai/rules/, CONTRIBUTING.md, docs/
+    architecture: "auto-detect"
+    style: "auto-detect"
+    testing: "auto-detect"
+
+  # Knowledge base configuration
+  knowledge_base:
+    location: "auto-detect"  # Look for: docs/, documentation/, .docs/, README.md
+
+    # Source type: auto-detect based on .gitignore
+    source: "auto-detect"  # Check if location is gitignored → gitignored/git
+
+    # Access method: bash (use Read tool)
+    access_method: "bash"
+
+    # Note: Will attempt to detect common documentation locations
+    # Priority: docs/, documentation/, .docs/, wiki/, README.md
+
+mcp_tools:
+  auto_detect: true
+  # Will attempt to use available MCP tools
+
+tech_stack:
+  auto_detect:
+    php: "composer.json exists"
+    laravel: "artisan file exists"
+    node: "package.json exists"
+    python: "requirements.txt exists"
+    go: "go.mod exists"
+    rust: "Cargo.toml exists"
+
+docker:
+  required: false
+  auto_detect: "docker-compose.yml or Dockerfile exists"
+  compose_file: "./docker-compose.yml"
+  containers:
+    php: "auto-detect"
+  user_id: 1000
+
+test_commands:
+  auto_detect:
+    - "package.json → scripts.test"
+    - "composer.json → scripts.test"
+    - "Makefile → test target"
+    - "pytest (if Python)"
+    - "go test (if Go)"
+    - "cargo test (if Rust)"
+
+linter_commands:
+  auto_detect:
+    - "phpcs (if PHP)"
+    - "eslint (if Node.js)"
+    - "pylint (if Python)"
+    - "golangci-lint (if Go)"
+
+notes: |
+  Generic fallback configuration for projects without specific config.
+
+  Auto-detection priorities:
+
+  1. Standards:
+     - .ai/rules/ (preferred)
+     - CONTRIBUTING.md
+     - docs/ directory
+     - README.md
+
+  2. Issue tracking:
+     - Extract pattern from branch names
+     - Look for {PREFIX}-#### format
+
+  3. Base branch:
+     - Check: develop, main, master (in order)
+
+  4. Storage:
+     - .wip/{ISSUE_KEY}/ (preferred)
+     - .reviews/{ISSUE_KEY}/ (alternative)
+     - .claude/reviews/{ISSUE_KEY}/ (gitignored fallback)
+
+  5. Tech stack:
+     - Detect from project files
+     - Use language-specific conventions
+
+  6. Test commands:
+     - Check common test scripts
+     - Fall back to framework defaults
+
+  When using generic config:
+  - More manual verification needed
+  - Standards citations may be less specific
+  - Test commands may need customization
+
+  Recommend creating a specific project config file for frequently used projects.

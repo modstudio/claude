@@ -1,0 +1,181 @@
+# Starship Project Configuration
+# Supply chain management platform for medical/dental products
+
+project:
+  name: "Starship"
+  type: "Laravel"
+  description: "Enterprise supply chain management for medical/dental products"
+  path: "~/Projects/starship"
+  git_remote_pattern: "JanusTrade/starship"
+
+issue_tracking:
+  pattern: "STAR-####"
+  regex: "STAR-[0-9]+"
+  system: "YouTrack"
+  url_template: "https://janus.myjetbrains.com/youtrack/issue/{ISSUE_KEY}"
+  url_article_template: "https://janus.myjetbrains.com/youtrack/articles/{ARTICLE_ID}"
+
+branching:
+  base_branch: "develop"
+  hotfix_base_branch: "master"
+  pattern: "{type}/{ISSUE_KEY}-{description}"
+  types:
+    - feature
+    - enhancement
+    - styling
+    - fix
+    - hotfix
+    - technical
+
+standards:
+  location: ".ai/rules/"
+  files:
+    - path: ".ai/rules/00-system-prompt.md"
+      purpose: "System role and interaction rules"
+
+    - path: ".ai/rules/01-core-workflow.md"
+      purpose: "Git workflow, single step rule, task decomposition"
+
+    - path: ".ai/rules/10-coding-style.md"
+      purpose: "Code quality, naming, comments, typing"
+
+    - path: ".ai/rules/20-architecture.md"
+      purpose: "DDD structure, patterns, conventions"
+
+    - path: ".ai/rules/30-testing.md"
+      purpose: "Test types, fixtures, naming"
+
+    - path: ".ai/rules/40-context-and-ops.md"
+      purpose: "Docker commands, documentation usage"
+
+    - path: ".ai/rules/dev-processes.md"
+      purpose: "Issue tracking, branching, workflows"
+
+  main_guide: ".ai/guide.md"
+
+citation_format:
+  architecture: "[ARCH §{section-heading}]"
+  style: "[STYLE: \"{direct-quote}\"]"
+  testing: "[TEST §{section-heading}]"
+  workflow: "[WORKFLOW §{section-heading}]"
+  examples:
+    - "[ARCH §Backend: Controllers]"
+    - "[STYLE: \"Comments: write only when non-obvious\"]"
+    - "[TEST §Core Principles]"
+
+storage:
+  location: ".wip/{ISSUE_KEY}/"
+  files:
+    external_review: "external-review-fixes.md"
+    specification: "specification.md"
+    notes: "notes.md"
+
+documentation:
+  # Project standards location
+  standards:
+    directory: ".ai/rules/"
+    architecture: ".ai/rules/20-architecture.md"
+    style: ".ai/rules/10-coding-style.md"
+    testing: ".ai/rules/30-testing.md"
+
+  # Knowledge base configuration (YouTrack docs)
+  knowledge_base:
+    location: "storage/app/youtrack_docs"
+
+    # Source type: gitignored (docs fetched from YouTrack API, stored locally but not committed)
+    source: "gitignored"
+
+    # Access method: bash (use Read tool to access files)
+    access_method: "bash"
+
+mcp_tools:
+  laravel_boost:
+    enabled: true
+    commands:
+      - application-info
+      - database-schema
+      - database-query
+      - list-routes
+      - tinker
+      - search-docs
+      - read-log-entries
+      - browser-logs
+      - last-error
+      - get-config
+      - list-available-config-keys
+
+  youtrack:
+    enabled: true
+    commands:
+      - get_issue
+      - search_issues
+      - create_issue
+      - update_issue
+      - add_issue_comment
+      - get_issue_comments
+
+tech_stack:
+  backend:
+    framework: "Laravel"
+    version: "12.x"
+    php_version: "8.4+"
+    database: "MySQL 8.x"
+    architecture: "Domain-Driven Design (DDD)"
+
+  frontend:
+    framework: "Vue.js"
+    version: "2.x"
+    ui_library: "Element UI"
+    build_tool: "Webpack"
+    styling: "SCSS"
+
+docker:
+  required: true
+  compose_file: "./docker-compose.yml"
+  containers:
+    php: "starship_server"
+    frontend: "starship_frontend"
+  user_id: 1000
+
+test_commands:
+  unit: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit --testsuite=unit"
+
+  functional: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit --testsuite=functional"
+
+  acceptance: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit --testsuite=acceptance"
+
+  all: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit"
+
+  specific_file: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit {FILE_PATH}"
+
+linter_commands:
+  phpcs: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpcs"
+
+  phpstan: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpstan analyze"
+
+artisan_commands:
+  tinker: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server php artisan tinker"
+
+  migrate: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server php artisan migrate"
+
+  test: "docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server php artisan test"
+
+notes: |
+  Starship is transitioning from flat Laravel structure to DDD.
+
+  Key domains:
+  - Product (catalog, matching, SKU management)
+  - Orders (sales and purchase order management)
+  - Shipment (shipping, packing slips, tracking)
+  - Inventory (stock management, lots, warehouses)
+  - Reports (business intelligence and analytics)
+
+  Multi-organization setup:
+  - Internal: Janus, Mission, Blaze (shared tables)
+  - Customers: Owens, Schein, Medline, DC Dental (dedicated tables)
+
+  Important conventions:
+  - Database: snake_case, UUIDs preferred
+  - Backend: final/abstract classes, avoid global scopes
+  - Frontend: PascalCase components, axios via ApiClients only
+  - Testing: Use fixtures and builders from tests/ directory

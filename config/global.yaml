@@ -1,0 +1,72 @@
+# Claude Code Global Configuration
+# Single source of truth for global settings used across all workflows
+
+# Storage Configuration
+storage:
+  # .wip folder location: PROJECT-LOCAL (not global!)
+  # Each project has its own .wip/ folder in the project directory
+  wip_root: "./.wip"
+
+  # Why project-local?
+  # - Clear boundaries: Each project manages its own task documentation
+  # - Gitignored: Add .wip to .gitignore to keep personal docs out of repo
+  # - Optional sharing: Teams can commit .wip if desired
+  # - Easy cleanup: Delete .wip when project is done
+  # - No cross-project confusion: Tasks stay with their projects
+
+  # Pattern for task folders: {ISSUE_KEY}-{slug}
+  # Example: .wip/STAR-1234-My-Feature/, .wip/AB-567-Bug-Fix/
+
+  # IMPORTANT: .wip is created in the PROJECT directory (where you run commands)
+  # NOT in ~/.claude/ or $HOME/.wip
+
+# Workflow Configuration
+workflows:
+  task_planning:
+    enabled: true
+    modes:
+      - default
+      - greenfield
+      - in_progress
+
+  code_review:
+    enabled: true
+    modes:
+      - interactive
+      - quick
+      - report
+      - external
+
+  release:
+    enabled: true
+    levels:
+      - feature
+      - develop
+      - production
+
+# Default Project Configuration
+# These settings are used when no project-specific YAML exists
+defaults:
+  issue_tracking:
+    pattern: "PROJ-####"
+    regex: "[A-Z]+-[0-9]+"
+
+  standards:
+    location: ".ai/rules/"
+
+  citation_format:
+    architecture: "[ARCH: \"{quote}\"]"
+    style: "[STYLE: \"{quote}\"]"
+
+  test_commands:
+    all: "npm test"
+
+  mcp_tools:
+    youtrack: false
+    laravel_boost: false
+    playwright: false
+
+# Version
+version: "2.0.0"
+last_updated: "2025-11-20"
+notes: "Major upgrade: Project-local .wip, modular architecture, DRY compliance"

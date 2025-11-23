@@ -1,0 +1,24 @@
+# Claude Code - Local/Personal Settings
+settings.local.json
+*.local.json
+*.local.md
+
+# Claude Code - Session/Runtime Data
+history.jsonl
+/debug/
+/session-env/
+/shell-snapshots/
+/todos/
+/plans/
+/statsig/
+/projects/
+/agents/
+/file-history/
+/conversations/
+/cache/
+
+# System Files
+.DS_Store
+*.tmp
+*.swp
+*~

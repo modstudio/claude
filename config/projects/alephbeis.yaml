@@ -1,0 +1,169 @@
+# Alephbeis Project Configuration
+# Hebrew language learning platform for teachers and students
+
+project:
+  name: "Alephbeis"
+  type: "Laravel"
+  description: "Educational platform for Hebrew reading and language skills"
+  path: "~/Projects/alephbeis-app"
+  git_remote_pattern: "alephbeis"
+
+issue_tracking:
+  pattern: "AB-####"
+  regex: "AB-[0-9]+"
+  system: "Generic"
+  url_template: "https://github.com/{org}/{repo}/issues/{ISSUE_NUMBER}"
+
+branching:
+  base_branch: "main"
+  pattern: "{ISSUE_KEY}-{description}"
+  types:
+    - feature
+    - fix
+    - enhancement
+    - refactor
+
+standards:
+  location: ".ai/rules/"
+  files:
+    - path: ".ai/rules/code-architecture.md"
+      purpose: "Architecture patterns and DDD structure"
+
+    - path: ".ai/rules/codestyle.md"
+      purpose: "Code quality and style guidelines"
+
+    - path: ".ai/rules/ddd.md"
+      purpose: "Domain-Driven Design principles"
+
+    - path: ".ai/rules/dev-processes.md"
+      purpose: "Development workflow and processes"
+
+    - path: ".ai/rules/issue-workflow.md"
+      purpose: "Issue tracking and workflow"
+
+    - path: ".ai/rules/testing.md"
+      purpose: "Testing standards and practices"
+
+  main_guide: ".ai/guide.md"
+  project_overview: ".ai/project.md"
+  boost_guidelines: ".ai/boost/guidelines.md"
+
+citation_format:
+  architecture: "[ARCH: \"{direct-quote}\"]"
+  style: "[STYLE: \"{direct-quote}\"]"
+  testing: "[TEST: \"{direct-quote}\"]"
+  ddd: "[DDD: \"{direct-quote}\"]"
+  examples:
+    - "[ARCH: \"Controllers thin; delegate to Commands\"]"
+    - "[STYLE: \"Use self-documenting names\"]"
+    - "[TEST: \"Prefer stubs over mocks\"]"
+
+storage:
+  location: ".wip/{ISSUE_KEY}/"
+  files:
+    external_review: "external-review-fixes.md"
+    specification: "specification.md"
+    notes: "notes.md"
+
+documentation:
+  # Project standards location
+  standards:
+    directory: ".ai/rules/"
+    architecture: ".ai/rules/code-architecture.md"
+    style: ".ai/rules/codestyle.md"
+    testing: ".ai/rules/testing.md"
+
+  # Knowledge base configuration (project examples)
+  knowledge_base:
+    location: ".ai/examples"
+
+    # Source type: git (docs committed to repository)
+    source: "git"
+
+    # Access method: bash (use Read tool to access files)
+    access_method: "bash"
+
+mcp_tools:
+  laravel_boost:
+    enabled: true
+    commands:
+      - application-info
+      - database-schema
+      - database-query
+      - list-routes
+      - tinker
+      - search-docs
+      - read-log-entries
+      - browser-logs
+      - last-error
+
+  playwright:
+    enabled: true
+    commands:
+      - browser_snapshot
+      - browser_click
+      - browser_navigate
+      - browser_take_screenshot
+
+tech_stack:
+  backend:
+    framework: "Laravel"
+    version: "9.x"
+    php_version: "8.4+"
+    database: "MySQL"
+    architecture: "Transitioning to DDD"
+
+  frontend:
+    framework: "Vue.js"
+    version: "2.x (migrating to 3.x)"
+    state_management: "Vuex (selective use)"
+    routing: "Hybrid (Blade + Vue Router)"
+    build_tool: "Webpack"
+    styling: "Custom CSS (2-space indentation)"
+
+docker:
+  required: true
+  compose_file: "./docker-compose.yml"
+  containers:
+    php: "alephbeis_app"
+  user_id: 1000
+
+test_commands:
+  unit: "docker compose exec -u1000 alephbeis_app ./vendor/bin/phpunit --testsuite=unit"
+
+  feature: "docker compose exec -u1000 alephbeis_app ./vendor/bin/phpunit --testsuite=feature"
+
+  all: "docker compose exec -u1000 alephbeis_app ./vendor/bin/phpunit"
+
+  specific_file: "docker compose exec -u1000 alephbeis_app ./vendor/bin/phpunit {FILE_PATH}"
+
+linter_commands:
+  php_cs_fixer: "docker compose exec -u1000 alephbeis_app ./vendor/bin/php-cs-fixer fix --dry-run --diff"
+
+artisan_commands:
+  tinker: "docker compose exec -u1000 alephbeis_app php artisan tinker"
+
+  migrate: "docker compose exec -u1000 alephbeis_app php artisan migrate"
+
+notes: |
+  Alephbeis focuses on Hebrew language education with RTL text support.
+
+  Core concepts:
+  - Students - Learners using the platform
+  - Classes - Groups of students
+  - School Years - Academic year groupings
+  - Curriculum Levels - Hierarchical learning progression
+  - Skills - Specific learning objectives
+  - SmartTests - Customizable assessments
+  - Skill Selectors - Configuration for test parameters
+
+  Important features:
+  - Right-to-left (RTL) text support
+  - PDF generation for printable materials
+  - Progress tracking and reporting
+  - Adaptive learning paths
+
+  Architecture transition:
+  - Moving from flat Laravel to DDD
+  - Prefer Options API → Composition API (Vue)
+  - Vuex used selectively, not globally

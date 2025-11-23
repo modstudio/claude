@@ -1,0 +1,77 @@
+# Minimal Project Configuration
+# Essential settings only - copy to ~/.claude/config/projects/YOUR-PROJECT-NAME.yaml
+
+# ============================================================================
+# PROJECT IDENTIFICATION
+# ============================================================================
+
+project:
+  name: "Project Name"
+  type: "Node.js"
+
+# ============================================================================
+# PROJECT DETECTION
+# ============================================================================
+
+detection:
+  paths:
+    - "/path/to/project"
+  git_remotes:
+    - "github.com/username/repository"
+
+# ============================================================================
+# ISSUE TRACKING
+# ============================================================================
+
+issue_tracking:
+  pattern: "PROJ-1234"
+  regex: "([A-Z]+-[0-9]+)"
+  system: "YouTrack"
+  base_url: "https://youtrack.example.com"
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+documentation:
+  standards:
+    directory: "./docs"
+    architecture: "docs/architecture.md"
+    style: "docs/style-guide.md"
+  
+  knowledge_base:
+    location: "./docs/knowledge-base"
+    source: "git"  # gitignored, git, external, none
+    access_method: "bash"  # bash, git, mcp, none
+
+# ============================================================================
+# STORAGE
+# ============================================================================
+
+storage:
+  wip_root: "./.wip"
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+testing:
+  all_tests: "npm test"
+  unit_tests: "npm run test:unit"
+
+# ============================================================================
+# GIT WORKFLOW
+# ============================================================================
+
+git:
+  base_branch: "main"
+  branch_pattern: "feature/{ISSUE_KEY}-{description}"
+
+# ============================================================================
+# METADATA
+# ============================================================================
+
+metadata:
+  version: "2.0.0"
+  created: "2025-11-20"
+  updated: "2025-11-20"

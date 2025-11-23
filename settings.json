@@ -1,0 +1,18 @@
+{
+  "alwaysThinkingEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run logs:*)",
+      "Bash(gh run rerun:*)",
+      "Bash(gh run cancel:*)",
+      "Bash(docker compose:*)",
+      "Bash(mv:*)",
+      "mcp__laravel-boost__database-schema",
+      "mcp__laravel-boost__database-query",
+      "git remote get-url",
+      "Bash(docker-compose up:*)"
+    ]
+  }
+}

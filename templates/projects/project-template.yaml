@@ -1,0 +1,190 @@
+# Project Configuration Template
+# Copy this file to ~/.claude/config/projects/YOUR-PROJECT-NAME.yaml and customize
+
+# ============================================================================
+# PROJECT IDENTIFICATION
+# ============================================================================
+
+project:
+  name: "Project Name"
+  type: "Laravel"  # Laravel, Node.js, Python, Go, React, etc.
+  description: "Brief project description"
+
+# ============================================================================
+# PROJECT DETECTION
+# ============================================================================
+
+detection:
+  # Paths to match (when running commands from these directories)
+  paths:
+    - "/path/to/project"
+    - "/path/to/project/subdirectory"
+  
+  # Git remote patterns to match
+  git_remotes:
+    - "github.com/username/repository"
+    - "gitlab.com/organization/repository"
+
+# ============================================================================
+# ISSUE TRACKING
+# ============================================================================
+
+issue_tracking:
+  # Human-readable pattern description
+  pattern: "PROJ-1234"
+  
+  # Regex pattern for extracting issue keys
+  # Must have one capturing group for the full issue key
+  regex: "([A-Z]+-[0-9]+)"
+  
+  # Issue tracking system
+  system: "YouTrack"  # YouTrack, Jira, GitHub, GitLab, Linear, etc.
+  
+  # Base URL for issue links
+  base_url: "https://youtrack.example.com"
+  
+  # MCP tool configuration (if using YouTrack MCP)
+  mcp:
+    enabled: true
+    tool_prefix: "mcp__youtrack"
+    project_id: "PROJECT-ID"
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+documentation:
+  # Project standards location
+  standards:
+    directory: "./docs/standards"
+    architecture: "docs/standards/architecture.md"
+    style: "docs/standards/style-guide.md"
+  
+  # Knowledge base configuration
+  knowledge_base:
+    location: "./storage/youtrack-docs"
+    
+    # Source type: gitignored, git, external, none
+    # - gitignored: Docs stored locally, not committed (e.g., fetched from API)
+    # - git: Docs committed to repository
+    # - external: Docs accessible via URL or external system
+    # - none: No knowledge base available
+    source: "gitignored"
+    
+    # Access method: bash, git, mcp, none
+    # - bash: Use Read tool to access files
+    # - git: Use git commands to access from separate repo
+    # - mcp: Use MCP tool to fetch docs
+    # - none: Knowledge base not accessible
+    access_method: "bash"
+    
+    # Additional configuration based on access method
+    mcp_tool: "mcp__youtrack__get_article"  # If access_method = mcp
+    git_repo: ""  # If access_method = git
+    base_url: ""  # If access_method = external
+
+# ============================================================================
+# STORAGE
+# ============================================================================
+
+storage:
+  # .wip folder location (always project-local)
+  wip_root: "./.wip"
+  
+  # Task folder naming pattern
+  # Available variables: {ISSUE_KEY}, {slug}, {date}
+  task_folder_pattern: "{ISSUE_KEY}-{slug}"
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+testing:
+  # Command to run all tests
+  all_tests: "php artisan test"
+  
+  # Command to run unit tests only
+  unit_tests: "php artisan test --testsuite=Unit"
+  
+  # Test coverage tool (if applicable)
+  coverage_tool: "phpunit"  # phpunit, jest, pytest, go test, etc.
+  coverage_command: "php artisan test --coverage"
+
+# ============================================================================
+# GIT WORKFLOW
+# ============================================================================
+
+git:
+  # Base branch for feature branches
+  base_branch: "develop"
+  
+  # Branch naming pattern
+  # Available variables: {ISSUE_KEY}, {type}, {description}
+  branch_pattern: "feature/{ISSUE_KEY}-{description}"
+  
+  # Commit message pattern
+  commit_pattern: "{ISSUE_KEY}: {message}"
+
+# ============================================================================
+# BUILD & DEPLOYMENT
+# ============================================================================
+
+build:
+  # Build command
+  command: "npm run build"
+  
+  # Output directory
+  output_dir: "./dist"
+
+deployment:
+  # Deployment environments
+  environments:
+    - name: "staging"
+      branch: "develop"
+      url: "https://staging.example.com"
+    
+    - name: "production"
+      branch: "master"
+      url: "https://example.com"
+
+# ============================================================================
+# CODE QUALITY
+# ============================================================================
+
+code_quality:
+  # Linter configuration
+  linter:
+    command: "php ./vendor/bin/pint"
+    config: ".pint.json"
+  
+  # Static analysis
+  static_analysis:
+    command: "php ./vendor/bin/phpstan analyse"
+    config: "phpstan.neon"
+  
+  # Code formatting
+  formatter:
+    command: "php ./vendor/bin/pint"
+
+# ============================================================================
+# PROJECT-SPECIFIC SETTINGS
+# ============================================================================
+
+custom:
+  # Add any project-specific settings here
+  # These will be available as PROJECT_CUSTOM_* environment variables
+  
+  # Example:
+  # api_base_url: "https://api.example.com"
+  # feature_flags_enabled: true
+  # cache_driver: "redis"
+
+# ============================================================================
+# METADATA
+# ============================================================================
+
+metadata:
+  version: "2.0.0"
+  created: "2025-11-20"
+  updated: "2025-11-20"
+  notes: "Initial configuration"
