@@ -355,7 +355,7 @@ ISSUE_KEY=$(git branch --show-current | grep -oE "${PROJECT_CONTEXT.issue_tracki
 ## Integration with Other Workflows
 
 The release workflow integrates with:
-- `/plan-task-g` - Task planning creates task docs (in `$WIP_ROOT`) referenced in PRs
+- `/plan-task-g` - Task planning creates task docs (in `$TASK_DOCS_DIR`) referenced in PRs
   - Storage location configured in `~/.claude/config/global.yaml`
 - `/code-review-g` - Code review before release
 - Project-specific test suites

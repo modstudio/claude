@@ -28,14 +28,16 @@ TODOS_JSON=$(init_workflow_todos "task_planning")  # or code_review, release, co
 
 ### Task Planning (Default Mode)
 
+**NOTE:** Phases 1-4 are READ-ONLY. File/folder creation happens AFTER approval in Phase 5.
+
 ```json
 [
   {"content": "Load project context and fetch YouTrack issue", "status": "in_progress", "activeForm": "Loading context"},
-  {"content": "Create task folder and initialize documents", "status": "pending", "activeForm": "Creating task folder"},
+  {"content": "Check for existing task folder and research codebase", "status": "pending", "activeForm": "Researching codebase"},
   {"content": "Gather requirements and identify questions", "status": "pending", "activeForm": "Gathering requirements"},
   {"content": "Present questions to user for clarification", "status": "pending", "activeForm": "Presenting questions"},
   {"content": "Create technical implementation plan", "status": "pending", "activeForm": "Creating implementation plan"},
-  {"content": "Present plan for approval", "status": "pending", "activeForm": "Presenting plan for approval"}
+  {"content": "Present plan for approval (then create docs)", "status": "pending", "activeForm": "Presenting plan for approval"}
 ]
 ```
 

@@ -152,8 +152,8 @@ When this workflow executes, it returns:
 {end for}
 
 **For this task:**
-- External Review: `.wip/{ISSUE_KEY}/external-review-log.md`
-- Specification: `.wip/{ISSUE_KEY}/specification.md`
+- External Review: `.task-docs/{ISSUE_KEY}-{slug}/logs/review.md`
+- Decisions: `.task-docs/{ISSUE_KEY}-{slug}/logs/decisions.md`
 
 ---
 
@@ -300,9 +300,9 @@ for file in "${PROJECT_CONFIG.standards.files[@]}"; do
   cat "${file.path}"
 done
 
-# 4. Use project storage location
-REVIEW_FILE="${PROJECT_CONFIG.storage.location}${PROJECT_CONFIG.storage.files.external_review}"
-# Result: .wip/STAR-2233/external-review-log.md
+# 4. Use project storage location for review log
+REVIEW_FILE=".task-docs/STAR-2233-Feature/logs/review.md"
+# Result: .task-docs/STAR-2233-Feature/logs/review.md
 
 # 5. Run project-specific tests
 eval "${PROJECT_CONFIG.test_commands.unit}"
@@ -342,9 +342,7 @@ citation_format:
   architecture: "[ARCH: {quote}]"
 
 storage:
-  location: ".wip/{ISSUE_KEY}/"
-  files:
-    external_review: "external-review-log.md"
+  task_docs_dir: ".task-docs/"
 
 test_commands:
   all: "npm test"
@@ -391,7 +389,7 @@ citation_format:
   style: string            # Citation template
 
 storage:
-  location: string          # Always ".wip/{ISSUE_KEY}/"
+  location: string          # Always ".task-docs/{ISSUE_KEY}/"
   files:
     external_review: string # Filename
     specification: string   # Filename
@@ -461,7 +459,11 @@ If no project matches, `generic.yaml` is used with auto-detection:
 │       ├── generic.yaml        ← Fallback for unknown projects
 │       └── myproject.yaml      ← Add your own projects
 ├── templates/
-│   └── external-review-log.md
+│   └── task-planning/
+│       ├── 00-status.md ... 04-todo.md
+│       └── logs/
+│           ├── decisions.md
+│           └── review.md
 └── workflows/
     ├── project-context.md  ← This file (loader)
     └── code-review/

@@ -15,43 +15,43 @@ GLOBAL_CONFIG="$HOME/.claude/config/global.yaml"
 # If you need to parse YAML in bash (basic extraction)
 # Note: For complex YAML parsing, use a proper YAML parser
 
-# Extract .wip root location
-WIP_ROOT="$HOME/.wip"  # Default from global.yaml: storage.wip_root
+# Extract task docs root location
+TASK_DOCS_DIR="./.task-docs"  # Default from global.yaml: storage.task_docs_dir
 ```
 
 ---
 
 ## Storage Helpers
 
-### `.wip` Folder Management
+### Task Docs Folder Management
 
-**IMPORTANT**: The `.wip` folder is PROJECT-LOCAL and stored in `{PROJECT_ROOT}/.wip/`.
+**IMPORTANT**: The `.task-docs` folder is PROJECT-LOCAL and stored in `{PROJECT_ROOT}/.task-docs/`.
 
-- Add `.wip` to your `.gitignore` to prevent committing task artifacts
+- Add `.task-docs` to your `.gitignore` to prevent committing task artifacts
 - The folder must exist in your project directory for workflows to function
-- If no `.wip` folder is found, the agent will report and ask for guidance
+- If no `.task-docs` folder is found, the agent will report and ask for guidance
 
-#### Get WIP Root
+#### Get Task Docs Root
 
 ```bash
-# Get the .wip root directory (PROJECT-LOCAL location)
-get_wip_root() {
-  local project_wip="./.wip"
+# Get the task docs root directory (PROJECT-LOCAL location)
+get_task_docs_dir() {
+  local project_docs="./.task-docs"
 
-  if [ -d "$project_wip" ]; then
-    echo "$(pwd)/.wip"
+  if [ -d "$project_docs" ]; then
+    echo "$(pwd)/.task-docs"
   else
-    # No .wip folder found - return empty and let caller handle
+    # No .task-docs folder found - return empty and let caller handle
     echo ""
   fi
 }
 
 # Usage
-WIP_ROOT=$(get_wip_root)
-if [ -z "$WIP_ROOT" ]; then
-  echo "ERROR: No .wip folder found in project directory"
-  echo "Please create one: mkdir .wip"
-  echo "And add to .gitignore: echo '.wip' >> .gitignore"
+TASK_DOCS_DIR=$(get_task_docs_dir)
+if [ -z "$TASK_DOCS_DIR" ]; then
+  echo "ERROR: No .task-docs folder found in project directory"
+  echo "Please create one: mkdir .task-docs"
+  echo "And add to .gitignore: echo '.task-docs' >> .gitignore"
   exit 1
 fi
 ```
@@ -63,17 +63,17 @@ fi
 # Usage: find_task_folder "STAR-1234"
 find_task_folder() {
   local issue_key="$1"
-  local wip_root=$(get_wip_root)
+  local docs_root=$(get_task_docs_dir)
 
-  # Check if .wip folder exists
-  if [ -z "$wip_root" ]; then
-    echo "ERROR: No .wip folder found in project directory" >&2
-    echo "Please create one: mkdir .wip && echo '.wip' >> .gitignore" >&2
+  # Check if .task-docs folder exists
+  if [ -z "$docs_root" ]; then
+    echo "ERROR: No .task-docs folder found in project directory" >&2
+    echo "Please create one: mkdir .task-docs && echo '.task-docs' >> .gitignore" >&2
     return 1
   fi
 
   # Search for task folder
-  find "$wip_root" -type d -name "${issue_key}*" 2>/dev/null | head -1
+  find "$docs_root" -type d -name "${issue_key}*" 2>/dev/null | head -1
 }
 
 # Usage
@@ -81,9 +81,9 @@ TASK_FOLDER=$(find_task_folder "STAR-1234")
 if [ $? -eq 0 ] && [ -n "$TASK_FOLDER" ]; then
   echo "Found: $TASK_FOLDER"
 elif [ $? -ne 0 ]; then
-  echo "ERROR: Cannot search for tasks - .wip folder missing"
+  echo "ERROR: Cannot search for tasks - .task-docs folder missing"
 else
-  echo "No folder found for STAR-1234 in .wip/"
+  echo "No folder found for STAR-1234 in .task-docs/"
 fi
 ```
 
@@ -95,16 +95,16 @@ fi
 create_task_folder() {
   local issue_key="$1"
   local slug="$2"
-  local wip_root=$(get_wip_root)
+  local docs_root=$(get_task_docs_dir)
 
-  # Check if .wip folder exists
-  if [ -z "$wip_root" ]; then
-    echo "ERROR: No .wip folder found in project directory" >&2
-    echo "Please create one: mkdir .wip && echo '.wip' >> .gitignore" >&2
+  # Check if .task-docs folder exists
+  if [ -z "$docs_root" ]; then
+    echo "ERROR: No .task-docs folder found in project directory" >&2
+    echo "Please create one: mkdir .task-docs && echo '.task-docs' >> .gitignore" >&2
     return 1
   fi
 
-  local task_folder="$wip_root/${issue_key}-${slug}"
+  local task_folder="$docs_root/${issue_key}-${slug}"
   mkdir -p "$task_folder"
   echo "$task_folder"
 }
@@ -114,7 +114,7 @@ TASK_FOLDER=$(create_task_folder "STAR-1234" "My-Feature")
 if [ $? -eq 0 ]; then
   echo "Created: $TASK_FOLDER"
 else
-  echo "ERROR: Cannot create task folder - .wip folder missing"
+  echo "ERROR: Cannot create task folder - .task-docs folder missing"
 fi
 ```
 
@@ -123,22 +123,22 @@ fi
 ```bash
 # List all task folders
 list_all_tasks() {
-  local wip_root=$(get_wip_root)
+  local docs_root=$(get_task_docs_dir)
 
-  # Check if .wip folder exists
-  if [ -z "$wip_root" ]; then
-    echo "ERROR: No .wip folder found in project directory" >&2
-    echo "Please create one: mkdir .wip && echo '.wip' >> .gitignore" >&2
+  # Check if .task-docs folder exists
+  if [ -z "$docs_root" ]; then
+    echo "ERROR: No .task-docs folder found in project directory" >&2
+    echo "Please create one: mkdir .task-docs && echo '.task-docs' >> .gitignore" >&2
     return 1
   fi
 
-  ls -1 "$wip_root/" 2>/dev/null | grep -E "^[A-Z]+-[0-9]+"
+  ls -1 "$docs_root/" 2>/dev/null | grep -E "^[A-Z]+-[0-9]+"
 }
 
 # Usage
 echo "All tasks:"
 if ! list_all_tasks; then
-  echo "Cannot list tasks - .wip folder missing"
+  echo "Cannot list tasks - .task-docs folder missing"
 fi
 ```
 
@@ -200,40 +200,40 @@ fi
 
 ### In Markdown Documentation
 
-When referencing `.wip` in workflow documentation files:
+When referencing `.task-docs` in workflow documentation files:
 
 **✅ Correct patterns:**
 ```markdown
-- `.wip/{ISSUE_KEY}-{slug}/`            # Project-local location
-- `$(get_wip_root)/{ISSUE_KEY}-{slug}/` # Using helper function
-- `{PROJECT_ROOT}/.wip/`                # Explicit project-local
+- `.task-docs/{ISSUE_KEY}-{slug}/`            # Project-local location
+- `$(get_task_docs_dir)/{ISSUE_KEY}-{slug}/` # Using helper function
+- `{PROJECT_ROOT}/.task-docs/`                # Explicit project-local
 ```
 
 **❌ Incorrect patterns (DO NOT USE):**
 ```markdown
-- `~/.wip/{ISSUE_KEY}-{slug}/`  # Wrong - implies global location
-- `$HOME/.wip/`                 # Wrong - global location
-- `/Users/username/.wip/`       # Hardcoded path
+- `~/.task-docs/{ISSUE_KEY}-{slug}/`  # Wrong - implies global location
+- `$HOME/.task-docs/`                 # Wrong - global location
+- `/Users/username/.task-docs/`       # Hardcoded path
 ```
 
 ### In Bash Scripts
 
 **✅ Correct usage:**
 ```bash
-WIP_ROOT=$(get_wip_root)  # Always use helper function
-if [ -z "$WIP_ROOT" ]; then
-  echo "ERROR: No .wip folder found"
+TASK_DOCS_DIR=$(get_task_docs_dir)  # Always use helper function
+if [ -z "$TASK_DOCS_DIR" ]; then
+  echo "ERROR: No .task-docs folder found"
   exit 1
 fi
-TASK_FOLDER=$(find "$WIP_ROOT" -type d -name "STAR-1234*")
-mkdir -p "$WIP_ROOT/STAR-1234-Feature"
+TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "STAR-1234*")
+mkdir -p "$TASK_DOCS_DIR/STAR-1234-Feature"
 ```
 
 **❌ Incorrect usage:**
 ```bash
-WIP_ROOT=".wip"           # Wrong - hardcoded path
-WIP_ROOT="$HOME/.wip"     # Wrong - global location
-find .wip -type d         # Wrong - doesn't check if exists
+TASK_DOCS_DIR=".task-docs"           # Wrong - hardcoded path
+TASK_DOCS_DIR="$HOME/.task-docs"     # Wrong - global location
+find .task-docs -type d               # Wrong - doesn't check if exists
 ```
 
 ---
@@ -286,7 +286,7 @@ echo "$DOCS"
 
 ```bash
 # Phase 0: Load config
-WIP_ROOT=$(get_wip_root)
+TASK_DOCS_DIR=$(get_task_docs_dir)
 
 # Step 1: Auto-detect mode
 BRANCH=$(git branch --show-current)
@@ -313,7 +313,7 @@ if [ -n "$ISSUE_KEY" ]; then
   TASK_FOLDER=$(find_task_folder "$ISSUE_KEY")
   if [ -n "$TASK_FOLDER" ]; then
     # Read specification
-    cat "$TASK_FOLDER/01-functional-requirements.md"
+    cat "$TASK_FOLDER/02-functional-requirements.md"
   fi
 fi
 ```
@@ -324,14 +324,14 @@ fi
 
 All helpers use configuration from:
 - **Global config**: `~/.claude/config/global.yaml`
-- **Storage location**: `global.yaml → storage.wip_root` (defaults to `$HOME/.wip`)
+- **Storage location**: `global.yaml → storage.task_docs_dir` (defaults to `./.task-docs`)
 - **Task folder pattern**: `global.yaml → storage.task_folder_pattern`
 
 ---
 
 ## Benefits of Centralization
 
-1. **Single Source of Truth**: Change `.wip` location in ONE place
+1. **Single Source of Truth**: Change `.task-docs` location in ONE place
 2. **Consistency**: All workflows use the same patterns
 3. **Easy Updates**: Modify config, not every workflow file
 4. **Portability**: Easy to backup, sync, or migrate
@@ -344,18 +344,18 @@ All helpers use configuration from:
 
 **Before (global location):**
 ```bash
-find "$HOME/.wip" -type d -name "STAR-*"
-mkdir -p "$HOME/.wip/STAR-1234-Feature"
+find "$HOME/.task-docs" -type d -name "STAR-*"
+mkdir -p "$HOME/.task-docs/STAR-1234-Feature"
 ```
 
 **After (project-local with error handling):**
 ```bash
-WIP_ROOT=$(get_wip_root)
-if [ -z "$WIP_ROOT" ]; then
-  echo "ERROR: No .wip folder found. Create with: mkdir .wip"
+TASK_DOCS_DIR=$(get_task_docs_dir)
+if [ -z "$TASK_DOCS_DIR" ]; then
+  echo "ERROR: No .task-docs folder found. Create with: mkdir .task-docs"
   exit 1
 fi
-find "$WIP_ROOT" -type d -name "STAR-*"
+find "$TASK_DOCS_DIR" -type d -name "STAR-*"
 TASK_FOLDER=$(create_task_folder "STAR-1234" "Feature")
 ```
 
@@ -363,15 +363,15 @@ TASK_FOLDER=$(create_task_folder "STAR-1234" "Feature")
 
 **Before in documentation:**
 ```markdown
-Check `~/.wip/STAR-1234-*/` for documentation
+Check `~/.task-docs/STAR-1234-*/` for documentation
 ```
 
 **After:**
 ```markdown
-Check `.wip/STAR-1234-*/` for documentation (project-local, see `~/.claude/workflows/helpers.md`)
+Check `.task-docs/STAR-1234-*/` for documentation (project-local, see `~/.claude/workflows/helpers.md`)
 ```
 
 ---
 
-**Last Updated**: 2025-11-17
+**Last Updated**: 2025-12-10
 **Configuration**: `~/.claude/config/global.yaml`

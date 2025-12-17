@@ -4,21 +4,9 @@ You are a release management agent. Your job is to guide the release process thr
 
 ---
 
-## Phase 0: Project Context Already Loaded
+## Phase 0: Project Context
 
-**Project context was loaded by `/release-g` before this workflow started.**
-
-Available from project context:
-- **Project**: `PROJECT_CONTEXT.project.name` (e.g., Starship, Alephbeis)
-- **Issue Pattern**: `PROJECT_CONTEXT.issue_tracking.pattern` (e.g., STAR-####)
-- **Issue Regex**: `PROJECT_CONTEXT.issue_tracking.regex` (e.g., STAR-[0-9]+)
-- **Test Commands**: `PROJECT_CONTEXT.test_commands.*` (all, unit, feature, etc.)
-- **Git Workflow**: Branch naming from project standards
-- **MCP Tools Available**:
-  - YouTrack: `PROJECT_CONTEXT.mcp_tools.youtrack.enabled` (for status updates)
-- **Issue Key**: Already extracted from branch by command
-
-**Use these variables throughout the workflow instead of hardcoding project-specific values.**
+{{MODULE: ~/.claude/modules/phase-0-context.md}}
 
 ---
 
@@ -29,44 +17,21 @@ Available from project context:
    - Example: `feature/STAR-123-Add-feature` → Issue key: `STAR-123`
    - Issue key available as `ISSUE_KEY` variable
 
+2. **CI Monitoring Mode** (set by `/release-g`)
+   - `CI_MODE="monitor"` - Wait for CI and verify success (recommended)
+   - `CI_MODE="quick"` - Skip CI waiting, proceed immediately (faster)
+
+   **Quick Mode Behavior:**
+   - Pushes/merges proceed without waiting for CI
+   - No verification of test results
+   - User assumes responsibility for CI failures
+   - Still performs safety checks (branch verification, etc.)
+
 ## Safety Guards
 
-**CRITICAL: Before ANY git operations, verify:**
+{{MODULE: ~/.claude/modules/git-safety-checks.md}}
 
-1. **Verify current branch is NOT protected**
-   ```bash
-   CURRENT_BRANCH=$(git branch --show-current)
-   if [[ "$CURRENT_BRANCH" == "master" || "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "develop" ]]; then
-     echo "❌ ERROR: Cannot release from protected branch: $CURRENT_BRANCH"
-     echo "Please switch to a feature branch first"
-     exit 1
-   fi
-   ```
-
-2. **Verify protected branches exist before operations**
-   ```bash
-   # Fetch all remotes first
-   git fetch --all
-
-   # Check if develop exists (required for Level 2)
-   if ! git show-ref --verify --quiet refs/remotes/origin/develop; then
-     echo "❌ ERROR: develop branch does not exist on remote"
-     exit 1
-   fi
-
-   # Check if master/main exists (required for Level 3)
-   if ! git show-ref --verify --quiet refs/remotes/origin/master; then
-     if ! git show-ref --verify --quiet refs/remotes/origin/main; then
-       echo "❌ ERROR: Neither master nor main branch exists on remote"
-       exit 1
-     fi
-   fi
-   ```
-
-3. **Never delete protected branches**
-   - Protected branches: `master`, `main`, `develop`, `production`, `staging`
-   - If ANY command attempts to delete these, ABORT immediately
-   - Use `git branch -d` NEVER `git branch -D` (force delete)
+**CRITICAL:** Run safety checks before ANY git operations in this workflow.
 
 ---
 
@@ -103,6 +68,10 @@ Level 3: Develop → Master
   - Optional: Update to "Waiting for QA" (if YouTrack enabled)
 - **Level 1 + 2 + 3**: Full release (Feature → Develop → Master) → **End on develop**
   - Optional: Update to "Waiting for QA" or "Complete" (if YouTrack enabled)
+
+**CI Monitoring Mode:**
+- **Quick (No Wait)**: Push/merge immediately, skip CI monitoring (faster)
+- **Monitor CI**: Wait for CI to complete at each stage (recommended)
 
 **⚠️  IMPORTANT:**
 - Level 3 REQUIRES Level 2 to complete first
@@ -171,10 +140,16 @@ Mark todo as completed: "Push feature branch to remote"
 
 ---
 
-**Step 3: Monitor CI Tests**
+**Step 3: Monitor CI Tests (if CI_MODE="monitor")**
 
 Mark todo as in_progress: "Monitor CI tests on feature branch"
 
+**If CI_MODE="quick":**
+- Echo: "⚡ Quick mode: Skipping CI monitoring"
+- Echo: "ℹ️  CI will run in background - check manually if needed"
+- Mark todo as completed and skip to Step 5
+
+**If CI_MODE="monitor":**
 1. Get the most recent run for this branch:
    ```bash
    RUN_ID=$(gh run list --branch $FEATURE_BRANCH --limit 1 --json databaseId -q '.[0].databaseId')
@@ -192,10 +167,15 @@ Mark todo as completed: "Monitor CI tests on feature branch"
 
 ---
 
-**Step 4: Verify Tests Passed**
+**Step 4: Verify Tests Passed (if CI_MODE="monitor")**
 
 Mark todo as in_progress: "Verify tests passed"
 
+**If CI_MODE="quick":**
+- Echo: "⚡ Quick mode: Skipping test verification"
+- Mark todo as completed and skip to Step 5
+
+**If CI_MODE="monitor":**
 1. Get test results:
    ```bash
    gh run view $RUN_ID --json conclusion,jobs
@@ -404,10 +384,16 @@ Mark todo as completed: "Merge PR to develop"
 
 ---
 
-**Step 5: Monitor Staging Deployment**
+**Step 5: Monitor Staging Deployment (if CI_MODE="monitor")**
 
 Mark todo as in_progress: "Monitor staging deployment"
 
+**If CI_MODE="quick":**
+- Echo: "⚡ Quick mode: Skipping staging deployment monitoring"
+- Echo: "ℹ️  Deployment will run in background - check manually if needed"
+- Mark todo as completed and skip to Step 6
+
+**If CI_MODE="monitor":**
 1. Echo: "⏳ Waiting for staging deployment on develop branch..."
 2. Get latest run on develop: `RUN_ID=$(gh run list --branch develop --limit 1 --json databaseId -q '.[0].databaseId')`
 3. Watch deployment: `gh run watch $RUN_ID` OR poll every 30 seconds
@@ -821,31 +807,54 @@ echo ""
     - **NEVER** use `git branch -D` anywhere
     - **ALWAYS** switch to develop after production release
 
-11. **Verify production deployment**
+11. **Monitor and Verify Production Deployment (if CI_MODE="monitor")**
+
+    **If CI_MODE="quick":**
+    - Echo: "⚡ Quick mode: Skipping production deployment monitoring"
+    - Echo: "ℹ️  Deployment will run in background - check manually if needed"
+    - Echo: "⚠️  WARNING: Production changes pushed without verification!"
+    - Skip to checkout develop step
+
+    **If CI_MODE="monitor":**
+    - Echo: "⏳ Waiting for production deployment on $PROD_BRANCH..."
+    - Get latest run: `RUN_ID=$(gh run list --branch $PROD_BRANCH --limit 1 --json databaseId -q '.[0].databaseId')`
+    - Watch deployment: `gh run watch $RUN_ID`
     - Check CI for production deployment status
     - Report final status
     - Confirm deployment succeeded
 
-**END OF LEVEL 3:**
+**END OF LEVEL 3 - MANDATORY CHECKOUT DEVELOP:**
 
-After production release, switch to develop:
+**🚨 CRITICAL: You MUST checkout develop after production release**
+
+This step is NON-NEGOTIABLE. Staying on master risks accidental commits to production.
+
 ```bash
-# Switch to develop branch (the main working branch)
+# MANDATORY: Switch to develop branch after production release
 git fetch origin develop
 git checkout develop
 git pull origin develop
 
-echo "✓ Switched to develop branch"
-echo "✓ Production release complete!"
-echo "✓ Changes deployed: develop → $PROD_BRANCH → production"
-echo "✓ You're now on develop, ready for next feature"
+# Verify you're on develop
+CURRENT=$(git branch --show-current)
+if [ "$CURRENT" != "develop" ]; then
+  echo "❌ CRITICAL ERROR: Failed to checkout develop!"
+  echo "You are on: $CURRENT"
+  echo "Manually run: git checkout develop && git pull origin develop"
+  exit 1
+fi
+
+echo "✅ Switched to develop branch"
+echo "✅ Production release complete!"
+echo "✅ Changes deployed: develop → $PROD_BRANCH → production"
+echo "✅ You're now on develop, ready for next feature"
 ```
 
-**Why develop, not original branch?**
-- Your feature branch is now merged and deployed
-- `develop` is your main working branch
-- Starting next feature from `develop` ensures you have latest code
-- `master` is production-only (don't work directly on it)
+**Why develop, not master?**
+- ❌ **NEVER work on master** - it's production-only
+- ✅ `develop` is your main working branch
+- ✅ Starting next feature from `develop` ensures you have latest code
+- ✅ Avoids accidental commits to production
 
 **Optional: Update YouTrack Status (Level 3)**
 
@@ -946,10 +955,12 @@ LEVEL 3: Develop → Master (MERGE COMMIT, NO PR)
    ├─ Create merge commit: "Release: Merge develop to master"
    ├─ Push to production
    ├─ ✓ Production deployed
-   ├─ → git checkout develop (ALWAYS)
+   ├─ 🚨 **MANDATORY**: git checkout develop && git pull (ALWAYS!)
    └─ (Optional) Ask: Update to "Waiting for QA" or "Complete"? (if YouTrack enabled)
 
-FINAL STATE: You're on develop branch, ready for next feature
+🚨 FINAL STATE: You MUST be on develop branch, ready for next feature
+   - NEVER stay on master after release
+   - ALWAYS verify: git branch --show-current == "develop"
 ```
 
 **⚠️  WHAT HAPPENED WHEN MASTER WAS DELETED:**
@@ -970,6 +981,18 @@ The old workflow tried to skip Level 2 or merge incorrectly:
 ---
 
 ### Critical Safety Rules (ALWAYS FOLLOW)
+
+**POST-RELEASE: ALWAYS CHECKOUT DEVELOP**
+- ✅ **MANDATORY**: After ANY release level, checkout and pull develop
+- ✅ **Especially Level 3**: After production release, you MUST end on develop
+- ✅ **NEVER stay on master/main** - it's production-only, not for development
+- ✅ **Commands to run at end of every release:**
+  ```bash
+  git fetch origin develop
+  git checkout develop
+  git pull origin develop
+  ```
+- **Why?** Staying on master risks accidental commits to production
 
 **PROTECTED BRANCHES - NEVER DELETE:**
 - ❌ **NEVER** use `git branch -D` (force delete)

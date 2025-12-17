@@ -74,14 +74,39 @@ Reference docs: workflows/name/README.md
 │       └── main.md                # Commit planning implementation
 │
 ├── templates/               # Document templates
-│   ├── external-review-fixes.md  # External review record template
 │   └── task-planning/
 │       ├── 00-status.md
-│       ├── 01-functional-requirements.md
-│       ├── 02-decisions.md
+│       ├── 01-task-description.md
+│       ├── 02-functional-requirements.md
 │       ├── 03-implementation-plan.md
-│       ├── 04-task-description.md
-│       └── 05-todo.md
+│       ├── 04-todo.md
+│       └── logs/
+│           ├── decisions.md      # ADR-style decisions
+│           └── review.md         # External review feedback
+│
+├── lib/                     # Shell libraries and CLI tools
+│   ├── bin/                     # User-facing CLI wrappers (call these)
+│   │   ├── gather-context       # Gather task context for agents
+│   │   └── detect-mode          # Detect planning mode from git state
+│   │
+│   ├── posix/                   # POSIX fallback scripts (sh/dash/zsh)
+│   │   ├── core.sh              # Shared POSIX utilities
+│   │   ├── gather-context.sh    # Minimal context gatherer
+│   │   └── detect-mode.sh       # Minimal mode detector
+│   │
+│   ├── common.sh                # Bash logging, colors, error handling
+│   ├── git-utils.sh             # Git operations
+│   ├── issue-utils.sh           # Issue key extraction/validation
+│   ├── task-docs-utils.sh       # Task docs folder management
+│   ├── todo-utils.sh            # TodoWrite JSON patterns
+│   ├── template-utils.sh        # Template rendering
+│   ├── project-context.sh       # YAML config loading
+│   ├── gather-context.sh        # Bash-enhanced (rich output)
+│   └── detect-mode.sh           # Bash-enhanced (--pretty option)
+│
+├── modules/                 # Reusable rule/guideline modules
+│   ├── review-rules.md          # Code review guidelines
+│   └── todo-patterns.md         # TodoWrite patterns
 │
 └── README.md                # This file
 ```
@@ -193,8 +218,8 @@ Multi-mode task planning with YouTrack integration and automatic project detecti
 
 **Features:**
 - **Project-aware** - Uses YAML configuration
-- Auto-detects appropriate mode based on context (branch, .wip folder, commits)
-- Creates standardized documentation in `.wip/{PROJECT_KEY}-XXXX-{slug}/`
+- Auto-detects appropriate mode based on context (branch, .task-docs folder, commits)
+- Creates standardized documentation in `.task-docs/{PROJECT_KEY}-XXXX-{slug}/`
 - Fetches task from YouTrack (if available)
 - Searches for relevant business docs (if available)
 - Creates detailed implementation plan
@@ -240,7 +265,7 @@ Multi-mode code review with **automatic project detection** and severity analysi
 - Evaluates linter output (PHPCS, ESLint, PHPStan)
 - Independently verifies each suggestion
 - Accept/Modify/Reject decisions with reasoning
-- Records to `.wip/{ISSUE_KEY}/external-review-fixes.md`
+- Records to `.task-docs/{ISSUE_KEY}-{slug}/logs/review.md`
 - Builds review history for learning over time
 
 **Workflows:**
@@ -354,7 +379,7 @@ Load project-specific configuration for use by other workflows.
 - Standards file locations
 - Citation formats
 - Test commands
-- Storage locations (`.wip/{ISSUE_KEY}/`)
+- Storage locations (`.task-docs/{ISSUE_KEY}/`)
 - MCP tool availability
 
 **Workflow:** `workflows/project-context.md`
@@ -410,35 +435,27 @@ Load project-specific configuration for use by other workflows.
 
 ## Templates
 
-### External Review Record Template
-
-**Location:** `templates/external-review-fixes.md`
-
-**Used by:** External review workflow to create `.wip/{ISSUE_KEY}/external-review-fixes.md`
-
-**Purpose:**
-- Record external review evaluations
-- Track accept/reject decisions with reasoning
-- Enable circular review (review the reviewer)
-- Build institutional knowledge over time
-
-**Structure:**
-- File header with purpose
-- Review sections (appended per review)
-- Meta-evaluation (reviewer quality scoring)
-- Statistics and learning notes
-
 ### Task Planning Templates
 
 **Location:** `templates/task-planning/`
 
-**Files:**
+**Root Documents:**
 - `00-status.md` - Task status tracking
-- `01-functional-requirements.md` - Requirements documentation
-- `02-decisions.md` - Design decisions
+- `01-task-description.md` - Task description (high-level overview)
+- `02-functional-requirements.md` - Functional requirements (detailed)
 - `03-implementation-plan.md` - Implementation steps
-- `04-task-description.md` - Task description for YouTrack
-- `05-todo.md` - Todo list
+- `04-todo.md` - Todo list
+
+**Logs Subfolder:**
+- `logs/decisions.md` - Architectural decisions (ADR-style)
+- `logs/review.md` - External review evaluations
+
+**Purpose:**
+- Root docs: Core task planning documents
+- `logs/decisions.md`: Record architectural decisions with context, alternatives, consequences
+- `logs/review.md`: Track external review evaluations for circular review process
+
+**All docs created at start of planning** (even if initially empty)
 
 ---
 
@@ -469,38 +486,40 @@ Load project-specific configuration for use by other workflows.
 
 ## Storage Conventions
 
-### `.wip/` Directory Structure
+### `.task-docs/` Directory Structure
 
-All workflows use `.wip/{ISSUE_KEY}-{slug}/` for task-specific files:
+All workflows use `.task-docs/{ISSUE_KEY}-{slug}/` for task-specific files:
 
 ```
-{project}/.wip/
-├── {ISSUE_KEY}-{slug}/              # Example: STAR-2233-Add-Feature or AB-1378-Fix-Bug
+{project}/.task-docs/
+├── {ISSUE_KEY}-{slug}/              # Example: STAR-2233-Add-Feature
 │   ├── 00-status.md                 # Task status & overview (index)
-│   ├── 01-functional-requirements.md # Business requirements
-│   ├── 02-decisions.md              # Decision log (ADR-style)
+│   ├── 01-task-description.md       # Task description (high-level)
+│   ├── 02-functional-requirements.md # Functional requirements (detailed)
 │   ├── 03-implementation-plan.md    # Technical plan
-│   ├── 04-task-description.md       # Task summary (for YouTrack)
-│   ├── 05-todo.md                   # Implementation checklist
-│   └── external-review-fixes.md     # External review record (optional)
+│   ├── 04-todo.md                   # Implementation checklist
+│   └── logs/                        # Activity logs
+│       ├── decisions.md             # Architectural decisions (ADR-style)
+│       └── review.md                # External review feedback
 │
 └── {ISSUE_KEY}-{slug}/              # Another task
     ├── 00-status.md
-    ├── 01-functional-requirements.md
-    ├── 02-decisions.md
+    ├── 01-task-description.md
+    ├── 02-functional-requirements.md
     ├── 03-implementation-plan.md
-    ├── 04-task-description.md
-    ├── 05-todo.md
-    └── external-review-fixes.md
+    ├── 04-todo.md
+    └── logs/
+        ├── decisions.md
+        └── review.md
 ```
 
 **Universal Convention** (same for all projects):
-- **Format**: `.wip/{ISSUE_KEY}-{slug}/` where slug matches branch name
+- **Format**: `.task-docs/{ISSUE_KEY}-{slug}/` where slug matches branch name
 - **Issue key**: Extracted from branch name (STAR-####, AB-####, etc.)
 - **Slug**: Title-Case-With-Hyphens from issue title (same as branch)
-- **Always included**: 00-05 files (status through todo)
-- **Optional**: external-review-fixes.md (if using code review workflow)
-- **Gitignore**: Usually in `.gitignore` (personal/WIP)
+- **Root docs (00-04)**: Always created at planning start
+- **Logs folder**: Contains append-only activity logs (decisions, reviews)
+- **Gitignore**: Usually in `.gitignore` (personal work-in-progress)
 - **Team use**: Can be committed for collaboration if desired
 - **Consistent**: Same structure across all projects
 
@@ -583,6 +602,79 @@ Detailed steps, error handling, etc.
 
 ---
 
+## Shell Libraries (`lib/`)
+
+The `lib/` directory contains shell utilities used by workflows and commands.
+
+### Structure
+
+```
+lib/
+├── bin/                  # CLI wrappers (auto-detect shell)
+│   ├── gather-context    # → Uses bash if available, falls back to posix/
+│   └── detect-mode       # → Uses bash if available, falls back to posix/
+│
+├── posix/                # POSIX fallback (works in sh, dash, zsh, bash)
+│   ├── core.sh           # Shared utilities
+│   ├── gather-context.sh # Minimal version
+│   └── detect-mode.sh    # Minimal version
+│
+└── *.sh                  # Bash-enhanced libraries (rich features)
+```
+
+### Usage
+
+**Always call wrappers from `lib/bin/`** - they auto-detect shell:
+
+```bash
+# Gather task context (for agents)
+~/.claude/lib/bin/gather-context [ISSUE_KEY]
+~/.claude/lib/bin/gather-context --quick STAR-1234
+~/.claude/lib/bin/gather-context --list STAR-1234
+
+# Detect planning mode
+~/.claude/lib/bin/detect-mode
+~/.claude/lib/bin/detect-mode --json
+~/.claude/lib/bin/detect-mode --pretty  # (bash only - colored output)
+```
+
+### In Workflows
+
+Workflows call the bin wrappers:
+
+```bash
+# In commands/*.md or workflows/*.md
+~/.claude/lib/bin/detect-mode
+~/.claude/lib/bin/gather-context
+```
+
+### Sourcing Bash Libraries
+
+For bash scripts that need rich functionality:
+
+```bash
+#!/bin/bash
+source ~/.claude/lib/common.sh        # Logging, colors, error handling
+source ~/.claude/lib/git-utils.sh     # Git operations
+source ~/.claude/lib/issue-utils.sh   # Issue key extraction
+source ~/.claude/lib/task-docs-utils.sh  # Task docs management
+source ~/.claude/lib/project-context.sh  # YAML config loading
+```
+
+### Available Libraries
+
+| Library | Purpose |
+|---------|---------|
+| `common.sh` | Logging (`log_info`, `log_error`), colors, validation |
+| `git-utils.sh` | Branch operations, commit counting, status checks |
+| `issue-utils.sh` | Extract/validate issue keys, generate slugs |
+| `task-docs-utils.sh` | Find/create task folders, list documents |
+| `todo-utils.sh` | TodoWrite JSON generation |
+| `template-utils.sh` | Template rendering with variable substitution |
+| `project-context.sh` | YAML config loading, project detection |
+
+---
+
 ## Maintenance
 
 ### When to Update
@@ -616,12 +708,21 @@ Detailed steps, error handling, etc.
 
 ## Version History
 
-- **2025-11-14 v3.0**: Multi-project YAML configuration ⭐ NEW
+- **2025-12-10 v3.1**: Shell library reorganization
+  - Consolidated `lib/` structure with clear separation
+  - Added `lib/bin/` wrappers (auto-detect shell)
+  - Added `lib/posix/` fallback scripts (POSIX-compliant)
+  - Bash-enhanced versions with rich output (`--pretty`)
+  - Removed redundant modules (replaced by scripts)
+  - Updated all workflow references to use `lib/bin/`
+  - Standardized variable naming (`_DIR` suffix)
+
+- **2025-11-14 v3.0**: Multi-project YAML configuration
   - Added `config/projects/` directory for YAML configs
   - Created `starship.yaml`, `alephbeis.yaml`, `generic.yaml`
   - Added `project-context.md` workflow (YAML loader)
   - Updated `code-review-g.md` with Phase 0 (load context)
-  - Moved template to `templates/external-review-fixes.md`
+  - Moved template to `templates/task-planning/logs/review.md`
   - Optimized external review workflow (previous reviews in Phase 4.2)
   - Centralized all templates in `templates/` folder
   - Comprehensive documentation updates
@@ -658,9 +759,9 @@ code ~/.claude/config/projects/newproject.yaml
 
 **View external reviews for current task:**
 ```bash
-# Extract issue key from branch
+# Extract issue key from branch and find task folder
 ISSUE_KEY=$(git branch --show-current | grep -oE '[A-Z]+-[0-9]+')
-cat .wip/${ISSUE_KEY}/external-review-fixes.md
+cat .task-docs/${ISSUE_KEY}*/logs/review.md
 ```
 
 ---

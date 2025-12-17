@@ -4,78 +4,50 @@ You are a commit planning agent. Your job is to analyze code changes and create 
 
 ---
 
-## Phase 0: Project Context Already Loaded
+## Phase 0: Project Context
 
-**Project context was loaded by `/commit-plan-g` before this workflow started.**
-
-Available from project context:
-- **Project**: `PROJECT_CONTEXT.project.name` (e.g., Starship, Alephbeis)
-- **Issue Pattern**: `PROJECT_CONTEXT.issue_tracking.pattern` (e.g., STAR-####, AB-####)
-- **Issue Regex**: `PROJECT_CONTEXT.issue_tracking.regex`
-- **Standards Location**: `PROJECT_CONTEXT.standards.location` (e.g., .ai/rules/)
-- **Issue Key**: Already extracted from branch by command
-
-**Use these variables throughout the workflow instead of hardcoding project-specific values.**
+{{MODULE: ~/.claude/modules/phase-0-context.md}}
 
 ---
 
-## Step 1: Verify Git Repository and Branch
+## 📋 MANDATORY: Initialize Todo List
 
-**First, verify we're in a git repository and on a valid branch:**
+**IMMEDIATELY after loading project context, create a todo list to track workflow progress:**
 
-```bash
-# Check if in git repo
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
-  echo "❌ ERROR: Not in a git repository"
-  exit 1
-fi
-
-# Get current branch
-BRANCH=$(git branch --show-current)
-echo "📍 Current branch: $BRANCH"
-
-# Verify not on protected branch
-if [[ "$BRANCH" == "master" || "$BRANCH" == "main" || "$BRANCH" == "develop" ]]; then
-  echo "⚠️  WARNING: You're on a protected branch: $BRANCH"
-  echo "Consider creating a feature branch first"
-fi
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Run safety checks (verify git state and branch)", status: "in_progress", activeForm: "Running safety checks"},
+    {content: "Load project standards for commit messages", status: "pending", activeForm: "Loading project standards"},
+    {content: "Analyze current changes (staged, unstaged, untracked)", status: "pending", activeForm: "Analyzing current changes"},
+    {content: "Create logical commit groupings", status: "pending", activeForm: "Creating commit groupings"},
+    {content: "Generate commit messages following standards", status: "pending", activeForm: "Generating commit messages"},
+    {content: "Present commit plan for approval", status: "pending", activeForm: "Presenting commit plan"},
+    {content: "Execute commits after approval", status: "pending", activeForm: "Executing commits"}
+  ]
+})
 ```
 
----
-
-## Step 2: Extract Issue Key
-
-**Extract issue key from branch name using project pattern:**
-
-```bash
-BRANCH=$(git branch --show-current)
-ISSUE_KEY=$(echo "$BRANCH" | grep -oE "${PROJECT_CONTEXT.issue_tracking.regex}")
-
-if [[ -z "$ISSUE_KEY" ]]; then
-  echo "⚠️  No issue key found in branch name: $BRANCH"
-  echo "Expected pattern: ${PROJECT_CONTEXT.issue_tracking.pattern}"
-  echo ""
-  echo "Would you like to:"
-  echo "1. Continue without issue key (not recommended)"
-  echo "2. Provide issue key manually"
-  echo "3. Cancel and create properly named branch"
-else
-  echo "✅ Issue key: $ISSUE_KEY"
-fi
-```
+**Update the todo list as you progress through each step. Mark tasks complete immediately upon finishing them.**
 
 ---
 
-## Step 3: Load Project Standards
+## Step 1: Safety Checks
 
-**Read commit message standards from project configuration:**
+{{MODULE: ~/.claude/modules/git-safety-checks.md}}
 
-Look for commit guidelines in:
-1. `${PROJECT_CONTEXT.standards.location}dev-processes.md` - Git workflow and commit standards
-2. `${PROJECT_CONTEXT.standards.location}01-core-workflow.md` - Development workflow
-3. Project root: `CONTRIBUTING.md`, `DEVELOPMENT.md`, `.github/PULL_REQUEST_TEMPLATE.md`
+**Verify:**
+- [ ] In a git repository
+- [ ] Not on protected branch (master/main/develop)
+- [ ] Issue key extracted from branch name
 
-**Extract key information:**
+---
+
+## Step 2: Load Project Standards
+
+{{MODULE: ~/.claude/modules/standards-loading.md}}
+
+**For commit planning, specifically look for:**
 - Commit message format (conventional commits, custom format, etc.)
 - Commit message length limits
 - Required elements (type, scope, breaking changes)
@@ -126,6 +98,8 @@ echo "  Untracked: $UNTRACKED_COUNT files"
 ## Step 5: Create Logical Commit Groupings
 
 **Group changes into logical, atomic commits:**
+
+⚠️ **IMPORTANT**: Default to multiple commits. Only use a single commit for trivial fixes (typos, one-liners). "Changes are interdependent" is NOT a valid reason for single commit—the branch is released as one unit anyway. Multiple commits make review easier and intent clearer.
 
 **Principles for grouping:**
 1. **Atomic**: Each commit represents one logical change
@@ -411,13 +385,29 @@ Generated with Claude Code
 
 ### Commit Granularity
 
+**IMPORTANT: Default to multiple commits for any non-trivial work.**
+
+The purpose of multiple commits is to make review easier and keep intent clear per commit. A release/task is always deployed as one atomic unit anyway, so "changes are interdependent" is NOT a valid reason to use a single commit.
+
+**When to use a SINGLE commit:**
+- Simple bug fixes (one-liner or few lines)
+- Typo corrections
+- Minor config tweaks
+- Changes so small that splitting would be artificial
+
+**When to use MULTIPLE commits (the default):**
+- Any feature implementation
+- Any refactoring work
+- Any change touching multiple concerns
+- Anything that would benefit from separating "what changed" by intent
+
 **Too fine:**
 - 50 commits for one feature
 - Each line change is separate commit
 - Breaks functionality between commits
 
 **Too coarse:**
-- One commit for entire feature
+- One commit for entire feature (even if "interdependent")
 - Mix of unrelated changes
 - Impossible to review or revert selectively
 
@@ -426,6 +416,13 @@ Generated with Claude Code
 - Each commit is logical unit
 - Codebase works after each commit
 - Easy to review and understand
+
+**Never justify a single commit with:**
+- ❌ "All changes are interdependent"
+- ❌ "It's one unified feature"
+- ❌ "Files depend on each other"
+
+These arguments are flawed because the entire branch gets released as one unit anyway. Multiple commits exist to aid review and clarify intent, not to enable partial deployment.
 
 ### Commit Order
 

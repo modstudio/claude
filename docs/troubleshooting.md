@@ -1,29 +1,29 @@
 # Troubleshooting Guide
 
-**Version:** 2.0.0
-**Last Updated:** 2025-11-20
+**Version:** 2.1.0
+**Last Updated:** 2025-12-10
 
 ---
 
 ## Common Issues
 
-### .wip Folder Not Found
+### Task Docs Folder Not Found
 
-**Error:** `.wip folder not found in project directory`
+**Error:** `.task-docs folder not found in project directory`
 
-**Cause:** Project doesn't have a `.wip/` folder yet (it's project-local, not global)
+**Cause:** Project doesn't have a `.task-docs/` folder yet (it's project-local, not global)
 
 **Fix:**
 ```bash
-# Create .wip folder in your project directory
+# Create .task-docs folder in your project directory
 cd /path/to/your/project
-mkdir .wip
+mkdir .task-docs
 
 # Add to .gitignore
-echo '.wip' >> .gitignore
+echo '.task-docs' >> .gitignore
 ```
 
-**Why this happens:** In v2.0, `.wip` is project-local (each project has its own), not global (`~/.wip`).
+**Why this happens:** In v2.0+, `.task-docs` is project-local (each project has its own), not global (`~/.task-docs`).
 
 ---
 
@@ -100,6 +100,36 @@ yq --version
 
 ---
 
+### YouTrack MCP: Invalid Project ID
+
+**Error:** `Project not found` or `Invalid project` when using YouTrack MCP tools
+
+**Cause:** YouTrack MCP requires the numeric project ID (e.g., `0-0`), not the project key (e.g., `STAR`)
+
+**Debug:**
+```bash
+# List all projects to find their IDs
+# Use the MCP tool: mcp__youtrack__list_projects
+```
+
+**Fix:** Update your project YAML config with the correct numeric ID:
+```yaml
+# In ~/.claude/config/projects/YOUR-PROJECT.yaml
+issue_tracking:
+  project_id: "0-0"  # Use ID, not key
+
+# Or under mcp_tools section:
+mcp_tools:
+  youtrack:
+    project_id: "0-0"  # Use ID, not key
+```
+
+**Known project IDs:**
+- Starship (STAR): `0-0`
+- Alephbeis (AB): `0-6`
+
+---
+
 ### Issue Key Not Found in Branch
 
 **Error:** `Could not determine issue key from current branch`
@@ -123,7 +153,7 @@ echo $PROJECT_ISSUE_REGEX  # After loading project context
 
 ### Task Folder Already Exists
 
-**Warning:** `Task folder already exists: .wip/STAR-1234-Feature-Name`
+**Warning:** `Task folder already exists: .task-docs/STAR-1234-Feature-Name`
 
 **Cause:** Trying to create a task folder that already exists
 
@@ -132,10 +162,10 @@ echo $PROJECT_ISSUE_REGEX  # After loading project context
 **If you want to start fresh:**
 ```bash
 # Archive the old folder
-mv .wip/STAR-1234-Old-Name .wip/archive/STAR-1234-Old-Name
+mv .task-docs/STAR-1234-Old-Name .task-docs/archive/STAR-1234-Old-Name
 
 # Or delete it (careful!)
-rm -rf .wip/STAR-1234-Old-Name
+rm -rf .task-docs/STAR-1234-Old-Name
 ```
 
 ---
@@ -159,7 +189,7 @@ cd /path/to/your/project
 
 ### Permission Denied
 
-**Error:** `Permission denied` when creating .wip or running scripts
+**Error:** `Permission denied` when creating .task-docs or running scripts
 
 **Cause:** File permissions or ownership issues
 
@@ -168,8 +198,8 @@ cd /path/to/your/project
 # Check permissions
 ls -la .
 
-# Fix permissions on .wip
-chmod 755 .wip
+# Fix permissions on .task-docs
+chmod 755 .task-docs
 
 # Fix permissions on scripts
 chmod +x ~/.claude/lib/*.sh
@@ -256,5 +286,5 @@ When reporting issues, please include:
 
 ---
 
-**Last Updated:** 2025-11-20
-**Version:** 2.0.0
+**Last Updated:** 2025-12-10
+**Version:** 2.1.0
