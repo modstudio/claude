@@ -45,7 +45,7 @@
 
 ### Setup
 - [ ] Create/checkout feature branch: `${GIT_BRANCH}`
-- [ ] Ensure .wip folder exists and is gitignored
+- [ ] Ensure task docs folder exists and is gitignored
 - [ ] Update local dependencies if needed
 
 ### Core Implementation

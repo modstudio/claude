@@ -1,4 +1,4 @@
-# Decision Log - ${ISSUE_KEY}
+# Decisions Log - ${ISSUE_KEY}
 
 **Task:** ${TASK_SUMMARY}
 **Project:** ${PROJECT_NAME}

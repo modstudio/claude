@@ -251,7 +251,7 @@ If issues are discovered after deployment:
 
 ## References
 
-- **Decision Log:** See `02-decision-log.md`
-- **Requirements:** See `01-functional-requirements.md`
-- **Knowledge Base:** ${PROJECT_KB_LOCATION}
+- **Decisions Log:** See `logs/decisions.md`
+- **Requirements:** See `02-functional-requirements.md`
+- **Knowledge Base:** ${PROJECT_KB_DIR}
 - **Project Standards:** ${PROJECT_STANDARDS_DIR}
