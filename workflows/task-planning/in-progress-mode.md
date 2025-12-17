@@ -8,9 +8,35 @@
 ## Assumptions
 
 - Work has already started
-- `.wip` folder and/or git branch exists
+- Task docs folder (`${TASK_DOCS_DIR}`) and/or git branch exists
 - Code may have diverged from documentation
 - Need to understand current state and sync docs
+
+---
+
+## 📋 MANDATORY: Initialize Todo List
+
+**IMMEDIATELY when entering In Progress Mode, create a todo list to track review progress:**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Gather current state (git, task-docs folder)", status: "in_progress", activeForm: "Gathering current state"},
+    {content: "Review project docs for standards and architecture", status: "pending", activeForm: "Reviewing project standards and architecture"},
+    {content: "Review existing documentation", status: "pending", activeForm: "Reviewing documentation"},
+    {content: "Compare implementation vs documentation", status: "pending", activeForm: "Comparing implementation vs docs"},
+    {content: "Identify discrepancies", status: "pending", activeForm: "Identifying discrepancies"},
+    {content: "Present findings to user", status: "pending", activeForm: "Presenting findings"},
+    {content: "Clarify discrepancies with user", status: "pending", activeForm: "Clarifying discrepancies"},
+    {content: "Fix or update documentation", status: "pending", activeForm: "Updating documentation"},
+    {content: "Create alignment matrix", status: "pending", activeForm: "Creating alignment matrix"},
+    {content: "Code standards & readiness check", status: "pending", activeForm: "Checking code standards"},
+    {content: "Present updated state", status: "pending", activeForm: "Presenting updated state"}
+  ]
+})
+```
+
+**Update todo list as you progress. Mark tasks complete immediately upon finishing.**
 
 ---
 
@@ -51,21 +77,21 @@ fi
 **Important**: If NOT on a feature branch (e.g., on `develop`, `main`, or other non-standard branch):
 - Ask user: "Which task are you reviewing? Please provide the issue key (e.g., ${PROJECT_CONTEXT.issue_tracking.pattern})"
 - Validate against project pattern: `${PROJECT_CONTEXT.issue_tracking.regex}`
-- Use provided issue key to find `.wip/{ISSUE_KEY}*` folder
+- Use provided issue key to find `${TASK_DOCS_DIR}/{ISSUE_KEY}*` folder
 
-#### B) Check for `.wip` Folder
+#### B) Check for Task Docs Folder
 
-**IMPORTANT**: `.wip` folders are PROJECT-LOCAL in the project directory (`./.wip/`), NOT global.
+**IMPORTANT**: Task docs folders are PROJECT-LOCAL in the project directory, NOT global.
 
 ```bash
-# Get .wip root using helper function
-WIP_ROOT=$(get_wip_root)
+# Get task docs root using helper function
+TASK_DOCS_DIR=$(get_task_docs_dir)
 
-# Check if .wip folder exists
-if [ -z "$WIP_ROOT" ]; then
-  echo "ERROR: No .wip folder found in project directory"
+# Check if task docs folder exists
+if [ -z "$TASK_DOCS_DIR" ]; then
+  echo "ERROR: No task docs folder found in project directory"
   echo "Would you like me to:"
-  echo "1. Create .wip folder (mkdir .wip && echo '.wip' >> .gitignore)"
+  echo "1. Create task docs folder (mkdir .task-docs && echo '.task-docs' >> .gitignore)"
   echo "2. Search in a different location"
   echo "3. Skip task folder check"
   # STOP and ask user for guidance
@@ -73,13 +99,13 @@ if [ -z "$WIP_ROOT" ]; then
 fi
 
 # If user provides issue key (or extracted from branch)
-find "$WIP_ROOT" -type d -name "{PROJECT_KEY}-XXXX*"
+find "$TASK_DOCS_DIR" -type d -name "{ISSUE_KEY}*"
 
-# If no issue key, show all .wip folders
-ls -la "$WIP_ROOT/"
+# If no issue key, show all task docs folders
+ls -la "$TASK_DOCS_DIR/"
 
 # Present to user
-echo "Found: $WIP_ROOT/{PROJECT_KEY}-XXXX-{slug}/"
+echo "Found: $TASK_DOCS_DIR/{ISSUE_KEY}/"
 ```
 
 #### C) Get All Code Changes
@@ -110,17 +136,17 @@ git diff --stat develop..HEAD
 
 ### Step 2: Review Existing Documentation
 
-**Read all docs** from `.wip/{PROJECT_KEY}-XXXX-{slug}/`:
+**Read all docs** from `${TASK_DOCS_DIR}/{ISSUE_KEY}/`:
 
-**Remember**: `.wip` is PROJECT-LOCAL in the project directory (`./.wip/`).
+**Remember**: `${TASK_DOCS_DIR}` is PROJECT-LOCAL in the project directory.
 
 1. **Check which docs exist:**
    - [ ] `00-status.md` - Status & Overview
-   - [ ] `01-functional-requirements.md` - Requirements
-   - [ ] `02-decision-log.md` - Decision Log
+   - [ ] `01-task-description.md` - Task Description (high-level)
+   - [ ] `02-functional-requirements.md` - Functional Requirements
    - [ ] `03-implementation-plan.md` - Technical Plan
-   - [ ] `04-task-description.md` - Task Summary
-   - [ ] `05-todo.md` - Implementation Checklist
+   - [ ] `04-todo.md` - Implementation Checklist
+   - [ ] `logs/decisions.md` - Decision Log
 
 2. **Check when docs were last updated:**
    - Compare file modification times
@@ -129,7 +155,7 @@ git diff --stat develop..HEAD
 
 3. **Read current status:**
    - What does `00-status.md` say about current phase?
-   - What's marked as complete in `05-todo.md`?
+   - What's marked as complete in `04-todo.md`?
    - What decisions were documented?
 
 ---
@@ -187,7 +213,7 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 
 #### C) Check Against Requirements
 
-**Read `01-functional-requirements.md`** and compare:
+**Read `02-functional-requirements.md`** and compare:
 
 **Questions to answer:**
 - ✅ Do code changes fulfill acceptance criteria?
@@ -223,7 +249,7 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 - [ ] Missing docs (no `03-implementation-plan.md` but code exists)
 - [ ] Code changes not documented in plan
 - [ ] Implementation differs from documented plan
-- [ ] Decisions not documented in `02-decision-log.md`
+- [ ] Decisions not documented in `logs/decisions.md`
 
 #### Code Issues
 - [ ] Uncommitted changes (staged files)
@@ -234,11 +260,11 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 - [ ] Code quality issues (commented code, debug statements)
 
 #### Sync Issues
-- [ ] YouTrack issue description differs from `04-task-description.md`
+- [ ] YouTrack issue description differs from `01-task-description.md`
 - [ ] Requirements changed but docs not updated
 - [ ] Branch name doesn't match issue
 - [ ] Status in `00-status.md` doesn't match actual progress
-- [ ] `05-todo.md` not updated (items marked incomplete but code exists)
+- [ ] `04-todo.md` not updated (items marked incomplete but code exists)
 
 #### Standards Issues
 - [ ] Architecture violations (patterns not followed, layer separation broken)
@@ -256,7 +282,7 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 **Create comprehensive review report:**
 
 ```markdown
-# In Progress Review: {PROJECT_KEY}-XXXX - {Task Summary}
+# In Progress Review: {ISSUE_KEY} - {Task Summary}
 
 **Review Date**: {current-date}
 **Reviewed By**: Claude Code (In Progress Mode)
@@ -266,7 +292,7 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 ## Current State
 
 - **Branch**: {branch-name}
-- **Issue**: [{PROJECT_KEY}-XXXX]({youtrack-url})
+- **Issue**: [{ISSUE_KEY}]({youtrack-url})
 - **Status in docs**: {status from 00-status.md}
 - **Last doc update**: {date from git log}
 - **Last code commit**: {date of latest commit}
@@ -299,13 +325,15 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 
 ### Existing Docs
 - ✅ **Present**: 00-status.md (updated {date})
-- ✅ **Present**: 01-functional-requirements.md (updated {date})
-- ⚠️  **Outdated**: 05-todo.md (updated 2 weeks ago, code changed yesterday)
+- ✅ **Present**: 01-task-description.md (updated {date})
+- ✅ **Present**: 02-functional-requirements.md (updated {date})
 - ❌ **Missing**: 03-implementation-plan.md
+- ⚠️  **Outdated**: 04-todo.md (updated 2 weeks ago, code changed yesterday)
+- ✅ **Present**: logs/decisions.md (updated {date})
 
 ### Documentation Completeness
-- Standard structure: 4/6 files present
-- Docs up to date: 2/4 files current
+- Standard structure: 5/6 files present
+- Docs up to date: 4/5 files current
 - Missing critical docs: implementation plan
 
 ---
@@ -373,7 +401,7 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 - Action: Update status to reflect reality
 
 **Todo List Mismatch:**
-- `05-todo.md` Phase 2 items still marked incomplete
+- `04-todo.md` Phase 2 items still marked incomplete
 - But code shows these features are implemented
 - Action: Mark items complete, update checklist
 
@@ -425,10 +453,10 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 7. ⚠️  Move API tokens to .env file (security best practice)
 8. ⚠️  Refactor OrderProcessor::process() to reduce complexity
 9. ⚠️  Add missing docblocks to methods
-10. ⚠️  Add {Feature X} to `01-functional-requirements.md`
+10. ⚠️  Add {Feature X} to `02-functional-requirements.md`
 11. ⚠️  Create tests for {Feature B}
-12. ⚠️  Update `05-todo.md` to mark completed items
-13. ⚠️  Document decision to add {Feature X} in `02-decision-log.md`
+12. ⚠️  Update `04-todo.md` to mark completed items
+13. ⚠️  Document decision to add {Feature X} in `logs/decisions.md`
 
 ### Optional (Nice to Have)
 14. 💡 Improve variable naming in UserProcessor class
@@ -491,25 +519,25 @@ git diff --name-only develop..HEAD | grep "resources/"    # Frontend
 - Update phase descriptions to match reality
 - Add new phases if scope expanded
 
-#### Update `01-functional-requirements.md`
+#### Update `02-functional-requirements.md`
 - Add features that were implemented
 - Remove or defer features that aren't happening
 - Update acceptance criteria to match implementation
 - Add edge cases discovered during implementation
 
-#### Update `05-todo.md`
+#### Update `04-todo.md`
 - Mark completed items as done
 - Add new items discovered
 - Remove items no longer relevant
 - Reorganize based on current phase
 
-#### Update `02-decision-log.md`
+#### Update `logs/decisions.md`
 - Document why extra features were added
 - Document why planned features were deferred
 - Document technical decisions made during implementation
 - Mark user-confirmed decisions
 
-#### Update `04-task-description.md`
+#### Update `01-task-description.md`
 - Sync with current scope
 - Update to reflect actual implementation
 - Keep concise for YouTrack
@@ -829,7 +857,7 @@ Check test coverage and quality:
 - ✅ Updated next actions
 - ✅ Marked Phase 2 complete
 
-### 01-functional-requirements.md
+### 02-functional-requirements.md
 - ✅ Added password reset feature to requirements
 - ✅ Added remember me checkbox to requirements
 - ✅ Updated acceptance criteria
@@ -839,12 +867,12 @@ Check test coverage and quality:
 - ✅ Added EmailNotification.php to Phase 2
 - ✅ Updated Phase 3 to include password reset
 
-### 05-todo.md
+### 04-todo.md
 - ✅ Marked Phase 2 items complete
 - ✅ Added Phase 3 checklist items
 - ✅ Added "Create tests for password reset"
 
-### 02-decision-log.md
+### logs/decisions.md
 - ✅ Documented decision to add password reset (user-requested feature)
 - ✅ Documented decision to use repository pattern (technical best practice)
 
@@ -892,15 +920,15 @@ Would you like to:
 ### Gather Current State
 - [ ] Check current git branch
 - [ ] If NOT on feature branch, ask user for issue key
-- [ ] Check if `.wip` folder exists using `get_wip_root()` - if not, ask user for guidance
-- [ ] Search for `.wip/{PROJECT_KEY}-XXXX*` or list all .wip folders (remember: PROJECT-LOCAL)
+- [ ] Check if task docs folder exists using `get_task_docs_dir()` - if not, ask user for guidance
+- [ ] Search for `${TASK_DOCS_DIR}/{ISSUE_KEY}*` or list all task folders (remember: PROJECT-LOCAL)
 - [ ] Get unstaged changes (`git diff`)
 - [ ] Get staged changes (`git diff --cached`)
 - [ ] Get committed changes (`git log develop..HEAD`, `git diff develop..HEAD`)
 - [ ] Present summary of current state
 
 ### Review Documentation
-- [ ] Read all existing docs in `.wip/` folder (PROJECT-LOCAL in project directory)
+- [ ] Read all existing docs in `${TASK_DOCS_DIR}/` folder (PROJECT-LOCAL in project directory)
 - [ ] Check which docs exist and which are missing
 - [ ] Check when docs were last updated
 - [ ] Identify stale docs (old but code is recent)
@@ -908,7 +936,7 @@ Would you like to:
 ### Compare & Analyze
 - [ ] List all changed files and categorize them
 - [ ] Compare implementation vs `03-implementation-plan.md`
-- [ ] Compare code vs `01-functional-requirements.md`
+- [ ] Compare code vs `02-functional-requirements.md`
 - [ ] Identify what matches, what's extra, what's missing
 - [ ] Check test coverage
 
@@ -927,10 +955,10 @@ Would you like to:
 ### Update Documentation
 - [ ] Update `00-status.md` with current status
 - [ ] Update `03-implementation-plan.md` with actual implementation
-- [ ] Update `01-functional-requirements.md` with new/removed features
-- [ ] Update `05-todo.md` to reflect completed and remaining items
-- [ ] Update `02-decision-log.md` with new decisions
-- [ ] Update `04-task-description.md` if scope changed
+- [ ] Update `02-functional-requirements.md` with new/removed features
+- [ ] Update `04-todo.md` to reflect completed and remaining items
+- [ ] Update `logs/decisions.md` with new decisions
+- [ ] Update `01-task-description.md` if scope changed
 
 ### Create Alignment
 - [ ] Build requirements ↔ implementation ↔ tests matrix

@@ -2,6 +2,8 @@
 
 Task planning workflows with multi-project support via YAML configuration and three planning modes.
 
+**Uses Claude's Plan Mode discipline**: Read-only exploration → User approval → Implementation
+
 ## Quick Start
 
 ```bash
@@ -12,6 +14,53 @@ Task planning workflows with multi-project support via YAML configuration and th
 # Asks you to confirm mode selection
 # Executes the appropriate workflow
 ```
+
+---
+
+## Plan Mode Discipline
+
+**All planning workflows follow Claude's Plan Mode discipline.**
+
+See `~/.claude/modules/plan-mode-discipline.md` for detailed guidance.
+
+### The Two Phases
+
+| Phase | Mode | What's Allowed |
+|-------|------|----------------|
+| Planning | **READ-ONLY** | Read, Grep, Glob, WebSearch, AskUserQuestion, MCP lookups |
+| Implementation | **WRITE-ENABLED** | Edit, Write, Bash, git operations |
+
+### Key Rules
+
+1. **During planning (before approval):**
+   - Do NOT create files or folders
+   - Do NOT edit any files
+   - Do NOT run Bash commands that modify state
+   - Only use read-only tools to research
+
+2. **Parallel research:**
+   - Launch multiple search tools in parallel
+   - Wait for all results
+   - Synthesize findings
+   - Present summary to user
+
+3. **The Approval Gate:**
+   - Present complete plan with specific files
+   - Wait for explicit approval ("Yes", "Go ahead", "Approved")
+   - Do NOT interpret questions as approval
+   - Only then proceed to implementation
+
+4. **After approval:**
+   - Create task docs folder and documents
+   - Create git branch
+   - Begin implementation
+
+### Why Plan Mode?
+
+- **Prevents wasted effort** - Don't write code based on wrong assumptions
+- **Ensures user alignment** - Get buy-in before committing
+- **Better decisions** - Research thoroughly before choosing
+- **Thorough exploration** - Understand patterns before proposing solutions
 
 ---
 
@@ -35,19 +84,21 @@ Task planning workflows with multi-project support via YAML configuration and th
         └── quick-reference.md             ← Quick lookup guide
 ```
 
-**Storage Configuration**: Project-local `.wip/` folder (must exist in project directory)
+**Storage Configuration**: Project-local `${TASK_DOCS_DIR}` folder (must exist in project directory)
 
 **Project Files (Created by Workflows):**
 ```
-.wip/{ISSUE_KEY}-{slug}/
-├── 00-status.md                           ← Status & Overview (index)
-├── 01-functional-requirements.md          ← Business Requirements
-├── 02-decision-log.md                     ← Decision Log (ADR-style)
-├── 03-implementation-plan.md              ← Technical Plan
-├── 04-task-description.md                 ← Task Summary (for YouTrack)
-└── 05-todo.md                             ← Implementation Checklist
+${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
+├── 00-status.md                  ← Status & Overview (index)
+├── 01-task-description.md        ← Task Description (high-level overview)
+├── 02-functional-requirements.md ← Functional Requirements (detailed)
+├── 03-implementation-plan.md     ← Technical Plan
+├── 04-todo.md                    ← Implementation Checklist
+└── logs/                         ← Activity logs
+    ├── decisions.md              ← Decision Log (ADR-style)
+    └── review.md                 ← External review feedback
 ```
-*Where `.wip/` is PROJECT-LOCAL in the project directory (add to .gitignore)*
+*Where `${TASK_DOCS_DIR}` defaults to `./.task-docs/` - PROJECT-LOCAL in the project directory (add to .gitignore)*
 
 ---
 
@@ -61,14 +112,14 @@ Workflow automatically detects which project you're in:
 cd ~/Projects/starship
 # Detects: Starship (from YAML: starship.yaml)
 # Issue pattern: STAR-####
-# Storage: $WIP_ROOT/STAR-####-{slug}/ (from global.yaml)
+# Storage: $TASK_DOCS_DIR/STAR-####-{slug}/ (from global.yaml)
 # Standards: .ai/rules/
 # Tests: Docker + PHPUnit
 
 cd ~/Projects/alephbeis-app
 # Detects: Alephbeis (from YAML: alephbeis.yaml)
 # Issue pattern: AB-####
-# Storage: $WIP_ROOT/AB-####-{slug}/ (from global.yaml)
+# Storage: $TASK_DOCS_DIR/AB-####-{slug}/ (from global.yaml)
 # Standards: .ai/rules/
 # Tests: Docker + PHPUnit
 ```
@@ -90,7 +141,7 @@ Loads project-specific settings from `~/.claude/config/projects/{project}.yaml`:
 User → /plan-task-g
     ↓
 Phase 0: Load project context (from YAML)
-Step 1: Auto-detect mode (checks branch, .wip, commits)
+Step 1: Auto-detect mode (checks branch, .task-docs, commits)
 Step 2: Confirm mode with user
 Step 3: Execute selected mode workflow
     ↓
@@ -118,7 +169,7 @@ Step 3: Execute selected mode workflow
 
 **Typical scenarios:**
 - User provides issue key (e.g., "Let's work on STAR-2228")
-- No existing .wip folder found
+- No existing .task-docs folder found
 - No uncommitted changes or commits on branch
 - Standard planned development
 
@@ -131,7 +182,7 @@ Step 3: Execute selected mode workflow
 **Flow**: User-driven exploration
 1. Get initial context from user
 2. Optional YouTrack integration
-3. Create working directory (temporary: `.wip/exploratory-{name}/`)
+3. Create working directory (temporary: `.task-docs/exploratory-{name}/`)
 4. Document user's overview
 5. Proceed with planning
 6. Formalize when ready (migrate to Default Mode)
@@ -151,7 +202,7 @@ Step 3: Execute selected mode workflow
 **When to use**: Resuming work, reviewing progress, syncing docs with implementation
 
 **Flow**: Comprehensive review and sync
-1. Gather current state (git, .wip folder, code changes)
+1. Gather current state (git, .task-docs folder, code changes)
 2. Review existing documentation
 3. Compare implementation vs documentation
 4. Identify discrepancies (including standards violations)
@@ -165,7 +216,7 @@ Step 3: Execute selected mode workflow
 **[➜ See In Progress Mode Documentation](./in-progress-mode.md)**
 
 **Typical scenarios:**
-- Existing .wip folder found
+- Existing .task-docs folder found
 - Branch has commits already
 - Uncommitted changes present
 - User says "continue", "resume", "review progress"
@@ -174,14 +225,14 @@ Step 3: Execute selected mode workflow
 
 ## Folder Naming Convention
 
-**Storage Location**: Configured in `~/.claude/config/global.yaml` (`storage.wip_root`)
+**Storage Location**: Configured in `~/.claude/config/global.yaml` (`storage.task_docs_dir`)
 
 ### Standard Naming
 
-**Format**: `.wip/{PROJECT_KEY}-XXXX-{slug}/`
+**Format**: `${TASK_DOCS_DIR}/{ISSUE_KEY}/`
 
-- `.wip/` is PROJECT-LOCAL in the project directory (must exist, add to .gitignore)
-- Use issue key + slug from YouTrack
+- `${TASK_DOCS_DIR}` is PROJECT-LOCAL in the project directory (must exist, add to .gitignore)
+- Use issue key from YouTrack (e.g., STAR-2228, AB-1390)
 - Same as git branch name (without type prefix like `feature/`)
 - Provides context when browsing directories
 - Extract slug from YouTrack issue summary/title
@@ -194,39 +245,39 @@ Step 3: Execute selected mode workflow
 5. Slug format: Title-Case-With-Hyphens (same as git branch naming)
 
 **Examples**:
-- `.wip/STAR-2228-Warehouse-Queue/` ✅
-- `.wip/AB-1390-TypeError-in-GenerateWordCharacterSet/` ✅
-- ~~`.wip/STAR-2228/`~~ ❌ (missing context)
-- ~~`.wip/feature/STAR-2233/`~~ ❌ (don't include type prefix)
+- `${TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/` ✅
+- `${TASK_DOCS_DIR}/AB-1390-TypeError-in-GenerateWordCharacterSet/` ✅
+- ~~`${TASK_DOCS_DIR}/STAR-2228/`~~ ❌ (missing context)
+- ~~`${TASK_DOCS_DIR}/feature/STAR-2233/`~~ ❌ (don't include type prefix)
 
 **Searching for existing folders**:
 ```bash
-# Get .wip root using helper
-WIP_ROOT=$(get_wip_root)
+# Get task docs root using helper
+TASK_DOCS_DIR=$(get_task_docs_dir)
 
-# Check if .wip exists
-if [ -z "$WIP_ROOT" ]; then
-  echo "ERROR: No .wip folder found. Create with: mkdir .wip"
+# Check if folder exists
+if [ -z "$TASK_DOCS_DIR" ]; then
+  echo "ERROR: No task docs folder found. Create with: mkdir .task-docs"
   exit 1
 fi
 
 # Search for task
-find "$WIP_ROOT" -type d -name "{PROJECT_KEY}-XXXX*"
+find "$TASK_DOCS_DIR" -type d -name "{ISSUE_KEY}*"
 ```
-- Example: `find "$WIP_ROOT" -type d -name "STAR-2228*"` → finds `.wip/STAR-2228-Warehouse-Queue/`
+- Example: `find "$TASK_DOCS_DIR" -type d -name "STAR-2228*"` → finds `${TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/`
 
 ### Special Cases
 
 **Greenfield Mode** (temporary):
-- Format: `.wip/exploratory-{short-name}/`
+- Format: `${TASK_DOCS_DIR}/exploratory-{short-name}/`
 - Migrate to standard format when issue is created
-- Example: `.wip/exploratory-auth-prototype/` → `.wip/STAR-2250-Auth-Prototype/`
+- Example: `${TASK_DOCS_DIR}/exploratory-auth-prototype/` → `${TASK_DOCS_DIR}/STAR-2250-Auth-Prototype/`
 
 ---
 
 ## Document Structure
 
-All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{slug}/`:
+All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`:
 
 ### Required Documents
 
@@ -236,17 +287,17 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 - Quick links to all other docs, next actions
 - Completion criteria checklist
 
-**`01-functional-requirements.md` - Business Requirements**
-- Non-technical business requirements
-- User stories, acceptance criteria
-- Business rules, edge cases
-- Uncertainties section (during planning)
+**`01-task-description.md` - Task Description**
+- High-level overview of what needs to be done
+- Summary, acceptance criteria, scope boundaries
+- What you'd put in a task management system
+- Brief and actionable
 
-**`02-decision-log.md` - Decision Log**
-- ADR-style decision tracking
-- Architecture decisions, technical approach choices
-- Trade-offs, alternatives considered
-- User-confirmed vs obvious decisions
+**`02-functional-requirements.md` - Functional Requirements**
+- Detailed requirements (REQ-1, REQ-2, etc.)
+- Acceptance criteria per requirement
+- Edge cases and expected behaviors
+- Dependencies and out of scope items
 
 **`03-implementation-plan.md` - Technical Plan**
 - Detailed step-by-step implementation
@@ -254,17 +305,17 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 - API/frontend changes, testing strategy
 - Risks, mitigations, timeline
 
-**`04-task-description.md` - Task Summary**
-- Concise summary for YouTrack
-- High-level description, key decisions
-- Acceptance criteria
-- Short enough for YouTrack field
-
-**`05-todo.md` - Implementation Checklist**
+**`04-todo.md` - Implementation Checklist**
 - Phase-by-phase checklist
 - Mirrors implementation plan phases
 - Updated as work progresses
 - More detailed than TodoWrite tool
+
+**`logs/decisions.md` - Decision Log**
+- ADR-style decision tracking
+- Architecture decisions, technical approach choices
+- Trade-offs, alternatives considered
+- User-confirmed vs obvious decisions
 
 ### Optional Documents
 
@@ -280,7 +331,7 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 
 ### Greenfield → Default
 - **Trigger**: User creates or assigns official YouTrack issue
-- **Action**: Migrate `.wip/exploratory-*` → `.wip/{PROJECT_KEY}-XXXX-{slug}/`
+- **Action**: Migrate `${TASK_DOCS_DIR}/exploratory-*` → `${TASK_DOCS_DIR}/{ISSUE_KEY}/`
 - **Update**: Add issue references to all docs, sync with YouTrack
 
 ### Default → In Progress
@@ -305,7 +356,7 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 ## Git Workflow Integration
 
 - **Branch creation** happens after plan approval (Phase 4 in Default Mode)
-- **Branch name**: `{type}/{PROJECT_KEY}-XXXX-{slug}` (from YouTrack)
+- **Branch name**: `{type}/{ISSUE_KEY}` (from YouTrack, may include slug)
 - **Base branch**: `develop` (or `master` for hotfix)
 - **Never commit** to develop/main directly
 
@@ -315,9 +366,9 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 
 ### TodoWrite Tool Integration
 - Used during implementation (Phase 5) for **real-time tracking**
-- **Parallel to `05-todo.md`** but more granular
+- **Parallel to `04-todo.md`** but more granular
 - TodoWrite for current work-in-progress
-- `05-todo.md` for overall progress tracking
+- `04-todo.md` for overall progress tracking
 
 ### Single Step Rule
 - Applies during implementation (Phase 5)
@@ -329,23 +380,23 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 **When to Clean Up**
 
 **After task complete and deployed**:
-- Keep `.wip/{PROJECT_KEY}-XXXX-{slug}/` folder for reference
+- Keep `${TASK_DOCS_DIR}/{ISSUE_KEY}/` folder for reference
 - No automatic deletion
 
 **Manual cleanup** (user decides):
-- Archive to `.wip/archive/{PROJECT_KEY}-XXXX-{slug}/` if desired
+- Archive to `${TASK_DOCS_DIR}/archive/{ISSUE_KEY}/` if desired
 - Delete if no longer needed
 
 **What to Commit to Git**
 
-**Recommendation**: `.wip/` should be **gitignored**
+**Recommendation**: `.task-docs/` should be **gitignored**
 - Personal working directory
 - Single developer use case
 - Avoid clutter in repository
 
 **Alternative**: Commit if team wants visibility
-- Add `.wip/` to version control
-- Update `.gitignore` to allow `.wip/`
+- Add `.task-docs/` to version control
+- Update `.gitignore` to allow `.task-docs/`
 
 ---
 
@@ -354,7 +405,7 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 **Agent Behavior**:
 
 1. **When user mentions task key** (e.g., "Let's work on STAR-2233"):
-   - Proactively search for `.wip/STAR-2233*` (glob pattern to find matching directory)
+   - Proactively search for `${TASK_DOCS_DIR}/STAR-2233*` (glob pattern to find matching directory)
    - Auto-detect appropriate mode
    - Suggest mode to user
    - If not found, offer to run planning workflow
@@ -365,9 +416,9 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
    - Auto-detect and suggest mode
 
 3. **When user is already working on task**:
-   - Search for `.wip/{PROJECT_KEY}-XXXX*` (glob pattern)
+   - Search for `${TASK_DOCS_DIR}/{ISSUE_KEY}*` (glob pattern)
    - Auto-detect → likely In Progress Mode
-   - If missing .wip folder, offer to create documentation
+   - If missing task docs folder, offer to create documentation
 
 4. **When creating/updating docs**:
    - Always update `00-status.md` first
@@ -419,7 +470,7 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 ## Troubleshooting
 
 ### Problem: Can't find documentation
-**Solution**: Check `.wip/` directory or use glob pattern `.wip/{PROJECT_KEY}-XXXX*`
+**Solution**: Check `${TASK_DOCS_DIR}/` directory or use glob pattern `${TASK_DOCS_DIR}/{ISSUE_KEY}*`
 
 ### Problem: Existing docs are messy
 **Solution**: Use **In Progress Mode** to review, then offer reorganization options
@@ -431,7 +482,7 @@ All tasks use this standardized structure in `${WIP_ROOT}/{PROJECT_KEY}-XXXX-{sl
 **Solution**: Update `00-status.md` to "Blocked", document blocker, notify user
 
 ### Problem: User wants to skip planning
-**Solution**: Create minimal docs (at least `00-status.md` and `05-todo.md`) for tracking
+**Solution**: Create minimal docs (at least `00-status.md` and `04-todo.md`) for tracking
 
 ### Problem: Not sure which mode to use
 **Solution**: Run auto-detection (happens automatically in `/plan-task-g`), suggest mode, let user confirm
@@ -472,7 +523,7 @@ citation_format:
   style: "[STYLE: \"{direct-quote}\"]"
 
 storage:
-  location: ".wip/{ISSUE_KEY}-{slug}/"
+  location: "${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
 
 test_commands:
   all: "docker compose ... exec starship_server ./vendor/bin/phpunit"
@@ -497,7 +548,7 @@ citation_format:
   architecture: "[ARCH: \"{direct-quote}\"]"
 
 storage:
-  location: ".wip/{ISSUE_KEY}-{slug}/"
+  location: "${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
 
 test_commands:
   all: "docker compose exec alephbeis_app ./vendor/bin/phpunit"
@@ -537,7 +588,7 @@ standards:
   location: ".docs/rules/"
 
 storage:
-  location: ".wip/{ISSUE_KEY}-{slug}/"
+  location: "${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
 
 test_commands:
   all: "npm test"
@@ -558,9 +609,9 @@ cd ~/Projects/my-project
 
 | Mode | Use Case | When Suggested | Output |
 |------|----------|----------------|--------|
-| **Default** | Normal tasks, issue exists | User provides issue key, no existing work | Standardized docs in `.wip/` |
+| **Default** | Normal tasks, issue exists | User provides issue key, no existing work | Standardized docs in `.task-docs/` |
 | **Greenfield** | Exploration, prototypes | User says "explore", no issue key | Temporary docs, formalize later |
-| **In Progress** | Resume work, review progress | Existing .wip or commits found | Synced docs + alignment matrix |
+| **In Progress** | Resume work, review progress | Existing .task-docs or commits found | Synced docs + alignment matrix |
 
 ---
 
@@ -583,7 +634,7 @@ cd ~/Projects/my-project
 - ✅ **Share configs** - YAML files are portable
 - ✅ **Consistent standards** - Same structure, formats
 - ✅ **Knowledge transfer** - Docs explain decisions
-- ✅ **Onboarding** - New developers can read `.wip/` docs
+- ✅ **Onboarding** - New developers can read `.task-docs/` docs
 
 ---
 

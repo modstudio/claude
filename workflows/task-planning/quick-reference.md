@@ -1,6 +1,6 @@
 # Task Planning Workflow - Quick Reference
 
-**Full Documentation**: See `.ai/workflows/task-planning.md`
+**Full Documentation**: See `~/.claude/workflows/task-planning/`
 
 ---
 
@@ -9,23 +9,28 @@
 ### New Task
 ```bash
 # User provides issue key or uses slash command
-/plan-task {PROJECT_KEY}-2235
+/plan-task {ISSUE_KEY}
 
-# Agent will:
-# 1. Fetch from YouTrack
-# 2. Check for existing branch: git branch --list "*{PROJECT_KEY}-2235*"
-# 3. Read project rules (.ai/rules/)
-# 4. Create .wip/{PROJECT_KEY}-2235/ folder
-# 5. Create 6 standard documents
-# 6. Search YouTrack docs Table of Contents for STAR-A articles
-# 7. Ask clarifying questions
-# 8. Create implementation plan
-# 9. Get approval before coding
+# Agent will (READ-ONLY phases 1-4):
+# 1. Fetch from YouTrack (get issue summary for slug)
+# 2. Check for existing branch: git branch --list "*{ISSUE_KEY}*"
+# 3. Check for existing task folder: find ${TASK_DOCS_DIR} -name "{ISSUE_KEY}*"
+# 4. Read project rules (.ai/rules/)
+# 5. Search codebase for similar implementations
+# 6. Ask clarifying questions
+# 7. Create implementation plan
+# 8. Get approval before proceeding
+
+# After approval (Phase 5 - WRITE-ENABLED):
+# 9. Create ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/ folder
+# 10. Create 6 standard documents
+# 11. Create git branch and start coding
 ```
 
 ### Resume Existing Task
 ```bash
-# Agent checks .wip/{PROJECT_KEY}-2235/ automatically
+# Agent searches ${TASK_DOCS_DIR}/{ISSUE_KEY}* (glob pattern)
+# Uses gather-context.sh to find and read task folder
 # Reads 00-status.md for current state
 # Presents next actions
 ```
@@ -34,14 +39,18 @@
 
 ## Document Structure
 
-Every task has these 6 documents in `.wip/{PROJECT_KEY}-XXXX/`:
+Every task has these documents in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`:
 
+**Root documents:**
 1. **00-status.md** ← Start here (central index)
-2. **01-functional-requirements.md** ← Business requirements
-3. **02-decision-log.md** ← Decision log (ADR-style)
+2. **01-task-description.md** ← Task description (high-level overview)
+3. **02-functional-requirements.md** ← Functional requirements (detailed)
 4. **03-implementation-plan.md** ← Technical plan
-5. **04-task-description.md** ← Summary for YouTrack
-6. **05-todo.md** ← Implementation checklist
+5. **04-todo.md** ← Implementation checklist
+
+**Logs subfolder:**
+- **logs/decisions.md** ← Decision log (ADR-style)
+- **logs/review.md** ← External review feedback
 
 ---
 
@@ -72,9 +81,9 @@ Every task has these 6 documents in `.wip/{PROJECT_KEY}-XXXX/`:
 ## Key Rules
 
 ✅ **DO**:
-- Always create `.wip/{PROJECT_KEY}-XXXX/` (issue key only)
+- Always create `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` (issue key + slug from YouTrack)
 - Always start with `00-status.md`
-- Always check for existing branch: `git branch --list "*{PROJECT_KEY}-XXXX*"`
+- Always check for existing branch: `git branch --list "*{ISSUE_KEY}*"`
 - Always read relevant .ai/rules documents per phase
 - Always search YouTrack docs Table of Contents
 - Always ask questions before coding
@@ -96,12 +105,12 @@ Every task has these 6 documents in `.wip/{PROJECT_KEY}-XXXX/`:
 
 ### Git Workflow
 - Branch creation: Phase 4 (after approval)
-- Format: `{type}/{PROJECT_KEY}-XXXX-{slug}`
+- Format: `{type}/{ISSUE_KEY}-{slug}`
 - Base: `develop` (or `master` for hotfix)
 
 ### TodoWrite Tool
 - Used during Phase 5 (implementation)
-- Parallel to `05-todo.md` but more granular
+- Parallel to `04-todo.md` but more granular
 - Real-time work-in-progress tracking
 
 ### Single Step Rule
@@ -119,12 +128,12 @@ Every task has these 6 documents in `.wip/{PROJECT_KEY}-XXXX/`:
 
 ### Start Planning
 ```bash
-/plan-task {PROJECT_KEY}-2235
+/plan-task {ISSUE_KEY}
 ```
 
 ### Check for Existing Branch
 ```bash
-git branch --list "*{PROJECT_KEY}-2235*"
+git branch --list "*{ISSUE_KEY}*"
 ```
 
 ### Search YouTrack Docs
@@ -138,13 +147,13 @@ grep -i "inventory" storage/app/youtrack_docs/000\ Table\ of\ Contents.md
 
 ### Check Task Status
 ```bash
-# Agent reads .wip/{PROJECT_KEY}-2235/00-status.md automatically
+# Agent reads ${TASK_DOCS_DIR}/{ISSUE_KEY}/00-status.md automatically
 ```
 
 ### Update YouTrack Description
 ```bash
 # After planning complete, use content from:
-# .wip/{PROJECT_KEY}-2235/04-task-description.md
+# ${TASK_DOCS_DIR}/{ISSUE_KEY}/01-task-description.md
 ```
 
 ---
@@ -154,13 +163,13 @@ grep -i "inventory" storage/app/youtrack_docs/000\ Table\ of\ Contents.md
 ### Existing Non-Standard Docs
 1. Read all existing docs
 2. Offer reorganization options
-3. Archive old docs to `.wip/{PROJECT_KEY}-XXXX/archive/`
+3. Archive old docs to `${TASK_DOCS_DIR}/{ISSUE_KEY}/archive/`
 4. Create standard structure
 
 ### Complex Task with Subtasks
-- Document parent task in `.wip/{PROJECT_KEY}-XXXX/`
+- Document parent task in `${TASK_DOCS_DIR}/{ISSUE_KEY}/`
 - Link to subtasks in `00-status.md`
-- Optional: Create `.wip/{PROJECT_KEY}-YYYY/` for complex subtasks
+- Optional: Create `${TASK_DOCS_DIR}/{SUBTASK_KEY}/` for complex subtasks
 
 ### Task with Dependencies
 - Document in `03-implementation-plan.md` Dependencies section
@@ -171,21 +180,21 @@ grep -i "inventory" storage/app/youtrack_docs/000\ Table\ of\ Contents.md
 
 ## Folder Naming
 
-**Standard**: `.wip/{PROJECT_KEY}-XXXX/` (issue key only)
+**Standard**: `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` (issue key + slug from YouTrack)
 
 ✅ Correct:
-- `.wip/{PROJECT_KEY}-2228/`
-- `.wip/{PROJECT_KEY}-2233/`
+- `${TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/`
+- `${TASK_DOCS_DIR}/AB-2233-Fix-Login-Error/`
 
 ❌ Incorrect:
-- `.wip/{PROJECT_KEY}-2228-Warehouse-Queue/`
-- `.wip/technical/STAR-2233/`
+- `${TASK_DOCS_DIR}/STAR-2228/` (missing slug - no context)
+- `${TASK_DOCS_DIR}/technical/STAR-2233/` (wrong nesting)
 
 ---
 
 ## Templates Location
 
-Templates: `.ai/templates/task-planning/`
+Templates: `~/.claude/templates/task-planning/`
 
 Contains all 6 document templates ready to copy.
 
@@ -193,12 +202,12 @@ Contains all 6 document templates ready to copy.
 
 ## Example Flow
 
-1. User: "Let's work on {PROJECT_KEY}-2235"
-2. Agent: Fetches from YouTrack, creates `.wip/{PROJECT_KEY}-2235/`
+1. User: "Let's work on STAR-2235"
+2. Agent: Fetches from YouTrack, creates `${TASK_DOCS_DIR}/STAR-2235/`
 3. Agent: "This is a bug fix in authentication. I found these questions..."
 4. User: Answers questions
 5. Agent: Creates implementation plan, gets approval
-6. Agent: Creates branch `fix/{PROJECT_KEY}-2235-Login-timeout-error`
+6. Agent: Creates branch `fix/STAR-2235-Login-timeout-error`
 7. Agent: Implements following single-step rule
 8. Agent: Updates status as phases complete
 9. Complete: Merge, deploy, mark as Complete
@@ -221,15 +230,17 @@ Contains all 6 document templates ready to copy.
 
 ### Starting New Task
 - [ ] Get issue key
-- [ ] Fetch from YouTrack
-- [ ] Check for existing branch
-- [ ] Read project rules (01-core-workflow.md, dev-processes.md)
-- [ ] Create `.wip/{PROJECT_KEY}-XXXX/`
-- [ ] Create 6 standard documents
-- [ ] Search YouTrack docs Table of Contents
-- [ ] Ask questions
-- [ ] Create plan
-- [ ] Get approval
+- [ ] Fetch from YouTrack (get issue summary for slug)
+- [ ] Check for existing task folder: `find ${TASK_DOCS_DIR} -name "{ISSUE_KEY}*"`
+- [ ] Check for existing branch: `git branch --list "*{ISSUE_KEY}*"`
+- [ ] Read project rules (.ai/rules/)
+- [ ] Search codebase for similar implementations
+- [ ] Ask clarifying questions
+- [ ] Create implementation plan
+- [ ] **Get user approval** (READ-ONLY until here)
+- [ ] Create `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` (AFTER approval)
+- [ ] Create 6 standard documents (AFTER approval)
+- [ ] Create git branch and start coding
 
 ### Before Implementation
 - [ ] All questions answered
@@ -239,7 +250,7 @@ Contains all 6 document templates ready to copy.
 - [ ] Status: "In Progress"
 
 ### During Implementation
-- [ ] Update `05-todo.md`
+- [ ] Update `04-todo.md`
 - [ ] Use TodoWrite tool
 - [ ] Follow single-step rule
 - [ ] Update docs as needed
@@ -254,6 +265,6 @@ Contains all 6 document templates ready to copy.
 
 ---
 
-**Full Documentation**: `.ai/workflows/task-planning.md`
-**Templates**: `.ai/templates/task-planning/`
-**Slash Command**: `/plan-task [{PROJECT_KEY}-XXXX]`
+**Full Documentation**: `~/.claude/workflows/task-planning/`
+**Templates**: `~/.claude/templates/task-planning/`
+**Slash Command**: `/plan-task [{ISSUE_KEY}]`
