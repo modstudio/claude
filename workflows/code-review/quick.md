@@ -10,26 +10,34 @@ Running fast checklist review for small changes. This review focuses on critical
 
 ---
 
-## Phase 0: Project Context Already Loaded
+## Phase 0: Project Context
 
-**Project context was loaded by `/code-review-g` before mode selection.**
+{{MODULE: ~/.claude/modules/phase-0-context.md}}
 
-Available from project context:
-- **Project**: `PROJECT_CONTEXT.project.name`
-- **Issue Key**: Extracted from branch using `PROJECT_CONTEXT.issue_tracking.regex`
-- **Standards**: `PROJECT_CONTEXT.standards.location` and `.files[]`
-- **Citation Format**: Use `PROJECT_CONTEXT.citation_format.*` for all citations
-- **Test Commands**: `PROJECT_CONTEXT.test_commands.*`
-- **MCP Tools**: YouTrack, Laravel Boost (if enabled)
+**Severity Levels:** {{MODULE: ~/.claude/modules/severity-levels.md}}
 
-**Use these variables instead of hardcoded paths.**
+**Citation Format:** {{MODULE: ~/.claude/modules/citation-standards.md}}
 
 ---
 
-**IMPORTANT:** All findings must cite specific rule references using project citation format:
-- Architecture: Use `PROJECT_CONTEXT.citation_format.architecture`
-- Style: Use `PROJECT_CONTEXT.citation_format.style`
-- Test: Use `PROJECT_CONTEXT.citation_format.test` (if available)
+## 📋 MANDATORY: Initialize Todo List
+
+**IMMEDIATELY after loading context, create a todo list to track review progress:**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Check scope (decide quick vs full review)", status: "in_progress", activeForm: "Checking scope"},
+    {content: "Check critical files (migrations, models, services, frontend)", status: "pending", activeForm: "Checking critical files"},
+    {content: "Run auto-fix phase (linter, debug statements)", status: "pending", activeForm: "Running auto-fix phase"},
+    {content: "Verify tests", status: "pending", activeForm: "Verifying tests"},
+    {content: "Run tests", status: "pending", activeForm: "Running tests"},
+    {content: "Generate quick report", status: "pending", activeForm: "Generating quick report"}
+  ]
+})
+```
+
+**Update todo list as you progress. Mark tasks complete immediately upon finishing.**
 
 ---
 
@@ -55,11 +63,6 @@ git diff develop --stat
 ## 2. Critical File Checks (2 min)
 
 ### Migration Files (if any)
-```bash
-git status database/migrations/
-```
-
-- [ ] All migration files staged/committed (no untracked)
 - [ ] Migrations have both `up()` and `down()` methods
 - [ ] Migration timestamps are sequential
 - [ ] Data migrations are safe (no data loss)
@@ -86,19 +89,56 @@ For each modified model:
 - [ ] Components use PascalCase
 - [ ] Imports use `@` alias
 
+### Vue 3 Readiness (if frontend changes)
+- [ ] No new mixins introduced (use composables `use*.js` instead)
+- [ ] No `$on`/`$off`/`$once` usage (removed in Vue 3)
+- [ ] No filters `{{ value | filter }}` (use computed/methods)
+- [ ] Uses `v-slot` syntax, not deprecated `slot` attribute
+- [ ] No `Vue.set()`/`Vue.delete()` calls
+
 ---
 
-## 3. Forbidden Code Check (1 min)
+## 3. Auto-Fix Phase (Code Style & Debug Statements)
 
-Quick grep for forbidden patterns:
+**Run fixers and remove debug statements before reviewing.**
+
+### Step 1: Run Code Style Fixer
 
 ```bash
+# Get changed PHP files
+CHANGED_PHP=$(git diff develop --name-only --diff-filter=ACMR | grep '\.php$' | tr '\n' ' ')
+
+# Run PHP CS Fixer on changed files
+if [ -n "$CHANGED_PHP" ]; then
+  docker compose exec -T {container} ./vendor/bin/php-cs-fixer fix $CHANGED_PHP --config=.php-cs-fixer.php
+fi
+
+# For JS/TS projects:
+CHANGED_JS=$(git diff develop --name-only --diff-filter=ACMR | grep -E '\.(js|ts|vue)$' | tr '\n' ' ')
+if [ -n "$CHANGED_JS" ]; then
+  npx prettier --write $CHANGED_JS && npx eslint --fix $CHANGED_JS
+fi
+```
+
+**Record:**
+- Files fixed by linter: _____ (count)
+
+### Step 2: Remove Debug Statements
+
+```bash
+# Find debug statements
 git diff develop | grep -E "dd\(|var_dump|print_r|console\.log|die\("
 ```
 
-- [ ] No debug statements found (`dd`, `var_dump`, `print_r`)
-- [ ] No `console.log` in production code
-- [ ] No `die()` statements
+**If found, use Edit tool to remove:**
+- `dd()` - Remove entire statement
+- `var_dump()` - Remove entire statement
+- `print_r()` - Remove entire statement
+- `console.log()` - Remove entire statement (unless in debug utility file)
+- `die()` - Remove entire statement
+
+**Record:**
+- Debug statements removed: _____ (count)
 
 ---
 
@@ -147,6 +187,10 @@ If tests FAIL:
 ### Status
 
 **Overall:** [✅ PASS / ⚠️ NEEDS WORK / ❌ FAIL]
+
+### Auto-Fixed
+- 🔧 Files fixed by linter: [count]
+- 🔧 Debug statements removed: [count]
 
 ### Scope
 - Files changed: [count]

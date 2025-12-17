@@ -9,37 +9,45 @@ description: Interactive manual code review with step-by-step approval
 
 ---
 
-## Phase 0: Project Context Already Loaded
+## Phase 0: Project Context
 
-**Project context was loaded by `/code-review-g` before mode selection.**
-
-Available from project context:
-- **Project**: `PROJECT_CONTEXT.project.name`
-- **Issue Key**: Extracted from branch using `PROJECT_CONTEXT.issue_tracking.regex`
-- **Standards**: `PROJECT_CONTEXT.standards.location` and `.files[]`
-- **Citation Format**: `PROJECT_CONTEXT.citation_format.architecture`, `.style`
-- **Test Commands**: `PROJECT_CONTEXT.test_commands.*`
-- **Storage**: `${WIP_ROOT}/{ISSUE_KEY}-{slug}/` (where `WIP_ROOT` from `~/.claude/config/global.yaml`)
-- **MCP Tools**: YouTrack, Laravel Boost (if enabled)
-
-**Use these variables instead of hardcoded paths.**
+{{MODULE: ~/.claude/modules/phase-0-context.md}}
 
 ---
 
-**SSOT Guidance**
-- Do **not** duplicate rules inside this workflow. Always consult the standard files from `PROJECT_CONTEXT.standards.location`
-- **Cite** findings using citation format from `PROJECT_CONTEXT.citation_format.*`
+**Severity Levels:** {{MODULE: ~/.claude/modules/severity-levels.md}}
+
+**Citation Format:** {{MODULE: ~/.claude/modules/citation-standards.md}}
 
 **Principles**
 - Be fast, respectful, and precise; comment on code, not on people. Explain reasons and guide solutions.
 - Classify findings by severity and propose concrete, minimal changes. Prefer auto-fix patches for low-risk items.
 - Each step ends with a **STOP** for user approval (Single Step Rule).
 
-**Severity Levels**
-- **BLOCKER (stop-the-merge):** correctness/security/data loss/architecture violations affecting behavior or maintainability.
-- **MAJOR (must fix before merge):** substantial issues increasing risk or debt.
-- **MINOR (non-blocking):** small but worthwhile improvements; encourage addressing in this PR.
-- **NIT (optional):** trivial polish; can be skipped or handled in follow-up.
+---
+
+## 📋 MANDATORY: Initialize Todo List
+
+**IMMEDIATELY after loading context, create a todo list to track review progress:**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Step A: Specification check", status: "in_progress", activeForm: "Checking specification"},
+    {content: "Step 0: Inputs, business context & range", status: "pending", activeForm: "Gathering inputs and context"},
+    {content: "Step 1: Pre-flight diff intake & risk flags", status: "pending", activeForm: "Running pre-flight checks"},
+    {content: "Step 2: Requirements compliance", status: "pending", activeForm: "Checking requirements compliance"},
+    {content: "Step 3: Architecture review", status: "pending", activeForm: "Reviewing architecture"},
+    {content: "Step 4: Code quality review", status: "pending", activeForm: "Reviewing code quality"},
+    {content: "Step 5: Testing review", status: "pending", activeForm: "Reviewing tests"},
+    {content: "Step 6: Performance & security review", status: "pending", activeForm: "Reviewing performance & security"},
+    {content: "Step 7: Documentation & deployment check", status: "pending", activeForm: "Checking documentation & deployment"},
+    {content: "Step 8: Generate final summary report", status: "pending", activeForm: "Generating final report"}
+  ]
+})
+```
+
+**Update todo list as you progress through each step. Mark tasks complete immediately upon finishing.**
 
 ---
 
@@ -84,44 +92,17 @@ BRANCH="<paste-one-from-above>"
 [ -n "$BRANCH" ] && git log --oneline "$BRANCH" --grep="$KEY"
 ```
 
-### Step 0.2: Load Business Context from YouTrack
+### Step 0.2: Load Task Documentation (MANDATORY)
 
-**Get Issue Details:**
-```
-mcp__youtrack__get_issue
-issueId: {ISSUE-KEY}
-```
+**STOP - Execute this command before continuing:**
 
-**Extract:**
-- Issue summary and description
-- Issue type (Feature/Enhancement/Fix/Technical)
-- Priority, State, Assignee
-- Linked issues
-- Recent comments for additional context
-
-**Read YouTrack Knowledge Base:**
-- Check `storage/app/youtrack_docs/000 Table of Contents.md`
-- Search for relevant domain articles based on issue description:
-  - Product: STAR-A-136
-  - Inventory: STAR-A-38
-  - Shipping: STAR-A-177
-  - Import: STAR-A-5
-  - Report: STAR-A-47
-  - Organization: STAR-A-197
-- Read relevant articles for business rules and constraints
-
-**Read Task Documentation:**
 ```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
-
-# Find task folder and read documentation
-TASK_FOLDER=$(find "$WIP_ROOT" -type d -name "{ISSUE-KEY}*" 2>/dev/null | head -1)
-if [ -n "$TASK_FOLDER" ]; then
-  find "$TASK_FOLDER" -name "*.md" -type f
-fi
+~/.claude/lib/bin/gather-context
 ```
-- Read all found files for task-specific implementation notes
+
+This outputs all task context including project info, git status, and all task documentation.
+
+**If YouTrack MCP available**, also fetch issue details.
 
 ### Step 0.3: Enumerate Change Set
 
@@ -175,19 +156,15 @@ Verify the code implements the **Acceptance Criteria** from the Spec.
 ---
 
 ## Step 3 — Architecture Review
-Review against `.ai/rules/20-architecture.md` patterns:
 
-### Backend (PHP)
-- **DDD Structure:** Domain logic properly separated
-- **Models:** Fillable, casts, relationships, no business logic
-- **Services/Handlers:** Business logic location, DTOs vs raw arrays
-- **Repositories:** Query patterns, no business logic
-- **Migrations:** Reversible, sequential, commented
+Review against `.ai/rules/20-architecture.md` patterns.
 
-### Frontend (Vue.js)
-- **Components:** PascalCase, self-documenting, proper imports
-- **API Clients:** No direct axios, centralized clients
-- **State:** Vuex only for shared state
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
+
+Apply the following sections from the shared review rules:
+- **Backend Architecture Rules** (Models, Services, Handlers, Repositories, Controllers, Migrations)
+- **Frontend Architecture Rules** (Components, API Clients, State Management)
+- **Vue 3 Readiness Rules** (Composition API, Deprecated APIs, Template Syntax)
 
 **Output:** Findings by severity with file:line references.
 **STOP.**
@@ -195,28 +172,12 @@ Review against `.ai/rules/20-architecture.md` patterns:
 ---
 
 ## Step 4 — Code Quality Review
-Review against `.ai/rules/10-coding-style.md`:
 
-### Naming
-- Precise, self-documenting names
-- Booleans: `is*/has*/should*`
-- Collections/elements
-- Intent-based
+Review against `.ai/rules/10-coding-style.md`.
 
-### Typing
-- Scalar types everywhere
-- Return types
-- No `mixed` without reason
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
 
-### Forbidden Code
-- No `dd`, `var_dump`, `echo`, `print_r`
-- No debug statements
-- No commented-out code
-
-### Code Metrics
-- Functions ≤50 lines (guideline)
-- Lines ≤170 characters (guideline)
-- PSR-12 compliance
+Apply the **Code Quality Rules** section (Naming, Typing, Comments, Code Metrics).
 
 **Output:** Findings by severity.
 **STOP.**
@@ -224,26 +185,17 @@ Review against `.ai/rules/10-coding-style.md`:
 ---
 
 ## Step 5 — Testing Review
-Review against `.ai/rules/30-testing.md`:
 
-### Test Coverage
-- All new public methods have tests
-- Modified business logic tested
-- Edge cases covered
+Review against `.ai/rules/30-testing.md`.
 
-### Test Quality
-- Classes `final`
-- Methods `camelCase`
-- Return type `void`
-- Uses `self::assert*()` not `$this->assert*()`
-- Uses `createStub()` not `createMock()`
-- Descriptive variable names
-- Uses fixtures/builders properly
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
+
+Apply the **Test Quality Rules** section (Test Class Structure, Test Quality, Test Coverage).
 
 ### Test Execution
-Run all modified test files:
+Run all modified test files using project test commands:
 ```bash
-docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit {test-file}
+${PROJECT_TEST_CMD_UNIT} {test-file}
 ```
 
 **Output:** Test results + coverage findings by severity.
@@ -274,7 +226,7 @@ Quick scan for:
 
 ## Step 7 — Documentation & Deployment
 Check:
-- Task docs (`$WIP_ROOT/{ISSUE_KEY}-{slug}/`) aligned with implementation
+- Task docs (`$PROJECT_TASK_DOCS_DIR/{ISSUE_KEY}-{slug}/`) aligned with implementation
 - YouTrack references accurate
 - Breaking changes documented
 - Migration rollback tested

@@ -8,36 +8,57 @@ Executing comprehensive code review of **ALL git changes** (staged, unstaged, an
 
 ---
 
-## Phase 0: Project Context Already Loaded
+## Phase 0: Project Context
 
-**Project context was loaded by `/code-review-g` before mode selection.**
+{{MODULE: ~/.claude/modules/phase-0-context.md}}
 
-Available from project context:
-- **Project**: `PROJECT_CONTEXT.project.name`
-- **Issue Key**: Already extracted from branch using `PROJECT_CONTEXT.issue_tracking.regex`
-- **Standards**: `PROJECT_CONTEXT.standards.location` and `.files[]`
-- **Citation Format**: `PROJECT_CONTEXT.citation_format.*` (use for all rule citations)
-- **Test Commands**: `PROJECT_CONTEXT.test_commands.*` (all, unit, feature, etc.)
-- **Storage**: `${WIP_ROOT}/{ISSUE_KEY}-{slug}/` (where `WIP_ROOT` from `~/.claude/config/global.yaml`)
-- **MCP Tools**:
-  - YouTrack: `PROJECT_CONTEXT.mcp_tools.youtrack.enabled`
-  - Laravel Boost: `PROJECT_CONTEXT.mcp_tools.laravel_boost.enabled`
-- **YouTrack Docs**: `PROJECT_CONTEXT.youtrack_docs.available`
+**Severity Levels:** {{MODULE: ~/.claude/modules/severity-levels.md}}
 
-**Use these variables instead of hardcoded paths.**
+**Citation Format:** {{MODULE: ~/.claude/modules/citation-standards.md}}
+
+---
+
+## 📋 MANDATORY: Initialize Todo List
+
+**IMMEDIATELY after loading context, create a todo list to track review progress:**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Context gathering (YouTrack, commits, task docs, file status)", status: "in_progress", activeForm: "Gathering context"},
+    {content: "Extract requirements from task docs (create checklist)", status: "pending", activeForm: "Extracting requirements"},
+    {content: "Auto-fix simple issues (formatting, debug statements)", status: "pending", activeForm: "Auto-fixing simple issues"},
+    {content: "Architecture review (ALL files)", status: "pending", activeForm: "Reviewing architecture"},
+    {content: "Correctness & robustness analysis", status: "pending", activeForm: "Analyzing correctness"},
+    {content: "Requirements verification (compare vs task docs)", status: "pending", activeForm: "Verifying requirements"},
+    {content: "Code quality review", status: "pending", activeForm: "Reviewing code quality"},
+    {content: "Laravel standards check (if applicable)", status: "pending", activeForm: "Checking Laravel standards"},
+    {content: "Test coverage verification", status: "pending", activeForm: "Verifying test coverage"},
+    {content: "Test execution", status: "pending", activeForm: "Executing tests"},
+    {content: "Report generation with suggestions table", status: "pending", activeForm: "Generating report"}
+  ]
+})
+```
+
+**Update todo list as you progress. Mark tasks complete immediately upon finishing.**
 
 ---
 
 ## Progress Tracking
 
-Use TodoWrite to create and track these phases:
+The phases tracked by the todo list:
 1. Context gathering (YouTrack issue + docs, commits, task docs, file status)
-2. Architecture review (ALL files - staged, unstaged, untracked)
-3. Correctness & robustness analysis
-4. Laravel standards check (if Laravel Boost enabled)
-5. Test coverage verification
-6. Test execution (using project test commands)
-7. Report generation (with full context + file status warnings)
+2. **Extract requirements from task docs** (create checklist)
+3. **Auto-fix simple issues** (formatting, debug statements, whitespace)
+4. Architecture review (ALL files - staged, unstaged, untracked)
+5. Correctness & robustness analysis
+6. **Requirements verification** (compare implementation vs task docs)
+7. Code quality review
+8. Laravel standards check (if Laravel Boost enabled)
+9. Test coverage verification
+10. Test execution (using project test commands)
+11. Report generation (with requirements compliance matrix)
+12. **Compile suggestions summary table** (all issues in one table)
 
 ## Phase 1: Context Gathering
 
@@ -61,96 +82,55 @@ git branch -a --contains "$LAST" --format="%(refname:short)"
 **If no commits found or single-commit change:**
 - Proceed with current branch state only
 
-### 1.3 Load Business Context
+### 1.2 Load Task Documentation (MANDATORY)
 
-#### 1.3.1 Get Issue Details from YouTrack
+**STOP - Execute this command before continuing:**
 
-Use YouTrack MCP to retrieve issue information:
+```bash
+~/.claude/lib/bin/gather-context
+```
 
+This outputs all task context including:
+- Project and git information
+- All task documentation files with full contents
+- Requirements, implementation plan, and previous decisions
+
+**If YouTrack MCP available**, also fetch issue details:
 ```
 mcp__youtrack__get_issue
-issueId: {ISSUE-KEY}
+issueId: ${ISSUE_KEY}
 ```
 
-**Extract and record:**
-- **Issue Summary:** [from YouTrack]
-- **Issue Description:** [full description with business context]
-- **Issue Type:** Feature/Enhancement/Fix/Technical/etc.
-- **Custom Fields:** State, Priority, Assignee, Type, etc.
-- **Tags:** Any relevant tags
-- **Linked Issues:** Related/blocking/blocked-by issues
-- **Comments:** Review recent comments for context
+**Verify before continuing:**
+- ✅ Script output reviewed
+- ✅ Requirements and implementation plan understood
+- ✅ Issue tracker data loaded (if MCP available)
 
-**Why this matters:**
-- Understand the business problem being solved
-- Know acceptance criteria if documented in issue
-- See related issues that might affect implementation
-- Understand priority and risk level
+### 1.3 Extract and Record Requirements (from Task Docs)
 
-#### 1.3.2 Read YouTrack Knowledge Base Articles
+**If task docs were loaded, extract these key items:**
 
-Search for related documentation in local YouTrack docs:
+**From `02-functional-requirements.md`:**
+- [ ] List all acceptance criteria (AC1, AC2, etc.)
+- [ ] Note any constraints or edge cases mentioned
+- [ ] Record expected behaviors
 
-**Step 1: Check Table of Contents**
-```bash
-# Read the TOC to find relevant articles
-cat storage/app/youtrack_docs/000\ Table\ of\ Contents.md
+**From `03-implementation-plan.md`:**
+- [ ] List planned components/files to be modified
+- [ ] Note architectural decisions made
+- [ ] Record any technical constraints
+
+**Create Requirements Checklist:**
+```markdown
+## Requirements to Verify
+| ID | Requirement | Status | Evidence |
+|----|-------------|--------|----------|
+| AC1 | [Description from task docs] | ⏳ Pending | |
+| AC2 | [Description from task docs] | ⏳ Pending | |
+| ... | ... | ... | |
 ```
 
-**Step 2: Search for relevant articles based on:**
-- Issue description keywords
-- Domain areas mentioned (Product, Inventory, Shipping, etc.)
-- Organizations involved (Schein, Medline, Owens, etc.)
-
-**Step 3: Read relevant articles**
-
-Common articles to check based on domain:
-- **Product changes:** `STAR-A-136` - Product domain documentation
-- **Inventory changes:** `STAR-A-38` - Inventory Data documentation
-- **Shipping changes:** `STAR-A-177` - Shipping documentation
-- **Import changes:** `STAR-A-5` - Import system documentation
-- **Report changes:** `STAR-A-47` - Report system documentation
-- **Organization changes:** `STAR-A-197` - Organization documentation
-
-**How to find articles:**
-```bash
-# Search TOC for keywords
-grep -i "product\|inventory\|shipping" storage/app/youtrack_docs/000\ Table\ of\ Contents.md
-
-# Read specific article (example)
-cat storage/app/youtrack_docs/088\ STAR-A-38.md  # Inventory article
-```
-
-**Extract from articles:**
-- Business rules and constraints
-- Data models and relationships
-- Process flows and workflows
-- Edge cases and special handling
-- Integration points
-
-#### 1.3.3 Read Task Documentation
-
-Find and read ALL task documentation:
-```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
-
-# Find task folder
-TASK_FOLDER=$(find "$WIP_ROOT" -type d -name "{ISSUE-KEY}*" 2>/dev/null | head -1)
-
-# Read all markdown files
-if [ -n "$TASK_FOLDER" ]; then
-  find "$TASK_FOLDER" -name "*.md" -type f
-fi
-```
-- Read all found files for task-specific requirements, architecture decisions
-- Note key requirements and constraints
-
-**Combined Context:**
-By this point, you should have:
-- ✅ Issue description and acceptance criteria (from YouTrack issue)
-- ✅ Domain business rules (from YouTrack knowledge base)
-- ✅ Task-specific implementation notes (from task docs)
+**This checklist will be completed in Phase 6 (Requirements Verification).**
 
 ### 1.4 Analyze Scope (Staged AND Unstaged Files)
 
@@ -182,222 +162,171 @@ git diff --cached --name-status
 git diff --name-status
 ```
 - List all unstaged files by type
-- ⚠️ **WARNING:** If critical files are unstaged (migrations, models, tests), flag for attention
-
-**Untracked Files:**
-```bash
-git ls-files --others --exclude-standard
-```
-- List all untracked files
-- ⚠️ **WARNING:** New migrations, models, or tests should be tracked
 
 **Record:**
 - **Staged files:** [count] - [types]
 - **Unstaged files:** [count] - [types]
-- **Untracked files:** [count] - [types]
 - **Total lines +/-:** [added/removed]
 - **Commit range:** [if multi-commit]
 
 **Files to Review:**
 - ✅ Review ALL staged files
 - ✅ Review ALL unstaged files
-- ✅ Review ALL untracked files (if relevant to task)
-- ⚠️ Flag if unstaged/untracked files should be staged
-
-**Critical File Check:**
-If any of these are unstaged or untracked:
-- Migration files (`database/migrations/*.php`)
-- New model files (`app/Models/*.php`, `app/Domains/*/Models/*.php`)
-- New test files (`tests/**/*Test.php`)
-
-**→ WARN:** These critical files should likely be staged before merge.
+- ✅ Review ALL new/untracked files (if relevant to task)
 
 ### 1.5 Load Project Standards
-Read all standards documents:
-- `.ai/rules/00-system-prompt.md` - Interaction rules
-- `.ai/rules/20-architecture.md` - DDD, models, repositories, database
-- `.ai/rules/10-coding-style.md` - Naming, typing, code quality
-- `.ai/rules/30-testing.md` - Test coverage and conventions
 
-**IMPORTANT - SSOT Citation Requirement:**
-All findings reported in this review MUST cite specific rule references using format:
-- `[ARCH §X.Y]` - Architecture rule, section X.Y from 20-architecture.md
-- `[STYLE §X.Y]` - Code style rule, section X.Y from 10-coding-style.md
-- `[TEST §X.Y]` - Testing rule, section X.Y from 30-testing.md
-- `[LARAVEL §topic]` - Laravel best practice from Boost docs
+{{MODULE: ~/.claude/modules/standards-loading.md}}
 
-This ensures traceability and allows developers to verify findings against documented standards.
+**IMPORTANT:** All findings MUST cite rule references per the citation standards in Phase 0.
+
+## Phase 1.5: Auto-Fix Simple Issues
+
+**BEFORE detailed review, fix trivial issues automatically.** This reduces noise and saves review time.
+
+### Step 1: Run Project Linter/Fixer (if configured)
+
+**Check project config for fixer commands and run them first:**
+
+```bash
+# PHP projects - run PHP CS Fixer on changed files
+CHANGED_PHP=$(git diff develop --name-only --diff-filter=ACMR | grep '\.php$' | tr '\n' ' ')
+if [ -n "$CHANGED_PHP" ]; then
+  # Run PHP CS Fixer in fix mode
+  docker compose exec -T {container} ./vendor/bin/php-cs-fixer fix $CHANGED_PHP --config=.php-cs-fixer.php
+  # Or without docker:
+  # ./vendor/bin/php-cs-fixer fix $CHANGED_PHP --config=.php-cs-fixer.php
+fi
+
+# JavaScript/TypeScript projects - run prettier/eslint fix
+CHANGED_JS=$(git diff develop --name-only --diff-filter=ACMR | grep -E '\.(js|ts|vue|jsx|tsx)$' | tr '\n' ' ')
+if [ -n "$CHANGED_JS" ]; then
+  npx prettier --write $CHANGED_JS
+  npx eslint --fix $CHANGED_JS
+fi
+```
+
+**Use project-specific commands from `PROJECT_CONTEXT.fixer_commands`:**
+```yaml
+# Example project config
+fixer_commands:
+  php: "docker compose exec -T starship_server ./vendor/bin/php-cs-fixer fix {files}"
+  js: "npx prettier --write {files} && npx eslint --fix {files}"
+```
+
+**Record fixer results:**
+- Files fixed by linter: {count}
+- Types of fixes applied: {brief description}
+
+### Step 2: Remove Debug Statements
+
+**Find and remove debug statements that fixers might miss:**
+
+```bash
+# Find debug statements
+git diff develop | grep -E "dd\(|var_dump|print_r|console\.log|die\("
+```
+
+**Fix manually using Edit tool:**
+- [ ] Remove `dd()`, `var_dump()`, `print_r()`, `die()` debug statements
+- [ ] Remove `console.log()` statements (unless in debug utility)
+
+### Step 3: Final Cleanup
+
+**After running fixers, check for remaining issues:**
+- [ ] Trailing whitespace (should be fixed by linter)
+- [ ] Missing newline at end of file (should be fixed by linter)
+- [ ] Extra blank lines (should be fixed by linter)
+
+### What NOT to Auto-Fix
+
+**Always report these (don't auto-fix):**
+- Variable/function renaming
+- Adding type hints
+- Restructuring code
+- Any logic changes
+- Missing tests
+- Architecture issues
+
+### Record Auto-Fixes
+
+Track for final report:
+```markdown
+AUTO_FIXES_APPLIED:
+- Linter/fixer ran: {Yes/No}
+- Files fixed by linter: {count}
+- Debug statements removed manually: {count}
+- Total auto-fixes: {count}
+```
 
 ## Phase 2: Architecture Review
 
-For EACH modified file, verify compliance with `.ai/rules/20-architecture.md`:
+For EACH modified file, verify compliance with `.ai/rules/20-architecture.md`.
 
-### Backend Files (PHP)
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
 
-**Models** (`app/Models/*.php`, `app/Domains/*/Models/*.php`):
-- [ ] UUIDs used for IDs where applicable
-- [ ] Static constructors for complex creation
-- [ ] Eloquent relationships marked `@internal only for Eloquent`
-- [ ] Classes declared `final` or `abstract`
-- [ ] `$fillable` array properly defined
-- [ ] `$casts` defined for booleans, dates, custom types
-- [ ] Getter methods have return types
-- [ ] No business logic (just accessors/data methods)
-- [ ] Follows organization data structure (internal vs customer tables)
-
-**Services** (`app/Services/*.php`, `app/Domains/*/Services/*.php`):
-- [ ] Business logic in Command/Handler pattern (not in service methods)
-- [ ] Uses DTOs for complex data (not raw arrays)
-- [ ] All methods have type hints
-- [ ] No database queries (delegated to repositories)
-- [ ] Stateless where possible
-
-**Handlers** (`app/Domains/*/Commands/Handlers/*.php`):
-- [ ] Single responsibility per handler
-- [ ] Dependencies injected via constructor
-- [ ] Handles exactly one command
-- [ ] Returns appropriate value or void
-- [ ] Uses repositories for data access
-
-**Repositories** (`app/Repositories/*.php`, `app/Domains/*/Repositories/*.php`):
-- [ ] No business logic
-- [ ] Query builders for complex queries
-- [ ] Uses Criteria pattern for filters
-- [ ] Readable queries (not over-optimized)
-- [ ] No computed/raw SQL in model attributes
-
-**Controllers** (`app/Http/Controllers/*.php`):
-- [ ] Thin (delegates to handlers/services)
-- [ ] Uses FormRequests for validation
-- [ ] Returns via ResponseFactory
-- [ ] Multi-action where appropriate
-
-**FormRequests** (`app/Http/Requests/**/*.php`):
-- [ ] All validation rules defined
-- [ ] Uses custom validation rules when needed
-- [ ] No business logic in authorize()
-
-**Migrations** (`database/migrations/*.php`):
-- [ ] Timestamp format: `YYYY_MM_DD_HHMMSS`
-- [ ] Descriptive names
-- [ ] Both `up()` and `down()` methods
-- [ ] Uses Schema facade
-- [ ] Reversible (down() actually works)
-- [ ] Table names in `snake_case`
-- [ ] Columns: `id` (UUID first), timestamps last
-- [ ] Comments on columns for clarity
-- [ ] Data migrations separate from schema migrations
-
-### Frontend Files (Vue.js)
-
-**Components** (`resources/js/components/**/*.vue`):
-- [ ] File names in PascalCase
-- [ ] Component `name` in PascalCase
-- [ ] Self-closing empty tags
-- [ ] Template tags in PascalCase
-- [ ] Imports use `@` alias
-- [ ] Include `.vue` extension in imports
-
-**Architecture Pattern - Feature-Dominant with Ad-Hoc UI Layer:**
-- [ ] Routes organized by feature domain
-- [ ] Components reusable across features
-- [ ] Composables extracted for shared logic
-- [ ] Follows team's architectural pattern (not generic Vue best practices)
-
-**API Clients** (`resources/js/services/**/*ApiClient.js`):
-- [ ] Components don't call axios directly
-- [ ] Request/response handling centralized
-- [ ] Error handling included
-
-**State Management** (Vuex):
-- [ ] Only shared/cached/persistent UI state
-- [ ] Mutations via `commit()` only
-- [ ] Not used for local component state
+Apply the following sections from the shared review rules:
+- **Backend Architecture Rules** (Models, Services, Handlers, Repositories, Controllers, FormRequests, Migrations)
+- **Frontend Architecture Rules** (Components, Architecture Pattern, API Clients, State Management)
+- **Vue 3 Readiness Rules** (Composition API, Deprecated APIs, Template Syntax, Vuex → Pinia)
 
 ## Phase 2.5: Correctness & Robustness Analysis
 
-For EACH modified file containing business logic, verify:
+For EACH modified file containing business logic, verify.
 
-### Logic Paths & Edge Cases
-- [ ] All code paths covered (if/else, switch, early returns)
-- [ ] Edge cases handled:
-  - Empty arrays/collections
-  - Null values
-  - Zero and negative numbers
-  - Boundary conditions (min/max values)
-  - Empty strings
-- [ ] Default values appropriate
-- [ ] Fallback behavior defined
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
 
-### Error Handling
-- [ ] Exceptions properly caught and logged
-- [ ] Error messages meaningful to developers
-- [ ] User-facing errors appropriate
-- [ ] Graceful degradation where applicable
-- [ ] No silent failures
-- [ ] Stack traces preserved when re-throwing
-
-### Type Safety & Contracts
-- [ ] Nullability handled correctly (`?Type` vs `Type`)
-- [ ] Type contracts respected (method signatures)
-- [ ] No unsafe type coercion
-- [ ] Array type safety (`@param array<string, Product>`)
-- [ ] Return types match documentation
-
-### Concurrency & Async Patterns
-- [ ] Race conditions considered
-- [ ] Database transactions used for multi-step operations
-- [ ] Locks used appropriately (Redis, database)
-- [ ] Idempotency for retryable operations
-- [ ] Queue job failures handled
-- [ ] Event ordering considered
-
-### Data Handling
-- [ ] Timezone awareness in date operations
-- [ ] DateTime objects used (not strings)
-- [ ] Pagination bounds checked
-- [ ] Large dataset handling (chunking, streaming)
-- [ ] Memory usage considered for bulk operations
-- [ ] Currency precision maintained (decimal types)
-
-### Transactional Integrity
-- [ ] Database transactions around multi-step operations
-- [ ] Rollback on failure
-- [ ] No partial state on errors
-- [ ] Atomic operations where needed
-- [ ] Savepoints for nested transactions
+Apply the **Correctness & Robustness Rules** section (Logic Paths, Error Handling, Type Safety, Concurrency & Async, Data Handling, Transactional Integrity).
 
 **Citation requirement:** All findings must reference [ARCH §correctness] or specific architecture rule.
 
+## Phase 2.8: Requirements Verification (Compare Implementation vs Task Docs)
+
+**If task docs were loaded in Phase 1.3, NOW verify implementation matches requirements.**
+
+### Step 1: Complete the Requirements Checklist
+
+For EACH requirement extracted in Phase 1.3:
+
+| ID | Requirement | Status | Evidence (file:line or test) |
+|----|-------------|--------|------------------------------|
+| AC1 | [From task docs] | ✅ PASS / ⚠️ PARTIAL / ❌ MISSING | `app/Services/Foo.php:45` |
+| AC2 | [From task docs] | ... | ... |
+
+### Step 2: Verify Planned vs Actual Changes
+
+Compare `03-implementation-plan.md` against actual changes:
+
+**Planned files to modify:**
+- [ ] File A - Was it modified? Does change match plan?
+- [ ] File B - Was it modified? Does change match plan?
+
+**Unexpected changes:**
+- List any files modified that weren't in the plan
+- Assess if these are necessary or scope creep
+
+### Step 3: Check for Missing Implementation
+
+**For each requirement marked ⚠️ PARTIAL or ❌ MISSING:**
+- Document what's missing
+- Severity: BLOCKER if core functionality, MAJOR if important, MINOR if edge case
+
+### Step 4: Document Deviations
+
+**If implementation differs from plan:**
+- Document the deviation
+- Assess if deviation is justified (better approach discovered)
+- Flag if deviation needs discussion
+
+**Output:** Requirements compliance matrix for final report.
+
 ## Phase 3: Code Quality Review
 
-Check against `.ai/rules/10-coding-style.md`:
+Check against `.ai/rules/10-coding-style.md`.
 
-### Naming
-- [ ] Precise, self-documenting names (no `product1`, `product2`)
-- [ ] Booleans: `is*/has*/should*`
-- [ ] Collections: plural; elements: singular
-- [ ] Units in names: `*Seconds`, `*Dollars`, `*Meters`
-- [ ] Intent-based: `$validPayload`, `$existingUser`
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
 
-### Typing
-- [ ] Scalar types declared everywhere possible
-- [ ] Return types on all methods
-- [ ] No `mixed` unless absolutely necessary
-- [ ] Property types declared (PHP 7.4+)
-
-### Comments
-- [ ] Only when non-obvious
-- [ ] PHPDoc for complex generics: `@return array<string, Product>`
-- [ ] Links to business docs where relevant
-- [ ] No commented-out code
-
-### Code Quality
-- [ ] Functions ≤50 lines (guideline)
-- [ ] Lines ≤170 characters (guideline)
-- [ ] No forbidden functions: `dd`, `var_dump`, `echo`, `print_r`, `dump`
-- [ ] No debug statements left in code
-- [ ] PSR-12 compliance
+Apply the **Code Quality Rules** section (Naming, Typing, Comments, Code Metrics).
 
 ## Phase 4: Laravel Standards Check
 
@@ -425,31 +354,11 @@ git status --short | grep -E "test|Test"
 
 ### 5.2 Verify Test Quality
 
-Check EACH test file against `.ai/rules/30-testing.md`:
+Check EACH test file against `.ai/rules/30-testing.md`.
 
-**Test Class Structure:**
-- [ ] Class declared `final`
-- [ ] Method names in `camelCase`
-- [ ] Return type `void` on all test methods
-- [ ] Uses `self::assertSame()` NOT `$this->assertSame()`
-- [ ] Uses `createStub()` preferred over `createMock()`
-- [ ] Never uses `createMock()` (always use `createStub()` or `createConfiguredMock()`)
+**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
 
-**Test Quality:**
-- [ ] Descriptive variable names (`$expectedResult`, not `$result1`)
-- [ ] Covers happy path
-- [ ] Covers error scenarios
-- [ ] Uses fixtures from `tests/Fixtures/`
-- [ ] Uses builders from `tests/ModelBuilders/`
-- [ ] Meaningful test data (not just `'test'`)
-- [ ] Data providers for multiple scenarios
-- [ ] Precise assertions (verify business effects, not just method calls)
-
-**Test Coverage:**
-- [ ] All new public methods have tests
-- [ ] All new classes have tests
-- [ ] Modified business logic has tests
-- [ ] Edge cases covered
+Apply the **Test Quality Rules** section (Test Class Structure, Test Quality, Test Coverage).
 
 ### 5.3 Identify Missing Tests
 
@@ -461,11 +370,11 @@ For each new/modified file WITHOUT tests, note:
 
 ## Phase 6: Test Execution
 
-Run ALL affected test files:
+Run ALL affected test files using project test commands:
 
 ```bash
 # For each test file:
-docker compose --project-directory . -f ./docker-compose.yml exec -u1000 starship_server ./vendor/bin/phpunit {test-file-path}
+${PROJECT_TEST_CMD_UNIT} {test-file-path}
 ```
 
 **Record results:**
@@ -483,8 +392,10 @@ Create detailed markdown report with these sections:
 ### Executive Summary
 ```markdown
 ✅ **Review Status:** [PASS / NEEDS WORK / FAIL]
+📋 **Requirements:** [N/N implemented] (from task docs)
 ✅ **Tests:** [X of Y passing]
 ⚠️ **Critical Issues:** [N]
+🔧 **Auto-Fixed:** [N] issues (formatting, debug statements)
 📊 **Recommendation:** [APPROVE / NEEDS CHANGES / REJECT]
 ```
 
@@ -507,17 +418,59 @@ Create detailed markdown report with these sections:
 - **Components:** [backend/frontend/both]
 
 **File Status Breakdown:**
-- ✅ **Staged:** [N] files ready for commit
-- ⚠️ **Unstaged:** [N] files modified but not staged
-- ⚠️ **Untracked:** [N] new files not in git
-- 🗑️ **Deleted:** [N] files removed
+- **Staged:** [N] files
+- **Unstaged:** [N] files
+- **New (untracked):** [N] files
+- **Deleted:** [N] files
 
 **Context Sources:**
 - ✅ YouTrack issue description reviewed
 - ✅ YouTrack knowledge base articles: [list article IDs, e.g., STAR-A-38, STAR-A-136]
-- ✅ Task documentation: [list files found from $WIP_ROOT/{ISSUE_KEY}-{slug}/]
+- ✅ Task documentation: [list files found from $PROJECT_TASK_DOCS_DIR/{ISSUE_KEY}-{slug}/]
 
 **Note:** This review analyzed ALL files (staged, unstaged, and untracked) with full business context.
+
+### Requirements Compliance (from Task Docs)
+
+**If task docs were loaded, include this section:**
+
+| ID | Requirement | Status | Evidence |
+|----|-------------|--------|----------|
+| AC1 | [Description] | ✅ PASS | `file:line`, `TestClass::testMethod` |
+| AC2 | [Description] | ⚠️ PARTIAL | Missing edge case handling |
+| AC3 | [Description] | ❌ MISSING | Not implemented |
+
+**Summary:**
+- ✅ **Fully Implemented:** [N] of [Total] requirements
+- ⚠️ **Partially Implemented:** [N] requirements (details above)
+- ❌ **Missing:** [N] requirements (BLOCKER if core functionality)
+
+**Plan vs Implementation:**
+- **Planned Changes:** [N] files
+- **Actual Changes:** [N] files
+- **Deviations:** [List any significant deviations from plan]
+
+**If no task docs:** "Task documentation not available - requirements verification skipped."
+
+### Auto-Fixed Issues
+
+🔧 **{N} issues auto-fixed** during review - no action required:
+
+| Type | Count | Details |
+|------|-------|---------|
+| **Linter/Fixer** | {N} files | PHP CS Fixer / Prettier / ESLint |
+| Debug statements | {N} | `dd()`, `console.log()`, `var_dump()` |
+| Other manual fixes | {N} | Trailing whitespace, blank lines |
+| **Total** | **{N}** | |
+
+**Fixer command used:**
+```bash
+{actual command run, e.g.: docker compose exec -T starship_server ./vendor/bin/php-cs-fixer fix ...}
+```
+
+*These issues were fixed automatically. No findings reported for auto-fixed items.*
+
+---
 
 ### What Was Done Well ✅
 
@@ -654,6 +607,7 @@ Path: `app/Repositories/ProductRepository.php:120-135`
 | **Repositories** | ✅/❌ | [query patterns] |
 | **Database** | ✅/❌ | [migrations, conventions] |
 | **Frontend** | ✅/❌ | [components, API clients] |
+| **Vue 3 Readiness** | ✅/❌ | [no mixins, no deprecated APIs, v-slot syntax] |
 | **Code Style** | ✅/❌ | [naming, typing, PSR-12] |
 | **Testing** | ✅/❌ | [coverage, quality, conventions] |
 | **Laravel Standards** | ✅/❌ | [best practices] |
@@ -677,74 +631,11 @@ If any failures:
 **Fix:** [how to resolve]
 ```
 
-### Files Requiring Attention
-
-**CRITICAL:** Review includes staged AND unstaged files.
-
-**File Status Summary:**
-| Category | Count | Action Required |
-|----------|-------|-----------------|
-| Staged | [N] | ✅ Ready for commit |
-| Unstaged | [N] | ⚠️ Review and stage if needed |
-| Untracked | [N] | ⚠️ Add to git if needed |
-
-**Staged Files (Ready for commit):**
-```
-✅ app/Services/ProductService.php
-✅ app/Models/Product.php
-✅ tests/Unit/ProductServiceTest.php
-```
-
-**Unstaged Files (Modified but not staged):**
-```
-⚠️ app/Models/Product.php
-⚠️ app/Repositories/ProductRepository.php
-```
-**Action:** Review changes and stage if they should be included in this commit.
-
-**Untracked Files (New files not in git):**
-```
-⚠️ database/migrations/2025_11_13_100000_add_new_fields.php
-⚠️ tests/Fixtures/Products/NewProductFixture.php
-```
-**Action:** Critical files (migrations, models, tests) should be added to git.
-
-**Deleted Files:**
-```
-✅ app/OldClass.php (confirmed dead code removal)
-✅ app/Deprecated/Service.php (confirmed cleanup)
-```
-
-**⚠️ WARNINGS:**
-
-If critical files are unstaged or untracked:
-```markdown
-**WARNING - Critical Unstaged Files:**
-- `database/migrations/2025_11_13_100000_*.php` - Migration should be staged
-- `app/Models/NewModel.php` - New model should be staged
-
-**Command to stage:**
-```bash
-git add database/migrations/2025_11_13_100000_*.php
-git add app/Models/NewModel.php
-```
-```
-
-**Note:** All files (staged, unstaged, untracked) were reviewed for compliance.
-
 ### Action Plan
 
-**REQUIRED Before Commit:**
-```bash
-# 1. Stage migration files
-git add database/migrations/2025_11_13_100000_*.php
-
-# 2. Fix critical issue in ProductService.php:142
-[specific fix]
-
-# 3. Add missing test for NewFeature
-[test creation steps]
-```
+**REQUIRED Before Merge:**
+- [ ] [Fix critical issue in ProductService.php:142 - specific fix]
+- [ ] [Add missing test for NewFeature]
 
 **RECOMMENDED:**
 - [ ] Refactor ScheinCalculator::calculate() (reduce complexity)
@@ -773,7 +664,7 @@ git add database/migrations/2025_11_13_100000_*.php
 ### Documentation, Telemetry & Deployment Check
 
 #### Documentation
-- [ ] Task docs ($WIP_ROOT/{ISSUE_KEY}-{slug}/) reviewed and aligned with implementation
+- [ ] Task docs (`$PROJECT_TASK_DOCS_DIR/{ISSUE_KEY}-{slug}/`) reviewed and aligned with implementation
 - [ ] YouTrack references accurate
 - [ ] Code comments sufficient (only when non-obvious)
 - [ ] Migration comments clear
@@ -808,6 +699,24 @@ git add database/migrations/2025_11_13_100000_*.php
 - [ ] Cache clearing requirements noted
 - [ ] Queue worker restart requirements noted
 
+### Suggestions Summary Table
+
+**REQUIRED:** Compile ALL issues from the review into a single summary table at the end of the report:
+
+| # | Severity | Issue | Suggestion |
+|---|----------|-------|------------|
+| 1 | 🔴 Critical | [Brief issue title] | [Brief fix recommendation] |
+| 2 | ⚠️ Major | [Brief issue title] | [Brief fix recommendation] |
+| 3 | 📋 Minor | [Brief issue title] | [Brief fix recommendation] |
+
+**Totals:** 🔴 X Critical | ⚠️ X Major | 📋 X Minor
+
+This table provides a quick reference of all findings. Every issue from CRITICAL, MAJOR, and MINOR sections must appear here with:
+- **#**: Sequential number
+- **Severity**: 🔴 Critical / ⚠️ Major / 📋 Minor
+- **Issue**: Short title (e.g., "N+1 query in ProductRepository")
+- **Suggestion**: Brief fix (e.g., "Add eager loading with `with(['variants'])`")
+
 ### Final Recommendation
 
 **Decision:** [APPROVE / REQUEST CHANGES / REJECT]
@@ -825,13 +734,9 @@ git add database/migrations/2025_11_13_100000_*.php
 ## Execution Constraints
 
 **You MUST:**
-- ✅ **Load full business context:**
-  - Get issue from YouTrack using `mcp__youtrack__get_issue`
-  - Read relevant YouTrack knowledge base articles from `storage/app/youtrack_docs/`
-  - Read task documentation from `$WIP_ROOT/{ISSUE_KEY}-{slug}/`
-- ✅ **Review ALL files** - staged, unstaged, AND untracked
-- ✅ **Check file status** explicitly using `git diff --cached` and `git diff`
-- ✅ **Warn** if critical files (migrations, models, tests) are unstaged or untracked
+- ✅ **Load full business context** using `~/.claude/lib/bin/gather-context`
+- ✅ **Review ALL files** - staged, unstaged, AND new (untracked)
+- ✅ **Auto-fix simple issues** before detailed review (Phase 1.5)
 - ✅ Track all phases with TodoWrite
 - ✅ Read actual file contents (never assume)
 - ✅ Run ALL affected tests
@@ -841,10 +746,18 @@ git add database/migrations/2025_11_13_100000_*.php
 - ✅ Give code examples for issues
 - ✅ Provide bash commands for fixes
 
+**Auto-Fix Allowed (Phase 1.5 only):**
+- ✅ Remove debug statements (`dd()`, `console.log()`, `var_dump()`)
+- ✅ Fix trailing whitespace
+- ✅ Fix missing newlines at end of file
+- ✅ Remove extra blank lines
+- ✅ Fix obvious formatting issues
+
 **You MUST NOT:**
-- ❌ Make any code changes
-- ❌ Create or edit files
-- ❌ Run formatters or fixers
+- ❌ Make logic or behavioral code changes
+- ❌ Rename variables or functions
+- ❌ Add or modify type hints
+- ❌ Restructure code
 - ❌ Skip test execution
 - ❌ Make assumptions without verification
 - ❌ Use generic feedback ("improve naming")

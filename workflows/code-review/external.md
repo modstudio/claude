@@ -17,99 +17,54 @@ I'll evaluate an external code review and independently determine what changes a
 
 ---
 
-## Phase 0: Project Context Already Loaded
+## Phase 0: Project Context
 
-**Project context was loaded by `/code-review-g` before mode selection.**
+{{MODULE: ~/.claude/modules/phase-0-context.md}}
 
-Available from project context:
-- Issue key: `{ISSUE_KEY}` (from branch name)
-- Project: `{PROJECT_CONTEXT.project.name}`
-- Standards: `{PROJECT_CONTEXT.standards.location}`
-- Storage: `${WIP_ROOT}/{ISSUE_KEY}-{slug}/external-review-log.md`
-  - Where `WIP_ROOT` from `~/.claude/config/global.yaml` (default: `~/.wip`)
-- Citation format: `{PROJECT_CONTEXT.citation_format.*}`
-- Test commands: `{PROJECT_CONTEXT.test_commands.*}`
+**Severity Levels:** {{MODULE: ~/.claude/modules/severity-levels.md}}
 
-**Ready to proceed with external review evaluation.**
+**Citation Format:** {{MODULE: ~/.claude/modules/citation-standards.md}}
+
+**Storage:** Review log stored at `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
+
+---
+
+## 📋 MANDATORY: Initialize Todo List
+
+**IMMEDIATELY after loading context, create a todo list to track evaluation progress:**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Load project standards", status: "in_progress", activeForm: "Loading project standards"},
+    {content: "Load current code state", status: "pending", activeForm: "Loading current code state"},
+    {content: "Wait for external review text", status: "pending", activeForm: "Waiting for external review"},
+    {content: "Parse external review and check history", status: "pending", activeForm: "Parsing external review"},
+    {content: "Perform independent analysis", status: "pending", activeForm: "Performing independent analysis"},
+    {content: "Generate evaluation report", status: "pending", activeForm: "Generating evaluation report"},
+    {content: "Record evaluation to permanent file", status: "pending", activeForm: "Recording evaluation"},
+    {content: "Apply changes if approved", status: "pending", activeForm: "Applying changes"},
+    {content: "Generate final summary", status: "pending", activeForm: "Generating final summary"}
+  ]
+})
+```
+
+**Update todo list as you progress. Mark tasks complete immediately upon finishing.**
 
 ---
 
 ## Phase 1: Load Project Standards
 
-**Use project context to load correct standards:**
+{{MODULE: ~/.claude/modules/standards-loading.md}}
 
-### 1.1 Project-Specific Standards
+### Business Context
 
-**Load standards from project context:**
-```bash
-# Project context already identified standards location
-STANDARDS_DIR="${PROJECT_CONTEXT.standards.location}"
+**Load context in this order:**
 
-# Read key standard files (from project config)
-for file in "${PROJECT_CONTEXT.standards.files[@]}"; do
-  echo "Loading: $file"
-  cat "$file"
-done
-
-# Load main guide if exists
-if [ -f "${PROJECT_CONTEXT.standards.main_guide}" ]; then
-  cat "${PROJECT_CONTEXT.standards.main_guide}"
-fi
-```
-
-**Citation format (from project):**
-Use `PROJECT_CONTEXT.citation_format` for proper references:
-- Architecture: `${PROJECT_CONTEXT.citation_format.architecture}`
-- Style: `${PROJECT_CONTEXT.citation_format.style}`
-- Testing: `${PROJECT_CONTEXT.citation_format.testing}`
-
-### 1.2 Business Context
-
-**Load context based on project configuration:**
-
-**A) Check for YouTrack MCP (if project uses it):**
-```bash
-# If project has YouTrack integration
-if [ "${PROJECT_CONTEXT.mcp_tools}" contains "youtrack" ]; then
-  # Use mcp__youtrack__get_issue tool
-  # Get issue description, acceptance criteria, linked articles
-fi
-```
-
-**B) Check task documentation directory:**
-```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
-
-# Find task folder
-TASK_FOLDER=$(find "$WIP_ROOT" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
-
-# Read specification.md, notes.md, and other .md files
-if [ -n "$TASK_FOLDER" ]; then
-  ls -la "$TASK_FOLDER/"
-  cat "$TASK_FOLDER/specification.md" 2>/dev/null || echo "No spec yet"
-fi
-```
-
-**C) Check project business docs (if configured):**
-```bash
-# Some projects have business documentation
-if [ -n "${PROJECT_CONTEXT.documentation.business_docs}" ]; then
-  # Read relevant business docs
-  # Example: storage/app/youtrack_docs/ for Starship
-fi
-```
-
-**D) Git commit messages (fallback):**
-```bash
-git log --grep="$ISSUE_KEY" --format="%B" | head -50
-```
-
-**E) Ask user (last resort):**
-> "I don't have business context for {ISSUE_KEY}. Can you provide:
-> - What problem this solves
-> - Key acceptance criteria
-> - Any constraints"
+1. **Task documentation:** Run `~/.claude/lib/bin/gather-context` to load all task docs
+2. **YouTrack (if enabled):** Use `mcp__youtrack__get_issue` for issue details
+3. **Git history:** `git log --grep="$ISSUE_KEY" --format="%B" | head -50`
+4. **Ask user (fallback):** Request business context if not found
 
 **STOP - Standards loaded, ready for external review**
 
@@ -204,14 +159,14 @@ fi
 **Load past evaluations for THIS task (circular review):**
 
 ```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
+# Load .task-docs root from global config
+TASK_DOCS_DIR="$HOME/.task-docs"  # From ~/.claude/config/global.yaml
 
 # Find task folder
-TASK_FOLDER=$(find "$WIP_ROOT" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
+TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
 
 if [ -n "$TASK_FOLDER" ]; then
-  REVIEW_FILE="$TASK_FOLDER/external-review-log.md"
+  REVIEW_FILE="$TASK_FOLDER/logs/review.md"
 
   if [ -f "$REVIEW_FILE" ]; then
     echo "✅ Found previous external review evaluations"
@@ -220,7 +175,7 @@ if [ -n "$TASK_FOLDER" ]; then
     echo "ℹ️ No previous external review record (will create new)"
   fi
 else
-  echo "⚠️ Task folder not found in $WIP_ROOT"
+  echo "⚠️ Task folder not found in $TASK_DOCS_DIR"
 fi
 ```
 
@@ -549,26 +504,26 @@ ${PROJECT_CONTEXT.linter_commands}
 ### 7.1 Storage Location
 
 ```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
+# Load .task-docs root from global config
+TASK_DOCS_DIR="$HOME/.task-docs"  # From ~/.claude/config/global.yaml
 
 # Find or create task folder
-TASK_FOLDER=$(find "$WIP_ROOT" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
+TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
 
 # If not found, create with basic naming (should include slug from branch)
 if [ -z "$TASK_FOLDER" ]; then
   BRANCH=$(git branch --show-current)
   SLUG=$(echo "$BRANCH" | sed "s/^[^/]*\/${ISSUE_KEY}-//")
-  TASK_FOLDER="$WIP_ROOT/${ISSUE_KEY}-${SLUG}"
+  TASK_FOLDER="$TASK_DOCS_DIR/${ISSUE_KEY}-${SLUG}"
   mkdir -p "$TASK_FOLDER"
 fi
 
-REVIEW_FILE="$TASK_FOLDER/external-review-log.md"
+REVIEW_FILE="$TASK_FOLDER/logs/review.md"
 ```
 
 **Storage location:**
-- Always: `${WIP_ROOT}/{ISSUE_KEY}-{slug}/external-review-log.md`
-- Configuration: `~/.claude/config/global.yaml` (`storage.wip_root`)
+- Always: `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
+- Configuration: `~/.claude/config/global.yaml` (`storage.task-docs_root`)
 
 ### 7.2 Create or Append Record
 
@@ -856,7 +811,7 @@ echo "✅ Evaluation recorded: $REVIEW_FILE"
 - **Citation format:** `PROJECT_CONTEXT.citation_format.*`
 - **Test commands:** `PROJECT_CONTEXT.test_commands.*`
 - **MCP tools:** `PROJECT_CONTEXT.mcp_tools[]`
-- **Storage location:** `${WIP_ROOT}/{ISSUE_KEY}-{slug}/external-review-log.md` (from `~/.claude/config/global.yaml`)
+- **Storage location:** `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md` (from `~/.claude/config/global.yaml`)
 - **Tech stack:** `PROJECT_CONTEXT.tech_stack.*`
 
 **To add a new project:**

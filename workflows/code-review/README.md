@@ -20,14 +20,14 @@ Code review workflows with multi-project support via YAML configuration.
 ```
 ~/.claude/
 ├── config/
-│   ├── global.yaml                        ← Global configuration (storage.wip_root)
+│   ├── global.yaml                        ← Global configuration (storage.task-docs_root)
 │   └── projects/                          ← Project configurations (YAML)
 │       ├── starship.yaml                  ← Starship config
 │       ├── alephbeis.yaml                 ← Alephbeis config
 │       └── generic.yaml                   ← Fallback config
 │
 ├── templates/                             ← Reusable templates
-│   └── external-review-log.md            ← Review record template
+│   └── logs/review.md            ← Review record template
 │
 └── workflows/
     ├── project-context.md                 ← Multi-project loader
@@ -40,16 +40,16 @@ Code review workflows with multi-project support via YAML configuration.
         └── report.md                      ← Comprehensive review (if exists)
 ```
 
-**Storage Configuration**: See `~/.claude/config/global.yaml` (`storage.wip_root`)
+**Storage Configuration**: See `~/.claude/config/global.yaml` (`storage.task-docs_root`)
 
 **Project Files (Created by Workflows):**
 ```
-${WIP_ROOT}/{ISSUE_KEY}-{slug}/
-├── external-review-log.md                 ← Review record (appended)
+${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
+├── logs/review.md                 ← Review record (appended)
 ├── specification.md                       ← Task specification
 └── notes.md                               ← Task notes
 ```
-*Where `WIP_ROOT` defaults to `~/.wip` (GLOBAL location)*
+*Where `TASK_DOCS_DIR` defaults to `~/.task-docs` (GLOBAL location)*
 
 ---
 
@@ -95,7 +95,7 @@ Phase 2: Get current code state
 Phase 3: User pastes external review
 Phase 5: Independent analysis
 Phase 6: Generate evaluation report
-Phase 7: Record to ${WIP_ROOT}/{ISSUE_KEY}-{slug}/external-review-log.md
+Phase 7: Record to ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md
 Phase 8: Apply changes (optional)
 ```
 
@@ -124,7 +124,7 @@ Phase 8: Apply changes (optional)
 
 1. External reviewer reviews code
 2. You evaluate their review (this workflow)
-3. Record evaluation in `${WIP_ROOT}/{ISSUE_KEY}-{slug}/external-review-log.md`
+3. Record evaluation in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
 4. Next review reads past evaluations
 5. Maintain consistency, learn patterns
 6. Improve calibration over time
@@ -251,7 +251,7 @@ cd ~/Projects/starship
 # - ❌ Suggestion #2: REJECTED - Premature optimization
 # - ⚠️ Suggestion #3: MODIFIED - Better approach exists
 
-# Record saved to: ${WIP_ROOT}/STAR-2233-Feature-Name/external-review-log.md
+# Record saved to: ${TASK_DOCS_DIR}/STAR-2233-Feature-Name/logs/review.md
 ```
 
 ### Evaluate Human Code Review
@@ -271,11 +271,11 @@ cd ~/Projects/alephbeis-app
 ### Review the Review (Circular)
 
 ```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
+# Load .task-docs root from global config
+TASK_DOCS_DIR="$HOME/.task-docs"  # From ~/.claude/config/global.yaml
 
 # After multiple reviews:
-cat "$WIP_ROOT/STAR-2233-Feature-Name/external-review-log.md"
+cat "$TASK_DOCS_DIR/STAR-2233-Feature-Name/logs/review.md"
 
 # See:
 # - Review #1, #2, #3...
@@ -290,9 +290,9 @@ cat "$WIP_ROOT/STAR-2233-Feature-Name/external-review-log.md"
 
 ### External Review Record Template
 
-Located: `~/.claude/templates/external-review-log.md`
+Located: `~/.claude/templates/task-planning/logs/review.md`
 
-**Used for:** Creating `${WIP_ROOT}/{ISSUE_KEY}-{slug}/external-review-log.md`
+**Used for:** Creating `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
 
 **Structure:**
 - File header with purpose
@@ -405,17 +405,17 @@ path: "~/Projects"           # ❌ Too broad
 ### Review File Not Created
 
 **Check:**
-- Task folder exists in `$WIP_ROOT`
+- Task folder exists in `$TASK_DOCS_DIR`
 - Issue key extracted correctly
-- Permissions on `$WIP_ROOT` directory
+- Permissions on `$TASK_DOCS_DIR` directory
 
 **Debug:**
 ```bash
-# Load .wip root from global config
-WIP_ROOT="$HOME/.wip"  # From ~/.claude/config/global.yaml
+# Load .task-docs root from global config
+TASK_DOCS_DIR="$HOME/.task-docs"  # From ~/.claude/config/global.yaml
 
 # Check directory
-ls -la "$WIP_ROOT/"
+ls -la "$TASK_DOCS_DIR/"
 
 # Check branch name
 git branch --show-current

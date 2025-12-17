@@ -409,6 +409,18 @@ Things done well in this code review:
 
 ---
 
+## Suggestions Summary
+
+| # | Severity | Issue | Suggestion |
+|---|----------|-------|------------|
+| 1 | 🔴 Critical | [Issue title] | [Brief fix recommendation] |
+| 2 | ⚠️ Major | [Issue title] | [Brief fix recommendation] |
+| 3 | 📋 Minor | [Issue title] | [Brief fix recommendation] |
+
+**Totals:** 🔴 X Critical | ⚠️ X Major | 📋 X Minor
+
+---
+
 ## Final Verdict
 
 **Status:** ⚠️ Needs Revision / ✅ Approved / 🔴 Requires Major Changes
@@ -427,7 +439,7 @@ Things done well in this code review:
 
 - **Architecture Standards:** ${PROJECT_CITATION_ARCHITECTURE}
 - **Style Guide:** ${PROJECT_CITATION_STYLE}
-- **Knowledge Base:** ${PROJECT_KB_LOCATION}
+- **Knowledge Base:** ${PROJECT_KB_DIR}
 - **Project Standards:** ${PROJECT_STANDARDS_DIR}
 
 ---

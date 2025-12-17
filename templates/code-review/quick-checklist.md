@@ -25,6 +25,18 @@
 
 ---
 
+## Vue 3 Readiness (Frontend Changes)
+
+- [ ] No new mixins (use composables `use*.js` instead)
+- [ ] No deprecated APIs (`$on`/`$off`/`$once`, filters, `Vue.set()`)
+- [ ] Uses `v-slot` syntax, not deprecated `slot` attribute
+- [ ] Business logic in plain JS functions (not tied to `this`)
+- [ ] Vuex modules kept simple (Pinia migration ready)
+
+**Notes:**
+
+---
+
 ## Code Quality
 
 - [ ] Follows style guide (${PROJECT_CITATION_STYLE})
