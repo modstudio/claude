@@ -30,24 +30,48 @@ detection:
 # ============================================================================
 
 issue_tracking:
+  # Project key prefix (e.g., STAR, AB) - for display and issue key patterns
+  project_key: "PROJ"
+
   # Human-readable pattern description
   pattern: "PROJ-1234"
-  
+
   # Regex pattern for extracting issue keys
   # Must have one capturing group for the full issue key
   regex: "([A-Z]+-[0-9]+)"
-  
+
   # Issue tracking system
   system: "YouTrack"  # YouTrack, Jira, GitHub, GitLab, Linear, etc.
-  
+
   # Base URL for issue links
   base_url: "https://youtrack.example.com"
-  
-  # MCP tool configuration (if using YouTrack MCP)
-  mcp:
+
+# ============================================================================
+# MCP TOOLS
+# ============================================================================
+
+mcp_tools:
+  youtrack:
     enabled: true
-    tool_prefix: "mcp__youtrack"
-    project_id: "PROJECT-ID"
+    # CRITICAL: YouTrack MCP requires numeric project_id, NOT project_key
+    # To find project IDs, use: mcp__youtrack__list_projects
+    # Example: Starship = "0-0", Alephbeis = "0-6"
+    project_id: "0-0"  # Use this for MCP calls (NOT "PROJ")
+    commands:
+      - get_issue
+      - search_issues
+      - create_issue
+      - update_issue
+      - add_issue_comment
+      - get_issue_comments
+
+  laravel_boost:
+    enabled: false
+    commands: []
+
+  playwright:
+    enabled: false
+    commands: []
 
 # ============================================================================
 # DOCUMENTATION
@@ -88,8 +112,8 @@ documentation:
 # ============================================================================
 
 storage:
-  # .wip folder location (always project-local)
-  wip_root: "./.wip"
+  # Task docs folder location (always project-local)
+  task_docs_dir: "./.task-docs"
   
   # Task folder naming pattern
   # Available variables: {ISSUE_KEY}, {slug}, {date}

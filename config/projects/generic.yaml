@@ -40,11 +40,9 @@ citation_format:
     - "[ESLint: no-unused-vars]"
 
 storage:
-  location: ".wip/{ISSUE_KEY}/"  # Fallback: .reviews/ or .claude/reviews/
-  files:
-    external_review: "external-review-fixes.md"
-    specification: "specification.md"
-    notes: "notes.md"
+  task_docs_dir: ".task-docs/"  # Fallback: .reviews/ or .claude/reviews/
+  # Task folder structure: .task-docs/{ISSUE_KEY}-{slug}/
+  # Logs subfolder: .task-docs/{ISSUE_KEY}-{slug}/logs/
 
 documentation:
   # Project standards location
@@ -123,7 +121,7 @@ notes: |
      - Check: develop, main, master (in order)
 
   4. Storage:
-     - .wip/{ISSUE_KEY}/ (preferred)
+     - .task-docs/{ISSUE_KEY}/ (preferred)
      - .reviews/{ISSUE_KEY}/ (alternative)
      - .claude/reviews/{ISSUE_KEY}/ (gitignored fallback)
 

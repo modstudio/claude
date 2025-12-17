@@ -1,64 +1,69 @@
 #!/bin/bash
-# .wip folder utilities - PROJECT-LOCAL operations only
-# Version: 2.0.0
+# Task docs folder utilities - PROJECT-LOCAL operations only
+# Version: 3.0.1
 
 # Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use BASH_SOURCE if available, otherwise fallback to known location
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SCRIPT_DIR="$HOME/.claude/lib"
+fi
 source "$SCRIPT_DIR/common.sh"
 
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
-# .wip folder is ALWAYS project-local
-WIP_ROOT="./.wip"
+# Task docs folder is ALWAYS project-local
+TASK_DOCS_DIR="./.task-docs"
 
 # ============================================================================
-# WIP FOLDER OPERATIONS
+# TASK DOCS FOLDER OPERATIONS
 # ============================================================================
 
-# Get the .wip root directory (project-local)
-# Returns: absolute path to .wip if it exists, empty string otherwise
-get_wip_root() {
-  local wip_path="$(pwd)/.wip"
+# Get the task docs root directory (project-local)
+# Returns: absolute path to .task-docs if it exists, empty string otherwise
+get_task_docs_dir() {
+  local docs_path="$(pwd)/.task-docs"
 
-  if dir_exists "$wip_path"; then
-    echo "$wip_path"
+  if dir_exists "$docs_path"; then
+    echo "$docs_path"
     return 0
   else
-    log_debug ".wip folder not found at $wip_path"
+    log_debug ".task-docs folder not found at $docs_path"
     return 1
   fi
 }
 
-# Check if .wip folder exists in current project
-wip_exists() {
-  dir_exists "$WIP_ROOT"
+# Check if .task-docs folder exists in current project
+task_docs_exists() {
+  dir_exists "$TASK_DOCS_DIR"
 }
 
-# Ensure .wip folder exists (create if necessary)
-ensure_wip_exists() {
-  if ! wip_exists; then
-    log_info "Creating .wip folder in current project"
-    mkdir -p "$WIP_ROOT" || error_exit "Failed to create .wip folder"
+# Ensure .task-docs folder exists (create if necessary)
+ensure_task_docs_exists() {
+  if ! task_docs_exists; then
+    log_info "Creating .task-docs folder in current project"
+    mkdir -p "$TASK_DOCS_DIR" || error_exit "Failed to create .task-docs folder"
 
     # Add to .gitignore if not already there
     if file_exists ".gitignore"; then
-      if ! grep -q "^\.wip$" .gitignore 2>/dev/null; then
-        echo ".wip" >> .gitignore
-        log_success "Added .wip to .gitignore"
+      if ! grep -q "^\.task-docs$" .gitignore 2>/dev/null; then
+        echo ".task-docs" >> .gitignore
+        log_success "Added .task-docs to .gitignore"
       fi
     else
-      echo ".wip" > .gitignore
-      log_success "Created .gitignore with .wip entry"
+      echo ".task-docs" > .gitignore
+      log_success "Created .gitignore with .task-docs entry"
     fi
   fi
 }
 
-# Get absolute path to .wip root (ensures it exists)
-get_wip_root_abs() {
-  ensure_wip_exists
-  abs_path "$WIP_ROOT"
+# Get absolute path to .task-docs (ensures it exists)
+get_task_docs_dir_abs() {
+  ensure_task_docs_exists
+  abs_path "$TASK_DOCS_DIR"
 }
 
 # ============================================================================
@@ -73,14 +78,15 @@ find_task_folder() {
 
   validate_not_empty "$issue_key" "Issue key"
 
-  if ! wip_exists; then
-    log_debug "No .wip folder found, cannot search for task $issue_key"
+  if ! task_docs_exists; then
+    log_debug "No .task-docs folder found, cannot search for task $issue_key"
     return 1
   fi
 
   # Search for folder matching pattern: {ISSUE_KEY}* (e.g., STAR-1234-Feature-Name)
+  # Search up to 3 levels deep to support organized subdirectories
   local folder
-  folder=$(find "$WIP_ROOT" -maxdepth 1 -type d -name "${issue_key}*" 2>/dev/null | head -1)
+  folder=$(find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
 
   if is_not_empty "$folder"; then
     echo "$folder"
@@ -107,10 +113,10 @@ create_task_folder() {
   validate_not_empty "$issue_key" "Issue key"
   validate_not_empty "$slug" "Slug"
 
-  ensure_wip_exists
+  ensure_task_docs_exists
 
   local folder_name="${issue_key}-${slug}"
-  local task_folder="$WIP_ROOT/$folder_name"
+  local task_folder="$TASK_DOCS_DIR/$folder_name"
 
   if dir_exists "$task_folder"; then
     log_warning "Task folder already exists: $task_folder"
@@ -147,18 +153,18 @@ get_task_folder() {
   return 1
 }
 
-# List all task folders in .wip
+# List all task folders in .task-docs
 list_all_tasks() {
-  if ! wip_exists; then
-    log_info "No .wip folder found in current project"
+  if ! task_docs_exists; then
+    log_info "No .task-docs folder found in current project"
     return 0
   fi
 
-  # Find all directories matching issue key pattern
-  find "$WIP_ROOT" -maxdepth 1 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null | sort
+  # Find all directories matching issue key pattern (up to 3 levels deep)
+  find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null | sort
 }
 
-# Count tasks in .wip folder
+# Count tasks in .task-docs folder
 count_tasks() {
   list_all_tasks | wc -l | trim
 }
@@ -216,7 +222,7 @@ list_task_documents() {
 # CLEANUP OPERATIONS
 # ============================================================================
 
-# Archive a task folder (move to .wip/archive/)
+# Archive a task folder (move to .task-docs/archive/)
 archive_task() {
   local issue_key="$1"
 
@@ -226,7 +232,7 @@ archive_task() {
     return 1
   fi
 
-  local archive_dir="$WIP_ROOT/archive"
+  local archive_dir="$TASK_DOCS_DIR/archive"
   ensure_dir "$archive_dir"
 
   local folder_name=$(basename "$folder")
@@ -269,4 +275,4 @@ delete_task() {
 # INITIALIZATION
 # ============================================================================
 
-log_debug "Loaded wip-utils.sh"
+log_debug "Loaded task-docs-utils.sh"

@@ -9,10 +9,11 @@ project:
   git_remote_pattern: "alephbeis"
 
 issue_tracking:
+  project_key: "AB"                   # Human-readable project prefix (for display)
   pattern: "AB-####"
   regex: "AB-[0-9]+"
-  system: "Generic"
-  url_template: "https://github.com/{org}/{repo}/issues/{ISSUE_NUMBER}"
+  system: "YouTrack"
+  url_template: "https://janus.myjetbrains.com/youtrack/issue/{ISSUE_KEY}"
 
 branching:
   base_branch: "main"
@@ -59,11 +60,9 @@ citation_format:
     - "[TEST: \"Prefer stubs over mocks\"]"
 
 storage:
-  location: ".wip/{ISSUE_KEY}/"
-  files:
-    external_review: "external-review-fixes.md"
-    specification: "specification.md"
-    notes: "notes.md"
+  task_docs_dir: ".task-docs/"
+  # Task folder structure: .task-docs/{ISSUE_KEY}-{slug}/
+  # Logs subfolder: .task-docs/{ISSUE_KEY}-{slug}/logs/
 
 documentation:
   # Project standards location
@@ -104,6 +103,19 @@ mcp_tools:
       - browser_click
       - browser_navigate
       - browser_take_screenshot
+
+  youtrack:
+    enabled: true
+    # IMPORTANT: YouTrack MCP requires project ID (not key)
+    # Use: mcp__youtrack__list_projects to find IDs
+    project_id: "0-6"
+    commands:
+      - get_issue
+      - search_issues
+      - create_issue
+      - update_issue
+      - add_issue_comment
+      - get_issue_comments
 
 tech_stack:
   backend:

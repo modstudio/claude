@@ -3,7 +3,11 @@
 # Version: 2.0.0
 
 # Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SCRIPT_DIR="$HOME/.claude/lib"
+fi
 source "$SCRIPT_DIR/common.sh"
 
 # ============================================================================
@@ -178,15 +182,15 @@ load_project_context() {
   export PROJECT_CITATION_ARCHITECTURE=$(yaml_get "$yaml_file" "citation_format.architecture" || echo '[ARCH: "{quote}"]')
   export PROJECT_CITATION_STYLE=$(yaml_get "$yaml_file" "citation_format.style" || echo '[STYLE: "{quote}"]')
 
-  # Export storage config (project-local .wip)
-  export PROJECT_WIP_ROOT="./.wip"  # Always project-local
+  # Export storage config (project-local .task-docs)
+  export PROJECT_TASK_DOCS_DIR="./.task-docs"  # Always project-local
 
   # Export test commands
   export PROJECT_TEST_CMD_ALL=$(yaml_get "$yaml_file" "test_commands.all" || echo "")
   export PROJECT_TEST_CMD_UNIT=$(yaml_get "$yaml_file" "test_commands.unit" || echo "")
 
   # Export documentation config
-  export PROJECT_KB_LOCATION=$(yaml_get "$yaml_file" "documentation.knowledge_base.location" || echo "")
+  export PROJECT_KB_DIR=$(yaml_get "$yaml_file" "documentation.knowledge_base.location" || echo "")
   export PROJECT_KB_SOURCE=$(yaml_get "$yaml_file" "documentation.knowledge_base.source" || echo "none")
   export PROJECT_KB_ACCESS_METHOD=$(yaml_get "$yaml_file" "documentation.knowledge_base.access_method" || echo "none")
 
@@ -194,11 +198,15 @@ load_project_context() {
   export PROJECT_MCP_YOUTRACK=$(yaml_get "$yaml_file" "mcp_tools.youtrack.enabled" || echo "false")
   export PROJECT_MCP_LARAVEL_BOOST=$(yaml_get "$yaml_file" "mcp_tools.laravel_boost.enabled" || echo "false")
 
+  # Export YouTrack-specific config (CRITICAL: MCP tools need project_id, NOT project_key)
+  export PROJECT_YOUTRACK_PROJECT_ID=$(yaml_get "$yaml_file" "mcp_tools.youtrack.project_id" || echo "")
+  export PROJECT_YOUTRACK_PROJECT_KEY=$(yaml_get "$yaml_file" "issue_tracking.project_key" || echo "")
+
   log_success "Loaded project context: $PROJECT_NAME ($PROJECT_TYPE)"
   log_debug "  Issue pattern: $PROJECT_ISSUE_PATTERN"
   log_debug "  Base branch: $PROJECT_BASE_BRANCH"
   log_debug "  Standards: $PROJECT_STANDARDS_DIR"
-  log_debug "  WIP root: $PROJECT_WIP_ROOT"
+  log_debug "  Task docs: $PROJECT_TASK_DOCS_DIR"
 
   return 0
 }
@@ -232,16 +240,21 @@ ${COLOR_GREEN}Branching:${COLOR_RESET}
   Pattern:      $PROJECT_BRANCH_PATTERN
 
 ${COLOR_GREEN}Standards:${COLOR_RESET}      $PROJECT_STANDARDS_DIR
-${COLOR_GREEN}WIP Root:${COLOR_RESET}       $PROJECT_WIP_ROOT (project-local)
+${COLOR_GREEN}Task Docs:${COLOR_RESET}      $PROJECT_TASK_DOCS_DIR (project-local)
 
 ${COLOR_GREEN}Knowledge Base:${COLOR_RESET}
-  Location:     $PROJECT_KB_LOCATION
+  Directory:    $PROJECT_KB_DIR
   Source:       $PROJECT_KB_SOURCE
   Access:       $PROJECT_KB_ACCESS_METHOD
 
 ${COLOR_GREEN}Citations:${COLOR_RESET}
   Architecture: $PROJECT_CITATION_ARCHITECTURE
   Style:        $PROJECT_CITATION_STYLE
+
+${COLOR_GREEN}YouTrack MCP:${COLOR_RESET}
+  Enabled:      $PROJECT_MCP_YOUTRACK
+  Project ID:   $PROJECT_YOUTRACK_PROJECT_ID (use for MCP calls)
+  Project Key:  $PROJECT_YOUTRACK_PROJECT_KEY (display only)
 
 ${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}
 

@@ -9,6 +9,7 @@ project:
   git_remote_pattern: "JanusTrade/starship"
 
 issue_tracking:
+  project_key: "STAR"                # Human-readable project prefix (for display)
   pattern: "STAR-####"
   regex: "STAR-[0-9]+"
   system: "YouTrack"
@@ -64,11 +65,9 @@ citation_format:
     - "[TEST §Core Principles]"
 
 storage:
-  location: ".wip/{ISSUE_KEY}/"
-  files:
-    external_review: "external-review-fixes.md"
-    specification: "specification.md"
-    notes: "notes.md"
+  task_docs_dir: ".task-docs/"
+  # Task folder structure: .task-docs/{ISSUE_KEY}-{slug}/
+  # Logs subfolder: .task-docs/{ISSUE_KEY}-{slug}/logs/
 
 documentation:
   # Project standards location
@@ -106,6 +105,9 @@ mcp_tools:
 
   youtrack:
     enabled: true
+    # IMPORTANT: YouTrack MCP requires project ID (not key)
+    # Use: mcp__youtrack__list_projects to find IDs
+    project_id: "0-0"
     commands:
       - get_issue
       - search_issues

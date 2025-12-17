@@ -16,6 +16,8 @@ history.jsonl
 /file-history/
 /conversations/
 /cache/
+stats-cache.json
+/plugins/
 
 # System Files
 .DS_Store

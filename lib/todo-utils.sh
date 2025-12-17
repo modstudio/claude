@@ -3,7 +3,11 @@
 # Version: 2.0.0
 
 # Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SCRIPT_DIR="$HOME/.claude/lib"
+fi
 source "$SCRIPT_DIR/common.sh"
 
 # ============================================================================
@@ -44,14 +48,15 @@ generate_todos_json() {
 # ============================================================================
 
 # Get task planning todos (Default Mode)
+# NOTE: Phases 1-4 are READ-ONLY. File/folder creation happens AFTER approval.
 get_task_planning_todos() {
   local todos=(
     "$(generate_todo_item "Load project context and fetch YouTrack issue" "pending" "Loading context")"
-    "$(generate_todo_item "Create task folder and initialize documents" "pending" "Creating task folder")"
+    "$(generate_todo_item "Check for existing task folder and research codebase" "pending" "Researching codebase")"
     "$(generate_todo_item "Gather requirements and identify questions" "pending" "Gathering requirements")"
     "$(generate_todo_item "Present questions to user for clarification" "pending" "Presenting questions")"
     "$(generate_todo_item "Create technical implementation plan" "pending" "Creating implementation plan")"
-    "$(generate_todo_item "Present plan for approval" "pending" "Presenting plan for approval")"
+    "$(generate_todo_item "Present plan for approval (then create docs)" "pending" "Presenting plan for approval")"
   )
 
   generate_todos_json "${todos[@]}"
@@ -212,18 +217,19 @@ format_todos_markdown() {
 
 # Get phase-specific todos for task planning
 # Args: phase (1-5)
+# NOTE: Phases 1-4 are READ-ONLY. File/folder creation happens in Phase 5 AFTER approval.
 get_task_planning_phase_todos() {
   local phase="$1"
 
   case "$phase" in
     1)
-      # Discovery & Context Gathering
+      # Discovery & Context Gathering (READ-ONLY)
       local todos=(
         "$(generate_todo_item "Fetch issue from YouTrack" "pending" "Fetching issue")"
-        "$(generate_todo_item "Check for existing task folder" "pending" "Checking for existing folder")"
-        "$(generate_todo_item "Create or update task folder" "pending" "Creating task folder")"
-        "$(generate_todo_item "Load project standards" "pending" "Loading standards")"
+        "$(generate_todo_item "Check for existing task folder (using gather-context.sh)" "pending" "Checking for existing folder")"
+        "$(generate_todo_item "Load project standards from .ai/rules/" "pending" "Loading standards")"
         "$(generate_todo_item "Search knowledge base for related docs" "pending" "Searching knowledge base")"
+        "$(generate_todo_item "Present initial context to user" "pending" "Presenting context")"
       )
       ;;
     2)

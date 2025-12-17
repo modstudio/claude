@@ -3,7 +3,11 @@
 # Version: 2.0.0
 
 # Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SCRIPT_DIR="$HOME/.claude/lib"
+fi
 source "$SCRIPT_DIR/common.sh"
 
 # ============================================================================

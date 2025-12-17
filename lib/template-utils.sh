@@ -3,7 +3,11 @@
 # Version: 2.0.0
 
 # Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SCRIPT_DIR="$HOME/.claude/lib"
+fi
 source "$SCRIPT_DIR/common.sh"
 
 # ============================================================================
@@ -119,21 +123,39 @@ render_task_planning_docs() {
   local templates_dir="$TEMPLATES_DIR/task-planning"
   require_dir "$templates_dir" "Task planning templates not found"
 
-  # Standard templates to render
-  local templates=(
+  # Root templates to render (00-04)
+  local root_templates=(
     "00-status.md"
-    "01-functional-requirements.md"
-    "02-decision-log.md"
+    "01-task-description.md"
+    "02-functional-requirements.md"
     "03-implementation-plan.md"
-    "04-task-description.md"
-    "05-todo.md"
+    "04-todo.md"
+  )
+
+  # Log templates to render
+  local log_templates=(
+    "logs/decisions.md"
+    "logs/review.md"
   )
 
   # Add issue key to variables
   local all_args=("ISSUE_KEY=$issue_key" "$@")
 
-  # Render each template
-  for template_name in "${templates[@]}"; do
+  # Render root templates
+  for template_name in "${root_templates[@]}"; do
+    local template_file="$templates_dir/$template_name"
+    local output_file="$task_folder/$template_name"
+
+    if file_exists "$template_file"; then
+      render_template "$template_file" "$output_file" "${all_args[@]}"
+    else
+      log_warning "Template not found: $template_name (skipping)"
+    fi
+  done
+
+  # Create logs subfolder and render log templates
+  mkdir -p "$task_folder/logs"
+  for template_name in "${log_templates[@]}"; do
     local template_file="$templates_dir/$template_name"
     local output_file="$task_folder/$template_name"
 
