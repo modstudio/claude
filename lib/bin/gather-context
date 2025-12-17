@@ -1,0 +1,14 @@
+#!/bin/sh
+# Gather task context - auto-detects shell and uses best available version
+# Usage: gather-context [OPTIONS] [ISSUE_KEY]
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LIB_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Check for bash-enhanced version first
+if [ -f "$LIB_DIR/gather-context.sh" ] && command -v bash >/dev/null 2>&1; then
+  exec bash "$LIB_DIR/gather-context.sh" "$@"
+fi
+
+# Fall back to POSIX version
+exec "$LIB_DIR/posix/gather-context.sh" "$@"

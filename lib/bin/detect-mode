@@ -1,0 +1,14 @@
+#!/bin/sh
+# Detect planning mode - auto-detects shell and uses best available version
+# Usage: detect-mode [OPTIONS]
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LIB_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Check for bash-enhanced version first
+if [ -f "$LIB_DIR/detect-mode.sh" ] && command -v bash >/dev/null 2>&1; then
+  exec bash "$LIB_DIR/detect-mode.sh" "$@"
+fi
+
+# Fall back to POSIX version
+exec "$LIB_DIR/posix/detect-mode.sh" "$@"
