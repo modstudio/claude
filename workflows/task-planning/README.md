@@ -1,6 +1,6 @@
 # Task Planning Workflows
 
-Task planning workflows with multi-project support via YAML configuration and three planning modes.
+Task planning workflows with multi-project support via YAML configuration and two fundamental modes.
 
 **Uses Claude's Plan Mode discipline**: Read-only exploration → User approval → Implementation
 
@@ -15,13 +15,15 @@ Task planning workflows with multi-project support via YAML configuration and th
 # Executes the appropriate workflow
 ```
 
+**See also:** `~/.claude/docs/task-planning-overview.md` for a high-level conceptual overview.
+
 ---
 
 ## Plan Mode Discipline
 
 **All planning workflows follow Claude's Plan Mode discipline.**
 
-See `~/.claude/modules/plan-mode-discipline.md` for detailed guidance.
+See `~/.claude/modules/shared/plan-mode-discipline.md` for detailed guidance.
 
 ### The Two Phases
 
@@ -33,10 +35,10 @@ See `~/.claude/modules/plan-mode-discipline.md` for detailed guidance.
 ### Key Rules
 
 1. **During planning (before approval):**
-   - Do NOT create files or folders
-   - Do NOT edit any files
-   - Do NOT run Bash commands that modify state
-   - Only use read-only tools to research
+   - Do NOT modify project source code
+   - Do NOT create git branches
+   - Do NOT install dependencies
+   - **Exception:** Task docs folder (`.task-docs/`) may be created and populated during planning to track progress
 
 2. **Parallel research:**
    - Launch multiple search tools in parallel
@@ -78,9 +80,8 @@ See `~/.claude/modules/plan-mode-discipline.md` for detailed guidance.
     ├── project-context.md                 ← Multi-project loader
     └── task-planning/
         ├── README.md                      ← This file
-        ├── default-mode.md                ← Standard YouTrack-driven workflow
-        ├── greenfield-mode.md             ← Exploratory workflow
-        ├── in-progress-mode.md            ← Review & sync workflow
+        ├── default-mode.md                ← Planning workflow (YouTrack + greenfield)
+        ├── in-progress-mode.md            ← Reconciliation workflow
         └── quick-reference.md             ← Quick lookup guide
 ```
 
@@ -145,81 +146,81 @@ Step 1: Auto-detect mode (checks branch, .task-docs, commits)
 Step 2: Confirm mode with user
 Step 3: Execute selected mode workflow
     ↓
-  [Default] → default-mode.md
-  [Greenfield] → greenfield-mode.md
-  [In Progress] → in-progress-mode.md
+  [Default] → default-mode.md (planning - handles YouTrack + greenfield)
+  [In Progress] → in-progress-mode.md (reconciliation)
 ```
 
 ---
 
 ## Planning Modes
 
-### Mode 1: Default Mode
+### Mode 1: Default Mode (Planning)
 
-**When to use**: Normal workflow, issue exists in YouTrack, starting fresh
-
-**Flow**: Standard 5-phase workflow
-1. Discovery & Context Gathering
-2. Requirements Analysis
-3. Technical Planning
-4. Review & Approval
-5. Implementation
+**When to use**: Planning any task - with or without YouTrack issue
 
 **[➜ See Default Mode Documentation](./default-mode.md)**
 
+Default mode handles all planning scenarios through two branch points:
+
+**Branch 1: Context Source**
+| Has Issue Key? | Action |
+|----------------|--------|
+| YES | Fetch from YouTrack → get issue details |
+| NO | Get context from user → greenfield scenario |
+
+**Branch 2: Docs State**
+| Folder Exists? | Action |
+|----------------|--------|
+| YES | Resume existing task → read docs, assess state |
+| NO | Create task folder → render templates |
+
+**Flow**: After branching, all paths converge to planning-core:
+1. Search codebase for patterns
+2. Analyze requirements
+3. Technical planning
+4. Review & Approval (gate)
+5. Finalize documentation
+6. Start implementation
+
+**Context Matrix:**
+| Issue Key | Docs Folder | Scenario | Path |
+|-----------|-------------|----------|------|
+| YES | YES | Resume with YouTrack | fetch → resume → core |
+| YES | NO | New from YouTrack | fetch → create → core |
+| NO | YES | Resume orphan docs | user → resume → core |
+| NO | NO | Pure greenfield | user → create → core |
+
 **Typical scenarios:**
 - User provides issue key (e.g., "Let's work on STAR-2228")
-- No existing .task-docs folder found
-- No uncommitted changes or commits on branch
+- User wants to explore/prototype (no issue yet)
+- Resuming existing task docs
 - Standard planned development
 
 ---
 
-### Mode 2: Greenfield Mode
+### Mode 2: In Progress Mode (Reconciliation)
 
-**When to use**: Exploratory work, prototypes, tasks not yet in YouTrack
-
-**Flow**: User-driven exploration
-1. Get initial context from user
-2. Optional YouTrack integration
-3. Create working directory (temporary: `.task-docs/exploratory-{name}/`)
-4. Document user's overview
-5. Proceed with planning
-6. Formalize when ready (migrate to Default Mode)
-
-**[➜ See Greenfield Mode Documentation](./greenfield-mode.md)**
-
-**Typical scenarios:**
-- User says "explore", "prototype", "try out"
-- No issue key mentioned yet
-- Experimental or research work
-- Will formalize later if successful
-
----
-
-### Mode 3: In Progress Mode
-
-**When to use**: Resuming work, reviewing progress, syncing docs with implementation
-
-**Flow**: Comprehensive review and sync
-1. Gather current state (git, .task-docs folder, code changes)
-2. Review existing documentation
-3. Compare implementation vs documentation
-4. Identify discrepancies (including standards violations)
-5. Present findings to user
-6. Ask user to clarify discrepancies
-7. Fix or update documentation
-8. Create alignment matrix (requirements ↔ implementation ↔ tests ↔ standards)
-8.5. Code standards & implementation readiness check (.ai/rules/, Laravel, security)
-9. Present updated state (including merge readiness assessment)
+**When to use**: Code exists, docs may be out of sync, need to reconcile
 
 **[➜ See In Progress Mode Documentation](./in-progress-mode.md)**
 
+**Key difference from Default Mode:**
+- Default: Plan → then implement
+- In Progress: Already implemented → sync docs with reality
+
+**Flow**: Reconciliation workflow
+1. Gather implementation state (commits, changed files, git state)
+2. Read existing documentation
+3. Compare and identify discrepancies
+4. Present findings to user
+5. Update docs with user confirmation
+6. Present updated state
+
 **Typical scenarios:**
-- Existing .task-docs folder found
-- Branch has commits already
-- Uncommitted changes present
-- User says "continue", "resume", "review progress"
+- Code was written before/without documentation
+- Returning to work after extended break
+- Docs drifted from implementation
+- User says "sync", "reconcile", "update docs to match code"
 
 ---
 
@@ -268,10 +269,11 @@ find "$TASK_DOCS_DIR" -type d -name "{ISSUE_KEY}*"
 
 ### Special Cases
 
-**Greenfield Mode** (temporary):
-- Format: `${TASK_DOCS_DIR}/exploratory-{short-name}/`
-- Migrate to standard format when issue is created
-- Example: `${TASK_DOCS_DIR}/exploratory-auth-prototype/` → `${TASK_DOCS_DIR}/STAR-2250-Auth-Prototype/`
+**Greenfield Scenario** (no issue key):
+- Format: `${TASK_DOCS_DIR}/EXPLORATORY-{short-name}/`
+- Handled by Default Mode with `get-user-context` module
+- Can create YouTrack issue later and rename folder
+- Example: `${TASK_DOCS_DIR}/EXPLORATORY-auth-prototype/` → `${TASK_DOCS_DIR}/STAR-2250-Auth-Prototype/`
 
 ---
 
@@ -327,27 +329,27 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 
 ## Mode Transitions
 
-**When to switch modes during a task:**
-
-### Greenfield → Default
-- **Trigger**: User creates or assigns official YouTrack issue
-- **Action**: Migrate `${TASK_DOCS_DIR}/exploratory-*` → `${TASK_DOCS_DIR}/{ISSUE_KEY}/`
-- **Update**: Add issue references to all docs, sync with YouTrack
+**When to switch modes:**
 
 ### Default → In Progress
-- **Trigger**: User starts coding without updating docs, or returns after a break
-- **Action**: Run In Progress review to sync docs with code
-- **Update**: Align docs with actual implementation
+- **Trigger**: User has implemented code but docs are stale
+- **Action**: Run reconciliation to sync docs with code
+- **Update**: Docs now reflect actual implementation
 
 ### In Progress → Default
-- **Trigger**: After syncing, ready to continue with clean state
-- **Action**: Return to normal Phase 5 (Implementation) workflow
-- **Update**: Continue with updated docs as source of truth
+- **Trigger**: After syncing, ready to plan next phase
+- **Action**: Continue with Default mode planning
+- **Update**: Plan next work with accurate docs as baseline
 
-### Any Mode → In Progress (Health Check)
-- **Trigger**: User asks "where am I?" or "review my progress"
-- **Action**: Run In Progress review at any time
-- **Purpose**: Get current state summary and identify issues
+### Greenfield → Named Task
+- **Trigger**: User creates YouTrack issue for exploratory work
+- **Action**: Rename folder from `EXPLORATORY-*` to `{ISSUE_KEY}-*`
+- **Update**: Link docs to issue, continue with Default mode
+
+### Health Check (Any Time)
+- **Trigger**: User asks "where am I?" or "review progress"
+- **Action**: Run In Progress mode to assess state
+- **Purpose**: Get current state summary and identify misalignments
 
 **Best Practice**: Use In Progress mode periodically (weekly or after significant work) to ensure docs stay synchronized with implementation.
 
@@ -463,7 +465,7 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 7. **Follow single-step rule** - report, propose, ask, wait
 8. **Update status when blocked** - document why and what's needed
 9. **Use In Progress mode periodically** - keep docs synced (weekly on active tasks)
-10. **Choose the right mode** - Default for normal, Greenfield for exploration, In Progress for review
+10. **Choose the right mode** - Default for planning, In Progress for reconciliation
 
 ---
 
@@ -609,9 +611,8 @@ cd ~/Projects/my-project
 
 | Mode | Use Case | When Suggested | Output |
 |------|----------|----------------|--------|
-| **Default** | Normal tasks, issue exists | User provides issue key, no existing work | Standardized docs in `.task-docs/` |
-| **Greenfield** | Exploration, prototypes | User says "explore", no issue key | Temporary docs, formalize later |
-| **In Progress** | Resume work, review progress | Existing .task-docs or commits found | Synced docs + alignment matrix |
+| **Default** | Planning any task | User wants to plan, start fresh, or resume planning | Standardized docs in `.task-docs/` |
+| **In Progress** | Reconciliation | Code exists without matching docs, docs stale | Synced docs matching implementation |
 
 ---
 
@@ -638,5 +639,5 @@ cd ~/Projects/my-project
 
 ---
 
-**Last Updated:** 2025-11-17
-**Version:** 2.0 (Multi-mode with YAML-based multi-project support)
+**Last Updated:** 2025-12-19
+**Version:** 3.1 (Two-mode architecture: Default + In Progress with modular design)

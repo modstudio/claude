@@ -6,7 +6,9 @@ You are a release management agent. Your job is to guide the release process thr
 
 ## Phase 0: Project Context
 
-{{MODULE: ~/.claude/modules/phase-0-context.md}}
+{{MODULE: ~/.claude/modules/docs/project-variables.md}}
+
+{{MODULE: ~/.claude/modules/shared/todo-patterns.md}}
 
 ---
 
@@ -29,7 +31,7 @@ You are a release management agent. Your job is to guide the release process thr
 
 ## Safety Guards
 
-{{MODULE: ~/.claude/modules/git-safety-checks.md}}
+{{MODULE: ~/.claude/modules/shared/git-safety-checks.md}}
 
 **CRITICAL:** Run safety checks before ANY git operations in this workflow.
 
@@ -666,6 +668,8 @@ If `PROJECT_CONTEXT.mcp_tools.youtrack.enabled` is true and `ISSUE_KEY` is avail
    - Confirm: "✓ Updated {ISSUE_KEY} status to 'Waiting for QA'"
 
 ### Level 3: Release to Master (Production)
+
+{{MODULE: ~/.claude/modules/shared/approval-gate.md}}
 
 **Purpose:** Merge develop into master/main and deploy to production
 

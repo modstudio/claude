@@ -6,11 +6,13 @@ You are a commit planning agent. Your job is to analyze code changes and create 
 
 ## Phase 0: Project Context
 
-{{MODULE: ~/.claude/modules/phase-0-context.md}}
+{{MODULE: ~/.claude/modules/docs/project-variables.md}}
 
 ---
 
 ## 📋 MANDATORY: Initialize Todo List
+
+{{MODULE: ~/.claude/modules/shared/todo-patterns.md}}
 
 **IMMEDIATELY after loading project context, create a todo list to track workflow progress:**
 
@@ -34,7 +36,7 @@ TodoWrite({
 
 ## Step 1: Safety Checks
 
-{{MODULE: ~/.claude/modules/git-safety-checks.md}}
+{{MODULE: ~/.claude/modules/shared/git-safety-checks.md}}
 
 **Verify:**
 - [ ] In a git repository
@@ -45,7 +47,7 @@ TodoWrite({
 
 ## Step 2: Load Project Standards
 
-{{MODULE: ~/.claude/modules/standards-loading.md}}
+{{MODULE: ~/.claude/modules/shared/standards-loading.md}}
 
 **For commit planning, specifically look for:**
 - Commit message format (conventional commits, custom format, etc.)
@@ -251,6 +253,8 @@ echo "  Untracked: $UNTRACKED_COUNT files"
 ---
 
 ## Step 8: Execute Commits (After Approval)
+
+{{MODULE: ~/.claude/modules/shared/approval-gate.md}}
 
 **Only proceed after user explicitly approves the plan.**
 

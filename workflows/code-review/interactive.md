@@ -9,330 +9,158 @@ description: Interactive manual code review with step-by-step approval
 
 ---
 
-## Phase 0: Project Context
+## Mode
+READ-ONLY (review phases)
 
-{{MODULE: ~/.claude/modules/phase-0-context.md}}
+Each step ends with a **STOP** for user approval (Single Step Rule).
 
 ---
 
-**Severity Levels:** {{MODULE: ~/.claude/modules/severity-levels.md}}
+## Phase 0: Project Context
 
-**Citation Format:** {{MODULE: ~/.claude/modules/citation-standards.md}}
+{{MODULE: ~/.claude/modules/shared/quick-context.md}}
 
-**Principles**
-- Be fast, respectful, and precise; comment on code, not on people. Explain reasons and guide solutions.
-- Classify findings by severity and propose concrete, minimal changes. Prefer auto-fix patches for low-risk items.
-- Each step ends with a **STOP** for user approval (Single Step Rule).
+**Severity Levels:** {{MODULE: ~/.claude/modules/code-review/severity-levels.md}}
+
+**Citation Format:** {{MODULE: ~/.claude/modules/code-review/citation-standards.md}}
+
+**Principles:**
+- Be fast, respectful, and precise
+- Comment on code, not people
+- Classify findings by severity
+- Each step ends with STOP for user approval
 
 ---
 
 ## 📋 MANDATORY: Initialize Todo List
 
-**IMMEDIATELY after loading context, create a todo list to track review progress:**
-
 ```javascript
 TodoWrite({
   todos: [
-    {content: "Step A: Specification check", status: "in_progress", activeForm: "Checking specification"},
-    {content: "Step 0: Inputs, business context & range", status: "pending", activeForm: "Gathering inputs and context"},
-    {content: "Step 1: Pre-flight diff intake & risk flags", status: "pending", activeForm: "Running pre-flight checks"},
-    {content: "Step 2: Requirements compliance", status: "pending", activeForm: "Checking requirements compliance"},
-    {content: "Step 3: Architecture review", status: "pending", activeForm: "Reviewing architecture"},
-    {content: "Step 4: Code quality review", status: "pending", activeForm: "Reviewing code quality"},
-    {content: "Step 5: Testing review", status: "pending", activeForm: "Reviewing tests"},
-    {content: "Step 6: Performance & security review", status: "pending", activeForm: "Reviewing performance & security"},
-    {content: "Step 7: Documentation & deployment check", status: "pending", activeForm: "Checking documentation & deployment"},
-    {content: "Step 8: Generate final summary report", status: "pending", activeForm: "Generating final report"}
+    {content: "Specification check", status: "in_progress", activeForm: "Checking specification"},
+    {content: "Context gathering", status: "pending", activeForm: "Gathering context"},
+    {content: "Pre-flight diff intake & risk flags", status: "pending", activeForm: "Running pre-flight"},
+    {content: "Requirements compliance", status: "pending", activeForm: "Checking requirements"},
+    {content: "Architecture review", status: "pending", activeForm: "Reviewing architecture"},
+    {content: "Code quality review", status: "pending", activeForm: "Reviewing code quality"},
+    {content: "Testing review", status: "pending", activeForm: "Reviewing tests"},
+    {content: "Performance & security review", status: "pending", activeForm: "Reviewing performance/security"},
+    {content: "Documentation & deployment check", status: "pending", activeForm: "Checking documentation"},
+    {content: "Final summary report", status: "pending", activeForm: "Generating report"}
   ]
 })
 ```
 
-**Update todo list as you progress through each step. Mark tasks complete immediately upon finishing.**
-
 ---
 
-## Step A — Specification Check (STOP for approval)
-- If a valid Task Spec exists, briefly validate it (objective, acceptance criteria, DoD, constraints).
-- If missing or inadequate, run `/issue-specification` and obtain approval.
-**Output:** Approved "Task Spec".
+## Step 1: Specification Check (STOP)
+
+- If valid Task Spec exists, briefly validate (objective, acceptance criteria, DoD)
+- If missing or inadequate, request task specification
+
+**Output:** Approved "Task Spec"
 **STOP.**
 
 ---
 
-## Step 0 — Inputs, Business Context & Range (STOP for approval)
+## Step 2: Context Gathering (STOP)
 
-### Step 0.1: Issue Key & Branch Discovery
-If the branch name is not provided yet, request it — or at least the issue key (STAR-{n}).
-If only the issue key is provided:
-- Find all commits that contain the issue key.
-  - Find a branch that contains the last matching commit.
-  - If found, list all commits on that branch (this becomes the commit range to review).
+{{MODULE: ~/.claude/modules/shared/full-context.md}}
 
-If no commits or branch are found, inform the user and ask how to proceed.
+**Use "For Code Review Mode" section.**
 
-**Terminal helpers (optional):**
-```bash
-# 0) Set the issue key
-KEY='STAR-2163'  # replace with STAR-{n}
-
-# 1) Find commits that contain the issue key (most recent first)
-git log --all --grep="$KEY" --oneline | head -n 50
-
-# 2) Take the most recent matching commit (if any)
-LAST=$(git log --all --grep="$KEY" -n 1 --pretty=%H)
-
-# 3) List branches that contain that commit
-[ -n "$LAST" ] && git branch -a --contains "$LAST" --format="%(refname:short)"
-
-# 4) Pick one of the listed branches (local or remote) and list its commits
-BRANCH="<paste-one-from-above>"
-[ -n "$BRANCH" ] && git log --oneline --decorate --graph "$BRANCH"
-
-# 5) (Optional) Show only commits on that branch mentioning the issue key
-[ -n "$BRANCH" ] && git log --oneline "$BRANCH" --grep="$KEY"
-```
-
-### Step 0.2: Load Task Documentation (MANDATORY)
-
-**STOP - Execute this command before continuing:**
-
-```bash
-~/.claude/lib/bin/gather-context
-```
-
-This outputs all task context including project info, git status, and all task documentation.
-
-**If YouTrack MCP available**, also fetch issue details.
-
-### Step 0.3: Enumerate Change Set
-
-Validate accessibility and enumerate the change set.
-**Output:**
-- Issue summary and business context
-- Commit range
-- Short summary of diff scope (files by type: backend/frontend/migrations/configs)
-- Relevant business documentation reviewed
-
+**Output:** Context summary with issue, branch, files
 **STOP.**
 
 ---
 
-## Step 1 — Pre‑flight: Diff Intake & Risk Flags (STOP for approval)
-1) Open rule files and cache key headings for citation:
-   - `.ai/rules/20-architecture.md`
-2) Open the target branch and compute the diff for the provided commit range.
-3) Summarize changed files grouped by Backend/Frontend/Shared (added/modified/deleted).
-4) Flag potential **risk areas**: DB migrations, shared models/resources, public APIs, global middleware, performance‑sensitive paths, feature flags.
+## Step 3: Pre-flight Diff Intake & Risk Flags (STOP)
 
-**Terminal helpers (optional):**
-```bash
-git diff --name-status <first>..<last>
-git log --oneline <first>..<last>
-```
+{{MODULE: ~/.claude/modules/shared/standards-loading.md}}
 
-**Output:** "Scope Digest" with risk flags.
+1. Load standards and cache section headings
+2. Compute diff for commit range
+3. Summarize changed files by type
+4. Flag **risk areas:** DB migrations, shared models, public APIs, performance paths
+
+**Output:** Scope Digest with risk flags
 **STOP.**
 
 ---
 
-## Step 2 — Requirements Compliance
-Verify the code implements the **Acceptance Criteria** from the Spec.
-- Build a matrix: *Criterion* ↔ *Evidence in code/tests/manual notes*.
-- List missing/partial items.
+## Step 4: Requirements Compliance (STOP)
 
-**Output:** AC matrix + comments (BLOCKER/MAJOR/MINOR/NIT).
+{{MODULE: ~/.claude/modules/code-review/correctness-review.md}}
 
-**AC Matrix Template**
-```md
-| Criterion | Evidence (file:lines / tests / manual) | Status |
-|-----------|----------------------------------------|--------|
-| AC1: ... | `ScheinProduct.php:50-60`, `ScheinProductTest.php:testUomConversion()` | ✅ PASS |
-| AC2: ... | Missing test for edge case | ⚠️ PARTIAL |
-| AC3: ... | Not implemented | ❌ MISSING |
-```
+**Focus on:** Requirements Verification section (if task docs available)
 
+**Output:** AC matrix + comments (BLOCKER/MAJOR/MINOR)
 **STOP.**
 
 ---
 
-## Step 3 — Architecture Review
+## Step 5: Architecture Review (STOP)
 
-Review against `.ai/rules/20-architecture.md` patterns.
+{{MODULE: ~/.claude/modules/code-review/architecture-review.md}}
 
-**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
-
-Apply the following sections from the shared review rules:
-- **Backend Architecture Rules** (Models, Services, Handlers, Repositories, Controllers, Migrations)
-- **Frontend Architecture Rules** (Components, API Clients, State Management)
-- **Vue 3 Readiness Rules** (Composition API, Deprecated APIs, Template Syntax)
-
-**Output:** Findings by severity with file:line references.
+**Output:** Architecture findings by severity
 **STOP.**
 
 ---
 
-## Step 4 — Code Quality Review
+## Step 6: Code Quality Review (STOP)
 
-Review against `.ai/rules/10-coding-style.md`.
+{{MODULE: ~/.claude/modules/code-review/code-quality-review.md}}
 
-**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
-
-Apply the **Code Quality Rules** section (Naming, Typing, Comments, Code Metrics).
-
-**Output:** Findings by severity.
+**Output:** Quality findings by severity
 **STOP.**
 
 ---
 
-## Step 5 — Testing Review
+## Step 7: Testing Review (STOP)
 
-Review against `.ai/rules/30-testing.md`.
+{{MODULE: ~/.claude/modules/code-review/test-review.md}}
 
-**Reference:** {{MODULE: ~/.claude/modules/review-rules.md}}
-
-Apply the **Test Quality Rules** section (Test Class Structure, Test Quality, Test Coverage).
-
-### Test Execution
-Run all modified test files using project test commands:
-```bash
-${PROJECT_TEST_CMD_UNIT} {test-file}
-```
-
-**Output:** Test results + coverage findings by severity.
+**Output:** Test results + coverage findings
 **STOP.**
 
 ---
 
-## Step 6 — Performance & Security
-Quick scan for:
+## Step 8: Performance & Security (STOP)
 
-### Performance
-- N+1 query issues
-- Missing indexes (if migrations)
-- Large loops/collections
-- Unnecessary eager loading
+{{MODULE: ~/.claude/modules/code-review/performance-security.md}}
 
-### Security
-- SQL injection risks
-- XSS vulnerabilities
-- CSRF protection
-- Authorization checks
-- Input validation
-
-**Output:** Findings by severity (focus on BLOCKER/MAJOR).
+**Output:** Performance & security findings by severity
 **STOP.**
 
 ---
 
-## Step 7 — Documentation & Deployment
-Check:
-- Task docs (`$PROJECT_TASK_DOCS_DIR/{ISSUE_KEY}-{slug}/`) aligned with implementation
-- YouTrack references accurate
-- Breaking changes documented
-- Migration rollback tested
-- Environment variables documented
+## Step 9: Documentation & Deployment (STOP)
 
-**Output:** Documentation findings.
+**Documentation checks:**
+- [ ] Task docs aligned with implementation
+- [ ] YouTrack references accurate
+- [ ] Code comments sufficient (when non-obvious)
+- [ ] Breaking changes documented
+- [ ] Environment variables documented
+
+**Deployment checks:**
+- [ ] Migration rollback tested
+- [ ] Feature flags considered for risky changes
+- [ ] Cache clearing requirements noted
+- [ ] Queue worker restart requirements noted
+
+**Output:** Documentation findings
 **STOP.**
 
 ---
 
-## Step 8 — Final Summary Report
+## Step 10: Final Summary Report
 
-Generate comprehensive report:
-
-### Executive Summary
-- **Overall Status:** APPROVE / REQUEST CHANGES / REJECT
-- **Blockers:** [count]
-- **Major Issues:** [count]
-- **Minor Issues:** [count]
-- **Tests:** [X/Y passing]
-
-### Findings by Severity
-
-**Format requirement:** All findings MUST include citation to rule reference.
-
-**BLOCKERS:**
-1. [Issue] - `file:line` - **Violation:** [ARCH §X.Y] - [Fix required]
-
-**MAJOR:**
-1. [Issue] - `file:line` - **Violation:** [STYLE §X.Y] - [Recommendation]
-
-**MINOR:**
-1. [Issue] - `file:line` - **Violation:** [TEST §X.Y] - [Suggestion]
-
-**NITS:**
-1. [Issue] - `file:line` - [Optional polish (citation optional for nits)]
-
-### Action Plan
-
-**Required Before Merge:**
-```bash
-# Commands or changes
-```
-
-**Recommended:**
-- [ ] Change 1
-- [ ] Change 2
-
-**Optional:**
-- [ ] Improvement 1
-
-### Risk Assessment
-- **Overall Risk:** LOW / MEDIUM / HIGH
-- **Test Coverage:** [X%]
-- **Migration Safety:** Safe / Risky
-- **Breaking Changes:** None / Minor / Major
-
-### GitHub-Ready Review Comments
-
-For significant issues that should be posted as PR comments:
-
-#### Inline Code Suggestions
-````markdown
-**File:** `app/Services/ProductService.php:45-48`
-
-```suggestion
-// Improved version
-if (!empty($items)) {
-    foreach ($items as $item) {
-```
-````
-
-#### Architectural Issues
-```markdown
-**Architecture — [Issue Title]** (BLOCKER/MAJOR/MINOR)
-Path: `app/Services/ProductService.php:45-60`
-
-**Issue:** [What's wrong]
-**Violation:** [ARCH §X.Y]
-**Impact:** [Why it matters]
-**Fix:** [Concrete solution]
-```
-
-#### Test Coverage Gaps
-```markdown
-**Testing — Missing Coverage** (MAJOR)
-Path: `app/Handlers/UpdateProductHandler.php`
-
-**Missing Tests:**
-- [ ] `testHandlesEmptyInput()`
-- [ ] `testThrowsExceptionOnInvalidData()`
-
-**Violation:** [TEST §2.1]
-```
-
-### Final Recommendation
-**Decision:** [APPROVE / REQUEST CHANGES / REJECT]
-
-**Reasoning:** [2-3 sentences]
-
-**Next Steps:**
-1. [Step 1]
-2. [Step 2]
+{{MODULE: ~/.claude/modules/code-review/generate-report.md}}
 
 ---
 
 **End of Interactive Review**
 
-Use `/code-review` to return to mode selection, or continue with follow-up questions.
+Use `/code-review-g` to return to mode selection.

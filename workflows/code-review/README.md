@@ -1,6 +1,6 @@
 # Code Review Workflows
 
-Code review workflows with multi-project support via YAML configuration.
+Modular code review workflows with multi-project support via YAML configuration.
 
 ## Quick Start
 
@@ -8,10 +8,127 @@ Code review workflows with multi-project support via YAML configuration.
 # Invoke code review
 /code-review-g
 
-# Select: "External Review Evaluation"
-# Paste external review text
-# Get independent analysis with accept/reject decisions
+# Select mode:
+# - Report Review (comprehensive)
+# - Quick Review (fast)
+# - Interactive Review (step-by-step)
+# - External Review Evaluation
 ```
+
+---
+
+## Architecture
+
+### Modular Design
+
+The code review workflow follows a modular architecture similar to task-planning:
+
+```
+commands/code-review-g.md (entry point)
+  │
+  ├── modules/shared/quick-context.md (detect context)
+  │
+  └── Select Mode:
+      ├── workflows/code-review/report.md
+      ├── workflows/code-review/quick.md
+      ├── workflows/code-review/interactive.md
+      └── workflows/code-review/external.md
+          │
+          └── Each calls shared modules:
+              ├── modules/shared/full-context.md (Code Review Mode)
+              ├── modules/code-review/auto-fix-phase.md
+              ├── modules/code-review/architecture-review.md
+              ├── modules/code-review/correctness-review.md
+              ├── modules/code-review/code-quality-review.md
+              ├── modules/code-review/test-review.md
+              ├── modules/code-review/generate-report.md
+              ├── modules/code-review/critical-checks.md
+              ├── modules/code-review/performance-security.md
+              │
+              └── Shared standards:
+                  ├── modules/code-review/review-rules.md
+                  ├── modules/code-review/severity-levels.md
+                  └── modules/code-review/citation-standards.md
+```
+
+### Module Responsibilities
+
+| Module | Purpose | Mode |
+|--------|---------|------|
+| `shared/full-context.md` | Gather git state, files, issue, task docs | READ-ONLY |
+| `auto-fix-phase.md` | Run linters, remove debug statements | WRITE (safe) |
+| `architecture-review.md` | Check architecture compliance | READ-ONLY |
+| `correctness-review.md` | Check logic and robustness | READ-ONLY |
+| `code-quality-review.md` | Check style and quality | READ-ONLY |
+| `test-review.md` | Review tests and execute them | READ + BASH |
+| `generate-report.md` | Compile final report | READ-ONLY |
+| `critical-checks.md` | Quick checks for critical file types | READ-ONLY |
+| `performance-security.md` | Performance and security checks | READ-ONLY |
+
+### Shared Modules
+
+| Module | Purpose |
+|--------|---------|
+| `review-rules.md` | Checklists for all review types |
+| `severity-levels.md` | BLOCKER/MAJOR/MINOR/NIT definitions |
+| `citation-standards.md` | How to cite rule violations |
+| `standards-loading.md` | Load project standards from `.ai/rules/` |
+
+---
+
+## Review Modes
+
+### 1. Report Review (Recommended)
+
+**Best for:** Feature branches, regular PR reviews
+
+**Process:**
+1. Gather context (issue, git state, task docs)
+2. Auto-fix simple issues (linter, debug statements)
+3. Architecture review
+4. Correctness & robustness analysis
+5. Code quality review
+6. Test review & execution
+7. Generate comprehensive report
+
+**Output:** Detailed markdown report with all findings
+
+### 2. Quick Review
+
+**Best for:** Small PRs, bug fixes (<500 lines)
+
+**Process:**
+1. Scope check (decide quick vs full)
+2. Critical file checks (migrations, models)
+3. Auto-fix phase
+4. Test verification & execution
+5. Quick report
+
+**Output:** Pass/Fail report with critical issues only
+
+### 3. Interactive Review
+
+**Best for:** Complex changes, need manual control
+
+**Process:** Same as Report but with STOP points after each step for user approval
+
+**Output:** Step-by-step findings with approvals
+
+### 4. External Review Evaluation
+
+**Best for:** Evaluating AI or developer review feedback
+
+**Process:**
+1. Load project standards
+2. Load current code state
+3. User pastes external review
+4. Parse and check for duplicates
+5. Independent analysis of each suggestion
+6. Generate evaluation report
+7. Record to permanent file
+8. Apply changes if approved
+
+**Output:** Accept/Modify/Reject decisions with reasoning
 
 ---
 
@@ -19,427 +136,185 @@ Code review workflows with multi-project support via YAML configuration.
 
 ```
 ~/.claude/
-├── config/
-│   ├── global.yaml                        ← Global configuration (storage.task-docs_root)
-│   └── projects/                          ← Project configurations (YAML)
-│       ├── starship.yaml                  ← Starship config
-│       ├── alephbeis.yaml                 ← Alephbeis config
-│       └── generic.yaml                   ← Fallback config
+├── commands/
+│   └── code-review-g.md              ← Entry point
 │
-├── templates/                             ← Reusable templates
-│   └── logs/review.md            ← Review record template
+├── modules/
+│   ├── code-review/                  ← Code review specific
+│   │   ├── auto-fix-phase.md
+│   │   ├── architecture-review.md
+│   │   ├── correctness-review.md
+│   │   ├── code-quality-review.md
+│   │   ├── test-review.md
+│   │   ├── generate-report.md
+│   │   ├── critical-checks.md        ← Quick checks for migrations, models, etc.
+│   │   ├── performance-security.md   ← Performance and security checks
+│   │   ├── review-rules.md
+│   │   ├── severity-levels.md
+│   │   └── citation-standards.md
+│   │
+│   └── shared/                       ← Cross-workflow
+│       ├── quick-context.md
+│       ├── full-context.md           ← Includes "For Code Review Mode" section
+│       ├── standards-loading.md
+│       └── ...
 │
-└── workflows/
-    ├── project-context.md                 ← Multi-project loader
-    ├── helpers.md                         ← Helper functions
-    └── code-review/
-        ├── README.md                      ← This file
-        ├── external.md                    ← External review evaluator
-        ├── interactive.md                 ← Manual step-by-step (if exists)
-        ├── quick.md                       ← Quick checklist (if exists)
-        └── report.md                      ← Comprehensive review (if exists)
-```
-
-**Storage Configuration**: See `~/.claude/config/global.yaml` (`storage.task-docs_root`)
-
-**Project Files (Created by Workflows):**
-```
-${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
-├── logs/review.md                 ← Review record (appended)
-├── specification.md                       ← Task specification
-└── notes.md                               ← Task notes
-```
-*Where `TASK_DOCS_DIR` defaults to `~/.task-docs` (GLOBAL location)*
-
----
-
-## How It Works
-
-### 1. Project Detection
-
-Workflow automatically detects which project you're in:
-
-```bash
-cd ~/Projects/starship
-# Detects: Starship (from YAML: starship.yaml)
-# Issue pattern: STAR-####
-# Standards: .ai/rules/
-# Tests: Docker + PHPUnit
-
-cd ~/Projects/alephbeis-app
-# Detects: Alephbeis (from YAML: alephbeis.yaml)
-# Issue pattern: AB-####
-# Standards: .ai/rules/
-# Tests: Docker + PHPUnit
-```
-
-### 2. Configuration Loading
-
-Loads project-specific settings from `~/.claude/config/projects/{project}.yaml`:
-
-- Issue tracking pattern
-- Standards file locations
-- Citation formats
-- Test commands
-- MCP tool availability
-- Storage conventions
-
-### 3. External Review Evaluation
-
-```
-User → /code-review-g → "External Review"
-    ↓
-Phase 0: Load project context (from YAML)
-Phase 1: Load standards + previous reviews
-Phase 2: Get current code state
-Phase 3: User pastes external review
-Phase 5: Independent analysis
-Phase 6: Generate evaluation report
-Phase 7: Record to ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md
-Phase 8: Apply changes (optional)
+├── workflows/
+│   └── code-review/
+│       ├── README.md                 ← This file
+│       ├── report.md                 ← Full review controller
+│       ├── quick.md                  ← Quick review controller
+│       ├── interactive.md            ← Interactive controller
+│       └── external.md               ← External evaluation controller
 ```
 
 ---
 
-## External Review Workflow
+## Mode Comparison
 
-### What It Does
-
-**Evaluates external code reviews from:**
-- AI tools (GitHub Copilot, ChatGPT, Cursor)
-- Human reviewers
-- Automated linters (PHPCS, ESLint, PHPStan)
-- Static analysis tools
-
-**Provides:**
-- ✅ Independent verification of each suggestion
-- ✅ Accept/Modify/Reject decisions with reasoning
-- ✅ Citations to project standards
-- ✅ Permanent record for circular review
-- ✅ Learning feedback loop
-
-### Circular Review Concept
-
-**Review → Record → Review the Review → Improve**
-
-1. External reviewer reviews code
-2. You evaluate their review (this workflow)
-3. Record evaluation in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
-4. Next review reads past evaluations
-5. Maintain consistency, learn patterns
-6. Improve calibration over time
-
-**Example Record:**
-```markdown
-## Review #1 - 2025-11-14
-Source: GitHub Copilot
-Analyzed: 8 suggestions
-✅ Accepted: 2 (25%) - Good at null checks
-❌ Rejected: 5 (62%) - Doesn't understand DDD
-Quality: ⭐⭐⭐ (3/5)
-
-Lesson: Copilot good for simple bugs, ignore architecture suggestions
-```
+| Feature | Report | Quick | Interactive | External |
+|---------|--------|-------|-------------|----------|
+| Automated | Yes | Yes | No (STOP points) | Yes |
+| Auto-fix | Yes | Yes | No | No |
+| Architecture | Full | Critical only | Full | N/A |
+| Tests | All | Modified | All | Optional |
+| Time | 10-20 min | 5-10 min | 30+ min | Varies |
+| Best for | PRs | Bug fixes | Complex | Feedback |
 
 ---
 
 ## Project Configuration
 
-### Starship (starship.yaml)
+### Standards Location
+
+Standards loaded from `$PROJECT_STANDARDS_DIR` (typically `.ai/rules/`):
+
+```
+.ai/rules/
+├── 10-coding-style.md     ← Style, naming, formatting
+├── 20-architecture.md     ← DDD, patterns, structure
+└── 30-testing.md          ← Test conventions
+```
+
+### Citation Format
+
+Each project defines citation format in YAML:
 
 ```yaml
-issue_tracking:
-  pattern: "STAR-####"
-  regex: "STAR-[0-9]+"
-  system: "YouTrack"
-
-standards:
-  location: ".ai/rules/"
-  # 00-system-prompt.md, 01-core-workflow.md, etc.
-
 citation_format:
-  architecture: "[ARCH §{section-heading}]"
-  style: "[STYLE: \"{direct-quote}\"]"
-
-test_commands:
-  all: "docker compose ... exec starship_server ./vendor/bin/phpunit"
-
-mcp_tools:
-  laravel_boost: enabled
-  youtrack: enabled
+  architecture: "[ARCH §{section}]"
+  style: "[STYLE §{section}]"
+  test: "[TEST §{section}]"
 ```
 
-### Alephbeis (alephbeis.yaml)
+### Test Commands
+
+Project-specific test commands:
 
 ```yaml
-issue_tracking:
-  pattern: "AB-####"
-  regex: "AB-[0-9]+"
-
-standards:
-  location: ".ai/rules/"
-  # code-architecture.md, codestyle.md, etc.
-
-citation_format:
-  architecture: "[ARCH: \"{direct-quote}\"]"
-
 test_commands:
-  all: "docker compose exec alephbeis_app ./vendor/bin/phpunit"
-
-mcp_tools:
-  laravel_boost: enabled
-  playwright: enabled
-```
-
----
-
-## Adding a New Project
-
-### 1. Create YAML Configuration
-
-```bash
-# Copy template
-cp ~/.claude/config/projects/starship.yaml ~/.claude/config/projects/myproject.yaml
-
-# Edit configuration
-code ~/.claude/config/projects/myproject.yaml
-```
-
-### 2. Update Key Fields
-
-```yaml
-project:
-  name: "MyProject"
-  path: "~/Projects/my-project"
-  git_remote_pattern: "myorg/my-project"
-
-issue_tracking:
-  pattern: "MP-####"
-  regex: "MP-[0-9]+"
-
-standards:
-  location: ".docs/rules/"
-
-test_commands:
-  all: "npm test"
-```
-
-### 3. Test Detection
-
-```bash
-cd ~/Projects/my-project
-/project-context
-
-# Should load your YAML file
+  all: "docker compose exec app ./vendor/bin/phpunit"
+  unit: "docker compose exec app ./vendor/bin/phpunit --testsuite=unit"
 ```
 
 ---
 
 ## Usage Examples
 
-### Evaluate GitHub Copilot Review
+### Standard PR Review
 
 ```bash
 cd ~/Projects/starship
-# On branch: feature/STAR-2233-Add-Feature
+git checkout feature/STAR-2233-Add-Feature
 
-/code-review-g → "External Review"
-
-# Paste Copilot's suggestions
-# Get analysis:
-# - ✅ Suggestion #1: ACCEPTED - Violation [ARCH §Correctness]
-# - ❌ Suggestion #2: REJECTED - Premature optimization
-# - ⚠️ Suggestion #3: MODIFIED - Better approach exists
-
-# Record saved to: ${TASK_DOCS_DIR}/STAR-2233-Feature-Name/logs/review.md
+/code-review-g
+# Select: "Report Review"
+# Review runs automatically
+# Get comprehensive report
 ```
 
-### Evaluate Human Code Review
+### Quick Bug Fix
 
 ```bash
-cd ~/Projects/alephbeis-app
-# On branch: AB-1378-Smart-Test-Visibility
+cd ~/Projects/starship
+git checkout bugfix/STAR-2234-Fix-Bug
 
-/code-review-g → "External Review"
-
-# Paste code review comments
-# Get independent evaluation
-# Cross-reference with past reviews (if any)
-# Record for future consistency
+/code-review-g
+# Select: "Quick Review"
+# Fast checklist + tests
+# Get pass/fail report
 ```
 
-### Review the Review (Circular)
+### Complex Multi-Commit
 
 ```bash
-# Load .task-docs root from global config
-TASK_DOCS_DIR="$HOME/.task-docs"  # From ~/.claude/config/global.yaml
+cd ~/Projects/starship
+git checkout feature/STAR-2235-Big-Refactor
 
-# After multiple reviews:
-cat "$TASK_DOCS_DIR/STAR-2233-Feature-Name/logs/review.md"
+/code-review-g
+# Select: "Interactive Review"
+# Step through with approvals
+# Control each phase
+```
 
-# See:
-# - Review #1, #2, #3...
-# - Patterns in external review quality
-# - Your own evaluation consistency
-# - Learning over time
+### Evaluate External Feedback
+
+```bash
+cd ~/Projects/starship
+/code-review-g
+# Select: "External Review Evaluation"
+# Paste Copilot/ChatGPT suggestions
+# Get independent analysis
 ```
 
 ---
 
-## Template Usage
+## Severity Levels
 
-### External Review Record Template
+| Level | Symbol | Blocks Merge? | Must Fix? |
+|-------|--------|---------------|-----------|
+| BLOCKER | ⛔ | Yes | Yes |
+| MAJOR | ⚠️ | Conditional | Should |
+| MINOR | 📋 | No | Encouraged |
+| NIT | 💡 | No | Optional |
 
-Located: `~/.claude/templates/task-planning/logs/review.md`
-
-**Used for:** Creating `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
-
-**Structure:**
-- File header with purpose
-- How to use instructions
-- Review sections (appended per review)
-- Statistics summary
-- Learning notes
-
-**Workflow automatically:**
-1. Creates file from template (first review)
-2. Appends new review sections
-3. Updates statistics
-4. Maintains history
-
----
-
-## Maintenance
-
-### Update Project Configuration
-
-```bash
-# Edit YAML directly
-code ~/.claude/config/projects/starship.yaml
-
-# Changes take effect immediately
-```
-
-### Add New Standard File
-
-```yaml
-standards:
-  files:
-    - path: ".ai/rules/new-guideline.md"
-      purpose: "New coding guidelines"
-```
-
-### Update Test Commands
-
-```yaml
-test_commands:
-  unit: "docker compose exec app ./vendor/bin/phpunit --testsuite=unit"
-```
-
-### Enable New MCP Tool
-
-```yaml
-mcp_tools:
-  new_tool:
-    enabled: true
-    commands:
-      - command1
-      - command2
-```
-
----
-
-## Benefits
-
-### For Users
-- ✅ **No manual configuration** - Auto-detects project
-- ✅ **Consistent citations** - Uses project format
-- ✅ **Correct test commands** - From YAML config
-- ✅ **Review history** - Track all evaluations
-- ✅ **Learning feedback** - Improve over time
-
-### For Multiple Projects
-- ✅ **One workflow** - Works everywhere
-- ✅ **Project-specific** - Standards, commands, patterns
-- ✅ **Easy maintenance** - Update YAML, not workflow
-- ✅ **Extensible** - Add projects easily
-
-### For Teams
-- ✅ **Share configs** - YAML files are portable
-- ✅ **Consistent standards** - Same citations, formats
-- ✅ **Audit trail** - All reviews recorded
-- ✅ **Knowledge building** - Circular review learnings
+See `modules/code-review/severity-levels.md` for full definitions.
 
 ---
 
 ## Troubleshooting
 
-### Project Not Detected
+### Standards Not Found
 
 ```bash
-# Check YAML files exist
-ls ~/.claude/config/projects/
+# Check standards directory
+ls $PROJECT_STANDARDS_DIR
 
-# Check current path
-pwd
-
-# Check git remote
-git remote get-url origin
-
-# Verify YAML syntax
-cat ~/.claude/config/projects/starship.yaml
+# Typical location
+ls .ai/rules/
 ```
 
-### Wrong Project Detected
+### Tests Failing
 
-**Cause:** Multiple projects match patterns
-
-**Fix:** Make patterns more specific in YAML files
-
-```yaml
-# Be specific
-path: "~/Projects/starship"  # ✅ Specific
-path: "~/Projects"           # ❌ Too broad
-```
-
-### Review File Not Created
-
-**Check:**
-- Task folder exists in `$TASK_DOCS_DIR`
-- Issue key extracted correctly
-- Permissions on `$TASK_DOCS_DIR` directory
-
-**Debug:**
 ```bash
-# Load .task-docs root from global config
-TASK_DOCS_DIR="$HOME/.task-docs"  # From ~/.claude/config/global.yaml
+# Run tests manually
+$PROJECT_TEST_CMD_ALL
 
-# Check directory
-ls -la "$TASK_DOCS_DIR/"
+# Check test command in project config
+grep test_commands ~/.claude/config/projects/*.yaml
+```
 
-# Check branch name
-git branch --show-current
+### Context Not Loading
 
-# Extract issue key manually
-git branch --show-current | grep -oE "STAR-[0-9]+"
+```bash
+# Check gather-context script
+~/.claude/lib/bin/gather-context
+
+# Check task docs exist
+ls .task-docs/
 ```
 
 ---
 
-## Integration with Other Workflows
-
-The external review workflow can be called by:
-- `/code-review-g` (mode selector)
-- Project-specific `/code-review`
-- Custom workflows
-
-All workflows use the same:
-- Project context detection
-- YAML configuration
-- Storage conventions
-- Templates
-
----
-
-**Last Updated:** 2025-11-14
-**Version:** 3.0 (YAML-based multi-project)
+**Last Updated:** 2025-12-19
+**Version:** 4.0 (Modular Architecture)

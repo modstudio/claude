@@ -11,19 +11,19 @@
 # User provides issue key or uses slash command
 /plan-task {ISSUE_KEY}
 
-# Agent will (READ-ONLY phases 1-4):
+# Agent will:
 # 1. Fetch from YouTrack (get issue summary for slug)
 # 2. Check for existing branch: git branch --list "*{ISSUE_KEY}*"
 # 3. Check for existing task folder: find ${TASK_DOCS_DIR} -name "{ISSUE_KEY}*"
-# 4. Read project rules (.ai/rules/)
-# 5. Search codebase for similar implementations
-# 6. Ask clarifying questions
-# 7. Create implementation plan
-# 8. Get approval before proceeding
+# 4. Create ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/ folder (if not exists)
+# 5. Read project rules (.ai/rules/)
+# 6. Search codebase - populate findings in task docs
+# 7. Ask clarifying questions - document in task docs
+# 8. Create implementation plan - document in task docs
+# 9. Get approval before proceeding
 
-# After approval (Phase 5 - WRITE-ENABLED):
-# 9. Create ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/ folder
-# 10. Create 6 standard documents
+# After approval (WRITE-ENABLED for project code):
+# 10. Finalize task docs
 # 11. Create git branch and start coding
 ```
 
@@ -233,13 +233,13 @@ Contains all 6 document templates ready to copy.
 - [ ] Fetch from YouTrack (get issue summary for slug)
 - [ ] Check for existing task folder: `find ${TASK_DOCS_DIR} -name "{ISSUE_KEY}*"`
 - [ ] Check for existing branch: `git branch --list "*{ISSUE_KEY}*"`
+- [ ] Create `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` folder (tracks planning progress)
 - [ ] Read project rules (.ai/rules/)
-- [ ] Search codebase for similar implementations
-- [ ] Ask clarifying questions
-- [ ] Create implementation plan
-- [ ] **Get user approval** (READ-ONLY until here)
-- [ ] Create `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` (AFTER approval)
-- [ ] Create 6 standard documents (AFTER approval)
+- [ ] Search codebase - document findings in task docs
+- [ ] Ask clarifying questions - document in task docs
+- [ ] Create implementation plan - document in task docs
+- [ ] **Get user approval** (approval controls git branch + code changes)
+- [ ] Finalize task docs
 - [ ] Create git branch and start coding
 
 ### Before Implementation
