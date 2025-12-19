@@ -46,16 +46,16 @@ Reference docs: workflows/name/README.md
 │   ├── plan-task-g.md     # → workflows/task-planning/
 │   ├── code-review-g.md   # → workflows/code-review/
 │   ├── release-g.md       # → workflows/release/
-│   └── commit-plan-g.md   # → workflows/commit-planning/
+│   ├── commit-plan-g.md   # → workflows/commit-planning/
+│   └── update-docs-g.md   # → workflows/update-docs/
 │
 ├── workflows/              # Detailed workflow implementations
 │   ├── project-context.md # Multi-project config loader
 │   │
 │   ├── task-planning/     # Task planning workflows
 │   │   ├── README.md              # Reference documentation
-│   │   ├── default-mode.md        # Standard YouTrack-driven planning
-│   │   ├── greenfield-mode.md     # Exploratory planning
-│   │   ├── in-progress-mode.md    # Review & sync workflow
+│   │   ├── default-mode.md        # Planning workflow (YouTrack + greenfield)
+│   │   ├── in-progress-mode.md    # Reconciliation workflow
 │   │   └── quick-reference.md     # Quick lookup guide
 │   │
 │   ├── code-review/       # Code review workflows
@@ -69,9 +69,15 @@ Reference docs: workflows/name/README.md
 │   │   ├── README.md              # Reference documentation
 │   │   └── main.md                # CI/CD release workflow
 │   │
-│   └── commit-planning/   # Commit planning workflow
+│   ├── commit-planning/   # Commit planning workflow
+│   │   ├── README.md              # Reference documentation
+│   │   └── main.md                # Commit planning implementation
+│   │
+│   └── update-docs/        # Documentation update workflow
 │       ├── README.md              # Reference documentation
-│       └── main.md                # Commit planning implementation
+│       ├── knowledge-base.md      # Update knowledge base docs
+│       ├── inline.md              # Update inline code docs
+│       └── api.md                 # Update API documentation
 │
 ├── templates/               # Document templates
 │   └── task-planning/
@@ -105,8 +111,27 @@ Reference docs: workflows/name/README.md
 │   └── detect-mode.sh           # Bash-enhanced (--pretty option)
 │
 ├── modules/                 # Reusable rule/guideline modules
-│   ├── review-rules.md          # Code review guidelines
-│   └── todo-patterns.md         # TodoWrite patterns
+│   ├── shared/                   # Cross-workflow modules
+│   │   ├── quick-context.md          # Fast context scan for mode detection
+│   │   ├── full-context.md           # Complete context gathering
+│   │   ├── approval-gate.md          # Approval checkpoint pattern
+│   │   ├── todo-patterns.md          # TodoWrite patterns
+│   │   ├── youtrack-fetch-issue.md   # YouTrack issue fetching
+│   │   └── ...                       # Other shared modules
+│   │
+│   ├── code-review/              # Code review specific
+│   │   ├── review-rules.md           # Review guidelines
+│   │   ├── severity-levels.md        # Issue classification
+│   │   └── citation-standards.md     # Citation formats
+│   │
+│   ├── task-planning/            # Task planning specific
+│   │   ├── planning-core.md          # Core planning logic
+│   │   ├── create-task-folder.md     # Folder creation
+│   │   └── ...                       # Other planning modules
+│   │
+│   └── docs/                     # Documentation update modules
+│       ├── context-strategy.md       # Context gathering strategy
+│       └── style-guide-loading.md    # Style guide loading
 │
 └── README.md                # This file
 ```
@@ -210,9 +235,8 @@ Multi-mode task planning with YouTrack integration and automatic project detecti
    - Loads standards, test commands, issue patterns
 
 2. **Auto-Detect Planning Mode:**
-   - Default - Standard YouTrack-driven planning
-   - Greenfield - Exploratory work without issue key
-   - In Progress - Review and sync existing work
+   - Default - Planning workflow (handles YouTrack issues and greenfield scenarios)
+   - In Progress - Reconciliation workflow (sync docs with implementation)
 
 3. **Execute Selected Mode Workflow**
 
@@ -223,13 +247,12 @@ Multi-mode task planning with YouTrack integration and automatic project detecti
 - Fetches task from YouTrack (if available)
 - Searches for relevant business docs (if available)
 - Creates detailed implementation plan
-- Mode transitions (Greenfield → Default → In Progress)
+- Mode transitions (Default ↔ In Progress)
 
 **Workflows:**
 - Entry: `commands/plan-task-g.md` (orchestrator)
-- Default: `workflows/task-planning/default-mode.md`
-- Greenfield: `workflows/task-planning/greenfield-mode.md`
-- In Progress: `workflows/task-planning/in-progress-mode.md`
+- Default (Planning): `workflows/task-planning/default-mode.md` - handles YouTrack and greenfield
+- In Progress (Reconciliation): `workflows/task-planning/in-progress-mode.md` - sync docs with implementation
 
 **See:** `workflows/task-planning/README.md` for details
 
@@ -383,6 +406,41 @@ Load project-specific configuration for use by other workflows.
 - MCP tool availability
 
 **Workflow:** `workflows/project-context.md`
+
+---
+
+### `/update-docs-g`
+
+Update documentation to reflect implementation changes.
+
+**Usage:** `/update-docs-g`
+
+**Flow:**
+1. **Phase 0: Load Project Context** (automatic)
+   - Detects project from YAML
+   - Loads documentation standards and style guides
+   - Identifies documentation locations
+
+2. **Select Update Mode:**
+   - Knowledge Base - Update `.task-docs/` and knowledge base files
+   - Inline - Update code comments and docblocks
+   - API - Update API documentation (OpenAPI, etc.)
+
+3. **Execute Selected Mode Workflow**
+
+**Features:**
+- **Project-aware** - Uses YAML configuration
+- **Style-guide compliant** - Follows project documentation standards
+- **Diff-aware** - Analyzes what changed to update relevant docs
+- **Non-destructive** - Preserves existing documentation structure
+
+**Workflows:**
+- Entry: `commands/update-docs-g.md` (orchestrator)
+- Knowledge Base: `workflows/update-docs/knowledge-base.md`
+- Inline: `workflows/update-docs/inline.md`
+- API: `workflows/update-docs/api.md`
+
+**See:** `workflows/update-docs/README.md` for details
 
 ---
 
