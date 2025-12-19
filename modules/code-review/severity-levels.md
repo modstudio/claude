@@ -3,7 +3,11 @@
 **Module:** Issue severity classification
 **Version:** 1.0.0
 
-This module defines severity levels for code review findings, task blockers, and issue classification. All workflows should reference this module for consistent severity definitions.
+## Purpose
+Define severity levels for classifying code review findings and task blockers consistently.
+
+## Scope
+CODE-REVIEW - Used by: all code review workflows, task planning
 
 ---
 

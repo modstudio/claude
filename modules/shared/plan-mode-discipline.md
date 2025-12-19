@@ -1,5 +1,14 @@
 # Plan Mode Discipline
 
+**Module:** Planning vs implementation phase separation
+**Version:** 1.0.0
+
+## Purpose
+Enforce separation between planning (read-only) and implementation (write) phases.
+
+## Scope
+SHARED - Used by: task-planning workflows
+
 **Core principle**: Separate planning from implementation. Never modify anything during planning.
 
 ---
@@ -31,14 +40,33 @@ Plan Mode ensures:
 - MCP read tools (YouTrack lookup, etc.)
 
 **Forbidden tools (until approval):**
-- `Edit` - No editing files
-- `Write` - No creating files
+- `Edit` - No editing project source files
+- `Write` - No creating project source files
 - `Bash` commands that modify state:
   - No `git commit`, `git push`, `git checkout -b`
-  - No `mkdir`, `touch`, `rm`, `mv`
   - No `npm install`, `composer require`
-  - No writing to any file
+  - No modifying project source code
 - `NotebookEdit` - No editing notebooks
+
+### Task Docs Exception
+
+**Task docs folder (`.task-docs/`) may be created and written to during planning.**
+
+This is intentional because:
+- Task docs track planning progress and decisions
+- They're populated as research and analysis unfolds
+- The approval gate controls **implementation**, not documentation
+
+**During planning, you MAY:**
+- Create `.task-docs/{ISSUE_KEY}-{slug}/` folder
+- Write to task planning documents (00-status.md, 02-functional-requirements.md, etc.)
+- Update decision logs and notes
+
+**The approval gate still controls:**
+- Creating git branches
+- Modifying project source code
+- Installing dependencies
+- Any changes outside `.task-docs/`
 
 **Read-only Bash allowed:**
 - `git status`, `git log`, `git diff`, `git branch --list`

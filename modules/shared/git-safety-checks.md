@@ -3,7 +3,11 @@
 **Module:** Branch protection and safe git operations
 **Version:** 1.0.0
 
-This module defines safety checks for git operations to prevent accidental damage to protected branches. All workflows involving git operations should reference this module.
+## Purpose
+Define safety checks for git operations to prevent accidental damage to protected branches.
+
+## Scope
+SHARED - Used by: commit-planning, release workflows
 
 ---
 

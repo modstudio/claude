@@ -3,7 +3,11 @@
 **Module:** Project standards file discovery and loading
 **Version:** 1.0.0
 
-This module defines how to discover and load project coding standards from the standards directory. All workflows that need to reference standards should use this pattern.
+## Purpose
+Define how to discover and load project coding standards from the standards directory.
+
+## Scope
+SHARED - Used by: code-review, task-planning workflows
 
 ---
 

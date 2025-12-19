@@ -3,7 +3,11 @@
 **Module:** Shared Review Rules & Checklists
 **Version:** 1.0.0
 
-This module contains all review checklists shared between interactive and report workflows.
+## Purpose
+Provide comprehensive checklists for code review across different file types and architectural layers.
+
+## Scope
+CODE-REVIEW - Used by: interactive.md, report.md, quick.md
 
 ---
 

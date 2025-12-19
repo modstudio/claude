@@ -1,5 +1,14 @@
 # Context Gathering Strategy
 
+**Module:** Two-phase context gathering approach
+**Version:** 1.0.0
+
+## Purpose
+Define the two-phase context gathering strategy: light scan for mode detection, full scan for workflow execution.
+
+## Scope
+DOCS - Reference for: task-planning, update-docs workflows
+
 **Problem**: Full context is hundreds of lines, hidden by default, user can't see key findings.
 
 **Solution**: Two-phase context gathering with clear summaries.
@@ -46,7 +55,7 @@ git log -1 --format=%cr HEAD          # "3 days ago"
 | Uncommitted | 3 files |
 | Commits Ahead | 5 |
 
-**Suggested Mode**: Default (new task) / In Progress (existing work) / Greenfield (no context)
+**Suggested Mode**: Default (planning) / In Progress (reconciliation)
 ```
 
 **What NOT to do in Phase 1:**
@@ -109,13 +118,14 @@ git log -1 --format=%cr HEAD          # "3 days ago"
 - [ ] Any updates since last sync
 ```
 
-#### Greenfield Mode - Full Context
+#### Default Mode (Greenfield Scenario) - Full Context
 ```markdown
 ## Full Context Gathering
 
-### From User
+### From User (no issue key)
 - [ ] Task overview (ask user)
 - [ ] Goals and constraints
+- [ ] Offer to create YouTrack issue
 
 ### From Codebase (parallel)
 - [ ] Similar features/patterns

@@ -3,6 +3,12 @@
 **Module:** TodoWrite Progress Tracking
 **Version:** 2.0.0
 
+## Purpose
+Define standard patterns for using TodoWrite to track workflow progress consistently.
+
+## Scope
+SHARED - Used by: all workflows
+
 ---
 
 ## Initializing Progress Tracking

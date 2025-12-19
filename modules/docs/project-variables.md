@@ -1,9 +1,15 @@
-# Phase 0: Project Context Reference
+# Project Variables Reference
 
-**Module:** Shared project context documentation
+**Module:** PROJECT_* variables reference
 **Version:** 1.0.0
 
-This module documents the project context variables available after a command loads project configuration. All workflows should reference this module instead of duplicating Phase 0 sections.
+## Purpose
+Document all PROJECT_* variables available after project configuration is loaded.
+
+## Scope
+DOCS - Reference for: all workflows using project context
+
+**Type:** Reference documentation (not an action module)
 
 ---
 
@@ -92,7 +98,7 @@ Instead of duplicating Phase 0 sections, workflows should include:
 ```markdown
 ## Phase 0: Project Context
 
-{{MODULE: ~/.claude/modules/phase-0-context.md}}
+{{MODULE: ~/.claude/modules/docs/project-variables.md}}
 
 **Verify before continuing:**
 - [ ] Project context loaded successfully

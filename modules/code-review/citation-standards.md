@@ -3,7 +3,11 @@
 **Module:** Rule citation format and SSOT guidance
 **Version:** 1.0.0
 
-This module defines how to cite rules and standards in code reviews and findings. All workflows should reference this module for consistent citations.
+## Purpose
+Define consistent citation formats for referencing project standards in code review findings.
+
+## Scope
+CODE-REVIEW - Used by: all code review workflows
 
 ---
 
