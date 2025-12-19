@@ -149,8 +149,9 @@ abs_path() {
 # Get directory of current script (useful for sourcing other scripts)
 script_dir() {
   local source="${BASH_SOURCE[0]}"
+  local dir
   while [[ -L "$source" ]]; do
-    local dir="$(cd -P "$(dirname "$source")" && pwd)"
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
     source="$(readlink "$source")"
     [[ $source != /* ]] && source="$dir/$source"
   done
@@ -186,9 +187,15 @@ safe_read_file() {
 # STRING UTILITIES
 # ============================================================================
 
-# Trim whitespace from string
+# Trim whitespace from string (supports both arguments and stdin)
 trim() {
-  local var="$*"
+  local var
+  # Read from arguments if provided, otherwise from stdin
+  if [[ $# -gt 0 ]]; then
+    var="$*"
+  else
+    read -r var
+  fi
   # Remove leading whitespace
   var="${var#"${var%%[![:space:]]*}"}"
   # Remove trailing whitespace
