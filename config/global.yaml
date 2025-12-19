@@ -25,9 +25,8 @@ workflows:
   task_planning:
     enabled: true
     modes:
-      - default
-      - greenfield
-      - in_progress
+      - default       # Planning (handles YouTrack + greenfield scenarios)
+      - in_progress   # Reconciliation (sync docs with implementation)
 
   code_review:
     enabled: true
@@ -67,6 +66,6 @@ defaults:
     playwright: false
 
 # Version
-version: "2.0.0"
-last_updated: "2025-11-20"
-notes: "Major upgrade: Project-local .task-docs, modular architecture, DRY compliance"
+version: "2.1.0"
+last_updated: "2025-12-19"
+notes: "Module reorganization, standardized function naming, shellcheck compliance, validation tests"

@@ -12,9 +12,9 @@ I'll help you review code changes using project-specific standards and test comm
 
 ## Execution Steps
 
-### Step 1: Initialize Progress Tracking (MUST DO FIRST)
+### Step 1: Initialize Progress Tracking
 
-**Create todo list with ALL steps before doing anything else:**
+**Create todo list with initial steps:**
 
 ```javascript
 TodoWrite({
@@ -26,19 +26,15 @@ TodoWrite({
 })
 ```
 
-**Mark each todo as in_progress when starting, completed when done.**
-
 ---
 
 ### Step 2: Detect Context
 
 Mark todo as in_progress: "Detect context"
 
-Run quick context detection:
+**Run quick context detection:**
 
-```bash
-~/.claude/lib/bin/detect-mode --json
-```
+{{MODULE: ~/.claude/modules/shared/quick-context.md}}
 
 This provides issue key (if on feature branch) and current git state.
 
@@ -50,8 +46,7 @@ Mark todo as completed: "Detect context"
 
 Mark todo as in_progress: "Select review mode"
 
-**MANDATORY: You MUST use the AskUserQuestion tool to present ALL 4 options below.**
-**Do NOT auto-select a mode. Do NOT skip this step. ALWAYS ask the user.**
+**MANDATORY: Use AskUserQuestion to present ALL 4 options:**
 
 ```javascript
 AskUserQuestion({
@@ -69,8 +64,6 @@ AskUserQuestion({
 })
 ```
 
-**ALL 4 OPTIONS MUST BE PRESENTED. Never omit any option.**
-
 Mark todo as completed: "Select review mode"
 
 ---
@@ -83,37 +76,77 @@ Follow the appropriate workflow based on user selection:
 
 #### Report Review (Recommended)
 **Workflow:** `~/.claude/workflows/code-review/report.md`
-**Process:** Full context → check standards → run all tests → detailed report
-**Best for:** Feature branches, regular PR reviews
 
-**Report generation (optional):**
-```bash
-source ~/.claude/lib/template-utils.sh
-render_template ~/.claude/templates/code-review/review-report.md \
-  ./review-report.md PROJECT_NAME="$PROJECT_NAME" ...
-```
+**Modules used:**
+- `shared/full-context.md` - Context gathering (Code Review Mode)
+- `auto-fix-phase.md` - Linter and debug cleanup
+- `architecture-review.md` - Architecture compliance
+- `correctness-review.md` - Logic and robustness
+- `code-quality-review.md` - Style and quality
+- `test-review.md` - Test quality and execution
+- `generate-report.md` - Final report compilation
+
+**Best for:** Feature branches, regular PR reviews
 
 #### Quick Review
 **Workflow:** `~/.claude/workflows/code-review/quick.md`
-**Process:** Automated checklist → run modified tests → pass/fail report
-**Best for:** Small PRs, bug fixes (<500 lines)
 
-**Key operations:**
-```bash
-LINES=$(git diff --stat "$PROJECT_BASE_BRANCH"...HEAD | tail -1)
-FILES=$(git diff --name-only "$PROJECT_BASE_BRANCH"...HEAD)
-# Use $PROJECT_TEST_CMD_* for tests
-```
+**Modules used:**
+- `critical-checks.md` - Quick checks for critical file types
+- `auto-fix-phase.md` - Linter and debug cleanup
+- `test-review.md` - Test execution only
+
+**Best for:** Small PRs, bug fixes (<500 lines)
 
 #### Interactive Review
 **Workflow:** `~/.claude/workflows/code-review/interactive.md`
-**Process:** Manual step-by-step with user approval at each stage (Steps A, 0-8)
+
+**Modules used:**
+- All review modules with STOP points between each
+- `performance-security.md` - Performance and security checks
+
 **Best for:** Complex multi-commit changes, need full control
 
 #### External Review Evaluation
 **Workflow:** `~/.claude/workflows/code-review/external.md`
-**Process:** Parse suggestions → verify against standards → accept/reject with reasoning
+
+**Modules used:**
+- `shared/full-context.md` - Context gathering (Code Review Mode)
+- Standards loading for verification
+
 **Best for:** Evaluating AI or developer review feedback
+
+---
+
+## Module Architecture
+
+```
+commands/code-review-g.md (entry point)
+  │
+  ├── modules/shared/quick-context.md
+  │
+  └── Select Mode:
+      ├── workflows/code-review/report.md
+      ├── workflows/code-review/quick.md
+      ├── workflows/code-review/interactive.md
+      └── workflows/code-review/external.md
+          │
+          └── Each calls shared modules:
+              ├── modules/shared/full-context.md (Code Review Mode)
+              ├── modules/code-review/auto-fix-phase.md
+              ├── modules/code-review/architecture-review.md
+              ├── modules/code-review/correctness-review.md
+              ├── modules/code-review/code-quality-review.md
+              ├── modules/code-review/test-review.md
+              ├── modules/code-review/generate-report.md
+              ├── modules/code-review/critical-checks.md
+              ├── modules/code-review/performance-security.md
+              │
+              └── Shared standards:
+                  ├── modules/code-review/review-rules.md
+                  ├── modules/code-review/severity-levels.md
+                  └── modules/code-review/citation-standards.md
+```
 
 ---
 
@@ -121,56 +154,47 @@ FILES=$(git diff --name-only "$PROJECT_BASE_BRANCH"...HEAD)
 
 | Mode | Automated | Lines Changed | Output |
 |------|-----------|---------------|--------|
-| Report | ✅ Yes | Any | Comprehensive report |
-| Quick | ✅ Yes | <500 | Pass/Fail report |
-| Interactive | ❌ Manual | Any | Step-by-step findings |
-| External | ✅ Yes | Any | Accept/Reject analysis |
+| Report | Yes | Any | Comprehensive report |
+| Quick | Yes | <500 | Pass/Fail report |
+| Interactive | Manual | Any | Step-by-step findings |
+| External | Yes | Any | Accept/Reject analysis |
 
 ---
 
 ## Resources Available
 
-**Standards:** `$PROJECT_STANDARDS_DIR` (cite with `$PROJECT_CITATION_ARCHITECTURE`)  
-**Tests:** `$PROJECT_TEST_CMD_ALL` (all), `$PROJECT_TEST_CMD_UNIT` (unit only)  
-**Context:** YouTrack issue, knowledge base (`$PROJECT_KB_DIR`), task docs (`$PROJECT_TASK_DOCS_DIR`)  
+**Standards:** `$PROJECT_STANDARDS_DIR` (cite with `$PROJECT_CITATION_ARCHITECTURE`)
+**Tests:** `$PROJECT_TEST_CMD_ALL` (all), `$PROJECT_TEST_CMD_UNIT` (unit only)
+**Context:** YouTrack issue, knowledge base, task docs
 **MCP Tools:** Check `PROJECT_*` vars for YouTrack, Laravel Boost, Playwright
 
 ---
 
 ## Code Style: Run Fixer Before Review
 
-**ALWAYS run auto-fixer on changed files before reviewing code style:**
+**ALWAYS run auto-fixer on changed files before reviewing:**
 
 ```bash
-# PHP projects - fix all changed files
+# PHP projects
 git diff --name-only $PROJECT_BASE_BRANCH...HEAD -- '*.php' | xargs -I {} php-cs-fixer fix {}
 ```
 
 **Review flow:**
-1. **Run fixer on all changed PHP files first**
-2. Stage and commit fixer changes (separate "style fix" commit)
+1. Run fixer on all changed files first
+2. Stage and commit fixer changes (separate commit)
 3. Then proceed with code review
-4. Only report style issues that fixer couldn't resolve
-
-| Code Location | Action |
-|---------------|--------|
-| **Files we changed** | ✅ Run fixer first, then review |
-| **Pre-existing issues fixer can't resolve** | ⚠️ Note in review, don't block |
-| **Files we didn't change** | ❌ Ignore |
-
-**Never:** Report fixable code style issues without running fixer first.
+4. Only report style issues fixer couldn't resolve
 
 ---
 
 ## Key Reminders
 
-1. **FIRST:** Create TodoWrite with all steps (this enforces the workflow order)
-2. **Follow todos in order** - mark in_progress → completed for each
-3. **Context loading happens in the workflow** - each mode loads only what it needs
-4. Reference standards from `$PROJECT_STANDARDS_DIR` with proper citations
-5. Run tests using `$PROJECT_TEST_CMD_*`
-6. CI quality failures: only fix code we actually changed (see above)
+1. **FIRST:** Create TodoWrite with all steps
+2. **Follow todos in order** - mark in_progress → completed
+3. **Context loading happens in the workflow** - each mode loads what it needs
+4. Reference standards with proper citations
+5. Run tests using project test commands
 
 ---
 
-Begin: **Create TodoWrite with all 3 steps**, then execute each step in order.
+Begin: **Create TodoWrite**, then execute each step in order.

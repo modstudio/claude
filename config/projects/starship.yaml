@@ -105,9 +105,11 @@ mcp_tools:
 
   youtrack:
     enabled: true
-    # IMPORTANT: YouTrack MCP requires project ID (not key)
-    # Use: mcp__youtrack__list_projects to find IDs
-    project_id: "0-0"
+    # ⚠️ PLACEHOLDER - Replace with actual YouTrack project ID!
+    # YouTrack MCP requires numeric project ID (not key like "STAR")
+    # To find your project ID, run: mcp__youtrack__list_projects
+    # Example: project_id: "0-123" (where 123 is your project number)
+    project_id: "0-0"  # TODO: Replace with real project ID
     commands:
       - get_issue
       - search_issues
