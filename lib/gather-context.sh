@@ -24,7 +24,7 @@ mode_list() {
   local issue_key="$1"
   local task_folder
 
-  if ! task_folder=$(find_task_folder "$issue_key"); then
+  if ! task_folder=$(find_task_dir "$issue_key"); then
     echo "NO_TASK_FOLDER"
     return 1
   fi
@@ -39,7 +39,7 @@ mode_quick() {
   local task_folder
   local count=0
 
-  if task_folder=$(find_task_folder "$issue_key"); then
+  if task_folder=$(find_task_dir "$issue_key"); then
     count=$(find "$task_folder" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
     echo "ISSUE:$issue_key FOLDER:$task_folder DOCS:$count"
   else
@@ -61,7 +61,7 @@ mode_full() {
     project_name="$(basename "$(pwd)")"
   fi
 
-  task_folder=$(find_task_folder "$issue_key" 2>/dev/null) || task_folder=""
+  task_folder=$(find_task_dir "$issue_key" 2>/dev/null) || task_folder=""
   if [[ -n "$task_folder" ]]; then
     doc_count=$(find "$task_folder" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
   fi
@@ -137,7 +137,7 @@ mode_full() {
     echo ""
 
     for num in 00 01 02 03 04; do
-      for doc in "$task_folder"/${num}*.md; do
+      for doc in "${task_folder}"/${num}*.md; do
         [[ -f "$doc" ]] && {
           echo "--------------------------------------------------------------------------------"
           echo "FILE: $(basename "$doc")"

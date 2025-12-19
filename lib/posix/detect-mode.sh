@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 gather_state() {
   # Set globals for state
-  BRANCH=$(get_git_branch)
+  BRANCH=$(get_current_branch)
   ISSUE_KEY=""
   TASK_FOLDER=""
   COMMITS_AHEAD="0"
@@ -26,27 +26,30 @@ gather_state() {
 
   if is_git_repo; then
     COMMITS_AHEAD=$(count_commits_ahead)
-    UNCOMMITTED=$(count_uncommitted)
+    UNCOMMITTED=$(count_uncommitted_changes)
   fi
 }
 
 determine_mode() {
   # Determine mode based on gathered state
+  # Two-mode architecture: Default (planning) vs In Progress (reconciliation)
   MODE="default"
   REASON=""
   CONFIDENCE="medium"
 
-  if [ -z "$ISSUE_KEY" ]; then
-    MODE="greenfield"
-    REASON="No issue key found in branch name - exploratory or prototype work"
-    CONFIDENCE="medium"
-  elif [ "$COMMITS_AHEAD" -gt 0 ] || [ "$UNCOMMITTED" -gt 0 ]; then
+  if [ "$COMMITS_AHEAD" -gt 0 ] || [ "$UNCOMMITTED" -gt 0 ]; then
+    # Code exists - suggest reconciliation mode
     MODE="in_progress"
-    REASON="Found existing work: $COMMITS_AHEAD commits ahead, $UNCOMMITTED uncommitted changes"
+    REASON="Found existing work: $COMMITS_AHEAD commits ahead, $UNCOMMITTED uncommitted changes - consider reconciling docs"
     CONFIDENCE="high"
+  elif [ -z "$ISSUE_KEY" ]; then
+    # No issue key - greenfield scenario, handled by Default mode
+    MODE="default"
+    REASON="No issue key found - Default mode will handle as greenfield scenario"
+    CONFIDENCE="medium"
   elif [ -n "$TASK_FOLDER" ]; then
     MODE="default"
-    REASON="Task docs exist at $TASK_FOLDER but no code changes yet"
+    REASON="Task docs exist at $TASK_FOLDER but no code changes yet - continue planning"
     CONFIDENCE="high"
   else
     MODE="default"
@@ -96,12 +99,11 @@ Options:
   --help, -h    Show this help
 
 Modes:
-  default       Normal workflow - issue exists, starting fresh
-  greenfield    Exploratory work - no issue key, prototype
-  in_progress   Resuming work - commits or changes exist
+  default       Planning workflow - handles YouTrack issues and greenfield scenarios
+  in_progress   Reconciliation - sync docs with existing implementation
 
 Output Fields:
-  MODE          Suggested mode (default, greenfield, in_progress)
+  MODE          Suggested mode (default, in_progress)
   ISSUE_KEY     Extracted from branch name
   BRANCH        Current git branch
   TASK_FOLDER   Path to task docs if found

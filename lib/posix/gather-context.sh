@@ -82,7 +82,7 @@ mode_full() {
   if is_git_repo; then
     echo "GIT INFORMATION"
     echo "---------------"
-    echo "Branch: $(get_git_branch)"
+    echo "Branch: $(get_current_branch)"
     echo ""
     echo "Recent commits for $issue_key:"
     git log --all --grep="$issue_key" --oneline 2>/dev/null | head -10 || echo "(none found)"

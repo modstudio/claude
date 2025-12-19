@@ -43,7 +43,7 @@ gather_state() {
 
   # Find task folder
   if is_not_empty "$ISSUE_KEY"; then
-    TASK_FOLDER=$(find_task_folder "$ISSUE_KEY" 2>/dev/null || echo "")
+    TASK_FOLDER=$(find_task_dir "$ISSUE_KEY" 2>/dev/null || echo "")
   fi
 
   # Get git stats
@@ -58,17 +58,22 @@ determine_mode() {
   REASON=""
   CONFIDENCE="medium"
 
-  if is_empty "$ISSUE_KEY"; then
-    MODE="greenfield"
-    REASON="No issue key found in branch name - exploratory or prototype work"
-    CONFIDENCE="medium"
-  elif [[ "$COMMITS_AHEAD" -gt 0 ]] || [[ "$UNCOMMITTED" -gt 0 ]]; then
+  # Two-mode architecture: Default (planning) vs In Progress (reconciliation)
+  # Default mode handles all planning scenarios including greenfield (no issue key)
+
+  if [[ "$COMMITS_AHEAD" -gt 0 ]] || [[ "$UNCOMMITTED" -gt 0 ]]; then
+    # Code exists - suggest reconciliation mode
     MODE="in_progress"
-    REASON="Found existing work: $COMMITS_AHEAD commits ahead, $UNCOMMITTED uncommitted changes"
+    REASON="Found existing work: $COMMITS_AHEAD commits ahead, $UNCOMMITTED uncommitted changes - consider reconciling docs"
     CONFIDENCE="high"
+  elif is_empty "$ISSUE_KEY"; then
+    # No issue key - greenfield scenario, handled by Default mode
+    MODE="default"
+    REASON="No issue key found - Default mode will handle as greenfield scenario"
+    CONFIDENCE="medium"
   elif is_not_empty "$TASK_FOLDER"; then
     MODE="default"
-    REASON="Task docs exist at $TASK_FOLDER but no code changes yet"
+    REASON="Task docs exist at $TASK_FOLDER but no code changes yet - continue planning"
     CONFIDENCE="high"
   else
     MODE="default"
@@ -124,7 +129,6 @@ output_pretty() {
 
   local mode_color="$COLOR_GREEN"
   [[ "$MODE" == "in_progress" ]] && mode_color="$COLOR_YELLOW"
-  [[ "$MODE" == "greenfield" ]] && mode_color="$COLOR_BLUE"
 
   echo -e "${COLOR_GREEN}Mode:${COLOR_RESET}         ${mode_color}$MODE${COLOR_RESET}"
   echo -e "${COLOR_GREEN}Confidence:${COLOR_RESET}   $CONFIDENCE"
@@ -155,12 +159,11 @@ Options:
   --help, -h      Show this help
 
 Modes:
-  default       Normal workflow - issue exists, starting fresh
-  greenfield    Exploratory work - no issue key, prototype
-  in_progress   Resuming work - commits or changes exist
+  default       Planning workflow - handles YouTrack issues and greenfield scenarios
+  in_progress   Reconciliation - sync docs with existing implementation
 
 Output Fields:
-  MODE          Suggested mode (default, greenfield, in_progress)
+  MODE          Suggested mode (default, in_progress)
   ISSUE_KEY     Extracted from branch name
   BRANCH        Current git branch
   TASK_FOLDER   Path to task docs if found

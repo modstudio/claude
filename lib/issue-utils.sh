@@ -223,7 +223,7 @@ get_current_issue_context() {
   # Try to find task folder and extract slug
   source "$SCRIPT_DIR/task-docs-utils.sh"
   local folder
-  if folder=$(find_task_folder "$issue_key"); then
+  if folder=$(find_task_dir "$issue_key"); then
     local slug
     if slug=$(extract_slug_from_folder "$folder"); then
       echo "$issue_key:$slug"

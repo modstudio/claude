@@ -265,6 +265,7 @@ detect_git_state() {
 }
 
 # Suggest planning mode based on git state
+# Two-mode architecture: Default (planning) vs In Progress (reconciliation)
 suggest_planning_mode() {
   require_git_repo
 
@@ -273,15 +274,12 @@ suggest_planning_mode() {
 
   case "$git_state" in
     both|commits|uncommitted)
+      # Code exists - suggest reconciliation mode
       echo "in_progress"
       ;;
     clean)
-      # Check if on feature branch
-      if is_feature_branch; then
-        echo "default"
-      else
-        echo "greenfield"
-      fi
+      # No code changes - suggest planning mode (handles both YouTrack and greenfield)
+      echo "default"
       ;;
     *)
       echo "default"

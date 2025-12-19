@@ -1,7 +1,25 @@
 #!/bin/sh
 # Core utilities for POSIX-compliant scripts
-# Version: 1.0.0
+# Version: 1.1.0
 # Shell compatibility: POSIX sh (works in bash, zsh, dash, sh)
+#
+# ============================================================================
+# FUNCTION NAME MAPPING (POSIX vs Bash)
+# ============================================================================
+# These POSIX functions have equivalent bash versions with different names.
+# The lib/bin/* wrappers auto-detect shell and call the appropriate version.
+#
+#   Function                      | Notes
+#   ------------------------------|----------------------------------
+#   get_current_branch()          | Returns current git branch name
+#   count_uncommitted_changes()   | Count of uncommitted changes
+#   find_task_dir()               | Find task docs directory for issue
+#   extract_issue_key()           | Extract issue key from text
+#   extract_issue_key_from_branch() | Extract issue key from current branch
+#   is_git_repo()                 | Check if in git repository
+#   count_commits_ahead()         | Count commits ahead of base branch
+#
+# ============================================================================
 
 # ============================================================================
 # CONFIGURATION
@@ -29,7 +47,7 @@ get_issue_key() {
     return 0
   fi
 
-  branch=$(get_git_branch)
+  branch=$(get_current_branch)
   if [ -n "$branch" ]; then
     key=$(extract_issue_key "$branch")
     if [ -n "$key" ]; then
@@ -39,6 +57,14 @@ get_issue_key() {
   fi
 
   return 1
+}
+
+# Extract issue key from current git branch
+# Args: [pattern]
+extract_issue_key_from_branch() {
+  pattern="${1:-$DEFAULT_ISSUE_PATTERN}"
+  branch=$(get_current_branch) || return 1
+  [ -n "$branch" ] && extract_issue_key "$branch" "$pattern"
 }
 
 # ============================================================================
@@ -51,7 +77,7 @@ is_git_repo() {
 }
 
 # Get current git branch
-get_git_branch() {
+get_current_branch() {
   is_git_repo && {
     git branch --show-current 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null
   }
@@ -66,7 +92,7 @@ count_commits_ahead() {
 }
 
 # Count uncommitted changes
-count_uncommitted() {
+count_uncommitted_changes() {
   is_git_repo && git status --porcelain 2>/dev/null | wc -l | tr -d ' ' || echo "0"
 }
 

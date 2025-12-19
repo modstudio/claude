@@ -1,6 +1,6 @@
 #!/bin/bash
 # Task docs folder utilities - PROJECT-LOCAL operations only
-# Version: 3.0.1
+# Version: 2.0.0
 
 # Source common utilities
 # Use BASH_SOURCE if available, otherwise fallback to known location
@@ -73,7 +73,7 @@ get_task_docs_dir_abs() {
 # Find a task folder by issue key
 # Args: issue_key (e.g., "STAR-1234")
 # Returns: path to folder if found, empty string otherwise
-find_task_folder() {
+find_task_dir() {
   local issue_key="$1"
 
   validate_not_empty "$issue_key" "Issue key"
@@ -100,7 +100,7 @@ find_task_folder() {
 # Check if task folder exists for given issue key
 task_exists() {
   local issue_key="$1"
-  find_task_folder "$issue_key" >/dev/null 2>&1
+  find_task_dir "$issue_key" >/dev/null 2>&1
 }
 
 # Create a new task folder
@@ -137,7 +137,7 @@ get_task_folder() {
 
   # Try to find existing folder first
   local folder
-  if folder=$(find_task_folder "$issue_key"); then
+  if folder=$(find_task_dir "$issue_key"); then
     echo "$folder"
     return 0
   fi
@@ -184,7 +184,7 @@ get_task_document() {
   validate_not_empty "$document_name" "Document name"
 
   local folder
-  if ! folder=$(find_task_folder "$issue_key"); then
+  if ! folder=$(find_task_dir "$issue_key"); then
     log_error "Task folder not found for $issue_key"
     return 1
   fi
@@ -210,7 +210,7 @@ list_task_documents() {
   local issue_key="$1"
 
   local folder
-  if ! folder=$(find_task_folder "$issue_key"); then
+  if ! folder=$(find_task_dir "$issue_key"); then
     log_error "Task folder not found for $issue_key"
     return 1
   fi
@@ -227,7 +227,7 @@ archive_task() {
   local issue_key="$1"
 
   local folder
-  if ! folder=$(find_task_folder "$issue_key"); then
+  if ! folder=$(find_task_dir "$issue_key"); then
     log_error "Task folder not found for $issue_key"
     return 1
   fi
@@ -253,7 +253,7 @@ delete_task() {
   local force="${2:-false}"
 
   local folder
-  if ! folder=$(find_task_folder "$issue_key"); then
+  if ! folder=$(find_task_dir "$issue_key"); then
     log_error "Task folder not found for $issue_key"
     return 1
   fi
