@@ -37,11 +37,12 @@ render_template() {
   content=$(cat "$template_file")
 
   # Parse variable assignments from arguments and perform substitution
-  # Bash 3.2 compatible (no associative arrays)
+  # Uses shell parameter expansion for POSIX compatibility
   for arg in "$@"; do
-    if [[ "$arg" =~ ^([A-Z_][A-Z0-9_]*)=(.*)$ ]]; then
-      local var_name="${BASH_REMATCH[1]}"
-      local var_value="${BASH_REMATCH[2]}"
+    # Check if arg contains = and starts with uppercase letter
+    if [[ "$arg" == *"="* ]] && [[ "$arg" =~ ^[A-Z_] ]]; then
+      local var_name="${arg%%=*}"   # Everything before first =
+      local var_value="${arg#*=}"   # Everything after first =
       log_debug "  Variable: $var_name = $var_value"
 
       # Escape forward slashes and special chars for sed
@@ -52,13 +53,19 @@ render_template() {
   done
 
   # Also substitute PROJECT_ environment variables automatically
-  for var_name in $(compgen -v PROJECT_ 2>/dev/null || echo ""); do
-    if [ -n "${!var_name:-}" ]; then
-      local var_value="${!var_name}"
-      local escaped_value=$(echo "$var_value" | sed 's/[\/&]/\\&/g')
-      content=$(echo "$content" | sed "s/\${$var_name}/$escaped_value/g")
+  # Use a temp file approach to avoid subshell issues with pipes
+  local tmpfile=$(mktemp)
+  echo "$content" > "$tmpfile"
+  # Use || true to prevent exit on no matches (for set -e compatibility)
+  env | grep '^PROJECT_' 2>/dev/null | while IFS='=' read -r var_name var_value; do
+    if [ -n "$var_value" ]; then
+      escaped_value=$(echo "$var_value" | sed 's/[\/&]/\\&/g')
+      sed -i.bak "s/\${$var_name}/$escaped_value/g" "$tmpfile" 2>/dev/null || \
+        sed -i '' "s/\${$var_name}/$escaped_value/g" "$tmpfile"
     fi
-  done
+  done || true
+  content=$(cat "$tmpfile")
+  rm -f "$tmpfile" "$tmpfile.bak" 2>/dev/null
 
   # Write to output file
   ensure_dir "$(dirname "$output_file")"
@@ -79,11 +86,12 @@ render_template_stdout() {
   content=$(cat "$template_file")
 
   # Parse variable assignments from arguments and perform substitution
-  # Bash 3.2 compatible (no associative arrays)
+  # Uses shell parameter expansion for POSIX compatibility
   for arg in "$@"; do
-    if [[ "$arg" =~ ^([A-Z_][A-Z0-9_]*)=(.*)$ ]]; then
-      local var_name="${BASH_REMATCH[1]}"
-      local var_value="${BASH_REMATCH[2]}"
+    # Check if arg contains = and starts with uppercase letter
+    if [[ "$arg" == *"="* ]] && [[ "$arg" =~ ^[A-Z_] ]]; then
+      local var_name="${arg%%=*}"   # Everything before first =
+      local var_value="${arg#*=}"   # Everything after first =
 
       # Escape forward slashes and special chars for sed
       local escaped_value=$(echo "$var_value" | sed 's/[\/&]/\\&/g')
@@ -93,13 +101,19 @@ render_template_stdout() {
   done
 
   # Also substitute PROJECT_ environment variables automatically
-  for var_name in $(compgen -v PROJECT_ 2>/dev/null || echo ""); do
-    if [ -n "${!var_name:-}" ]; then
-      local var_value="${!var_name}"
-      local escaped_value=$(echo "$var_value" | sed 's/[\/&]/\\&/g')
-      content=$(echo "$content" | sed "s/\${$var_name}/$escaped_value/g")
+  # Use a temp file approach to avoid subshell issues with pipes
+  local tmpfile=$(mktemp)
+  echo "$content" > "$tmpfile"
+  # Use || true to prevent exit on no matches (for set -e compatibility)
+  env | grep '^PROJECT_' 2>/dev/null | while IFS='=' read -r var_name var_value; do
+    if [ -n "$var_value" ]; then
+      escaped_value=$(echo "$var_value" | sed 's/[\/&]/\\&/g')
+      sed -i.bak "s/\${$var_name}/$escaped_value/g" "$tmpfile" 2>/dev/null || \
+        sed -i '' "s/\${$var_name}/$escaped_value/g" "$tmpfile"
     fi
-  done
+  done || true
+  content=$(cat "$tmpfile")
+  rm -f "$tmpfile" "$tmpfile.bak" 2>/dev/null
 
   echo "$content"
 }

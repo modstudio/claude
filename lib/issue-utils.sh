@@ -34,9 +34,11 @@ extract_issue_key() {
     return 1
   fi
 
-  # Extract first match of pattern
-  if [[ "$text" =~ ($pattern) ]]; then
-    echo "${BASH_REMATCH[1]}"
+  # Extract first match of pattern (using POSIX-safe grep)
+  local result
+  result=$(regex_extract "$text" "$pattern")
+  if is_not_empty "$result"; then
+    echo "$result"
     return 0
   else
     log_debug "No issue key found in: $text (pattern: $pattern)"
@@ -129,9 +131,11 @@ contains_issue_key() {
 # Get project prefix from issue key (e.g., "STAR" from "STAR-1234")
 get_issue_prefix() {
   local issue_key="$1"
+  local prefix
+  prefix=$(echo "$issue_key" | grep -oE '^[A-Z]+' | head -1)
 
-  if [[ "$issue_key" =~ ^([A-Z]+)- ]]; then
-    echo "${BASH_REMATCH[1]}"
+  if is_not_empty "$prefix"; then
+    echo "$prefix"
     return 0
   else
     log_error "Could not extract prefix from: $issue_key"
@@ -142,9 +146,11 @@ get_issue_prefix() {
 # Get issue number from issue key (e.g., "1234" from "STAR-1234")
 get_issue_number() {
   local issue_key="$1"
+  local number
+  number=$(echo "$issue_key" | grep -oE '[0-9]+$' | head -1)
 
-  if [[ "$issue_key" =~ -([0-9]+)$ ]]; then
-    echo "${BASH_REMATCH[1]}"
+  if is_not_empty "$number"; then
+    echo "$number"
     return 0
   else
     log_error "Could not extract number from: $issue_key"
@@ -198,8 +204,12 @@ extract_slug_from_folder() {
   folder=$(basename "$folder")
 
   # Extract slug: everything after first dash-number-dash pattern
-  if [[ "$folder" =~ ^[A-Z]+-[0-9]+-(.+)$ ]]; then
-    echo "${BASH_REMATCH[1]}"
+  # Uses sed to remove the "ISSUE-KEY-" prefix
+  local slug
+  slug=$(echo "$folder" | sed -E 's/^[A-Z]+-[0-9]+-//')
+
+  if [[ "$slug" != "$folder" ]] && is_not_empty "$slug"; then
+    echo "$slug"
     return 0
   else
     log_debug "Could not extract slug from folder: $folder"

@@ -5,6 +5,26 @@
 set -euo pipefail  # Exit on error, undefined var, pipe failure
 
 # ============================================================================
+# SHELL DETECTION & COMPATIBILITY
+# ============================================================================
+
+# Detect current shell
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+  CURRENT_SHELL="zsh"
+  # Enable bash compatibility options
+  setopt BASH_REMATCH 2>/dev/null || true   # Makes BASH_REMATCH work
+  setopt KSH_ARRAYS 2>/dev/null || true     # 0-indexed arrays like bash
+  setopt NO_NOMATCH 2>/dev/null || true     # Don't error on failed globs
+elif [[ -n "${BASH_VERSION:-}" ]]; then
+  CURRENT_SHELL="bash"
+else
+  CURRENT_SHELL="sh"
+fi
+
+# Export for child scripts
+export CURRENT_SHELL
+
+# ============================================================================
 # CONFIGURATION
 # ============================================================================
 
@@ -147,8 +167,18 @@ abs_path() {
 }
 
 # Get directory of current script (useful for sourcing other scripts)
+# Works in both bash and zsh
 script_dir() {
-  local source="${BASH_SOURCE[0]}"
+  local source
+  # Handle both bash and zsh
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    source="${BASH_SOURCE[0]}"
+  elif [[ -n "${(%):-%x}" ]]; then
+    source="${(%):-%x}"
+  else
+    source="$0"
+  fi
+
   local dir
   while [[ -L "$source" ]]; do
     dir="$(cd -P "$(dirname "$source")" && pwd)"
@@ -246,6 +276,25 @@ validate_pattern() {
   if ! [[ "$value" =~ $pattern ]]; then
     error_exit "$field_name does not match expected pattern: $pattern"
   fi
+}
+
+# ============================================================================
+# POSIX-SAFE REGEX HELPERS
+# ============================================================================
+# These use grep instead of BASH_REMATCH for maximum compatibility
+
+# Extract first match from text using grep (POSIX-safe)
+# Args: text, pattern
+# Returns: matched text or empty string
+regex_extract() {
+  echo "$1" | grep -oE "$2" | head -1
+}
+
+# Check if text matches pattern (POSIX-safe)
+# Args: text, pattern
+# Returns: 0 if match, 1 if no match
+regex_match() {
+  echo "$1" | grep -qE "$2"
 }
 
 # ============================================================================

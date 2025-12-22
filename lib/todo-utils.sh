@@ -31,10 +31,13 @@ EOF
 generate_todos_json() {
   local items=("$@")
   local json="["
+  local count=${#items[@]}
+  local i=0
 
-  for i in "${!items[@]}"; do
-    json+="${items[$i]}"
-    if [[ $i -lt $((${#items[@]} - 1)) ]]; then
+  for item in "${items[@]}"; do
+    json+="$item"
+    i=$((i + 1))
+    if [[ $i -lt $count ]]; then
       json+=", "
     fi
   done
