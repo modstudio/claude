@@ -325,7 +325,7 @@ Mark todo as completed: "Run safety checks"
 
 Mark todo as in_progress: "Check for existing PR"
 
-1. Run: `gh pr view --head $FEATURE_BRANCH --base develop --json number 2>/dev/null`
+1. Run: `gh pr list --head $FEATURE_BRANCH --base develop --json number -q '.[0].number' 2>/dev/null`
 2. If PR exists:
    - Get PR number
    - Echo "✅ PR already exists for this feature branch"
@@ -351,13 +351,29 @@ Mark todo as in_progress: "Create PR if needed"
    - Changes list
    - Link to YouTrack issue (if available)
    - **STRIP ALL AI ATTRIBUTION** from body
-4. Show PR content to user
-5. Get user approval for PR content
-6. Create PR: `gh pr create --title "{title}" --body "{body}" --base develop --head $FEATURE_BRANCH`
-7. Verify PR created successfully (check exit code)
-8. Get PR number: `PR_NUMBER=$(gh pr view --head $FEATURE_BRANCH --base develop --json number -q .number)`
-9. Echo confirmation: "✅ Created PR #{number}: {feature} → develop"
-10. **🚨 VERIFY**: PR number is not empty (if empty, ABORT)
+
+4. **🚨 STOP - SHOW PR TO USER FOR APPROVAL:**
+
+   Present the PR content in a clear format:
+   ```markdown
+   ## PR Preview
+
+   **Title:** {title}
+   **Base:** develop ← **Head:** {FEATURE_BRANCH}
+
+   ### Body:
+   {PR body content}
+   ```
+
+   Ask user: "Does this PR look correct? Should I create it?"
+
+   **DO NOT proceed until user explicitly approves.**
+
+5. Create PR: `gh pr create --title "{title}" --body "{body}" --base develop --head $FEATURE_BRANCH`
+6. Verify PR created successfully (check exit code)
+7. Get PR number: `PR_NUMBER=$(gh pr list --head $FEATURE_BRANCH --base develop --json number -q '.[0].number')`
+8. Echo confirmation: "✅ Created PR #{number}: {feature} → develop"
+9. **🚨 VERIFY**: PR number is not empty (if empty, ABORT)
 
 Mark todo as completed: "Create PR if needed"
 
@@ -519,7 +535,7 @@ echo "✓ Will merge: $FEATURE_BRANCH → develop"
    FEATURE_BRANCH=$(git branch --show-current)
    echo "🔍 Checking for existing PR from $FEATURE_BRANCH to develop..."
 
-   gh pr view --json number,title,body,state --head $FEATURE_BRANCH --base develop 2>/dev/null
+   gh pr list --head $FEATURE_BRANCH --base develop --json number,title,state -q '.[0]' 2>/dev/null
 
    if [ $? -eq 0 ]; then
      echo "✅ PR already exists for this feature branch"
@@ -552,7 +568,7 @@ echo "✓ Will merge: $FEATURE_BRANCH → develop"
 
    ```bash
    # Get PR number
-   PR_NUMBER=$(gh pr view --head $FEATURE_BRANCH --base develop --json number -q .number)
+   PR_NUMBER=$(gh pr list --head $FEATURE_BRANCH --base develop --json number -q '.[0].number')
 
    if [ -z "$PR_NUMBER" ]; then
      echo "❌ ERROR: No PR found to merge!"

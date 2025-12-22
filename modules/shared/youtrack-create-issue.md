@@ -65,7 +65,24 @@ Ask: "What should the issue title be?"
 SUMMARY = user input
 ```
 
-### Step 3: Create Issue
+### Step 3: 🚨 SHOW ISSUE PREVIEW AND GET APPROVAL
+
+**STOP - Present issue to user before creating:**
+
+```markdown
+## YouTrack Issue Preview
+
+**Project:** {PROJECT_NAME} ({PROJECT_YOUTRACK_PROJECT_ID})
+**Summary:** {SUMMARY}
+
+Ready to create this issue in YouTrack?
+```
+
+Ask user: "Does this look correct? Should I create it?"
+
+**DO NOT proceed until user explicitly approves.**
+
+### Step 4: Create Issue
 ```javascript
 mcp__youtrack__create_issue({
   project_id: "$PROJECT_YOUTRACK_PROJECT_ID",
@@ -73,7 +90,7 @@ mcp__youtrack__create_issue({
 })
 ```
 
-### Step 4: Report Result
+### Step 5: Report Result
 ```markdown
 ✅ Created issue: **{NEW_ISSUE_KEY}**
 
