@@ -23,15 +23,15 @@ TASK_DOCS_DIR="./.task-docs"
 # ============================================================================
 
 # Get the task docs root directory (project-local)
-# Returns: absolute path to .task-docs if it exists, empty string otherwise
+# Returns: absolute path to task docs dir if it exists, empty string otherwise
 get_task_docs_dir() {
-  local docs_path="$(pwd)/.task-docs"
+  local docs_path="$(pwd)/${TASK_DOCS_DIR#./}"
 
   if dir_exists "$docs_path"; then
     echo "$docs_path"
     return 0
   else
-    log_debug ".task-docs folder not found at $docs_path"
+    log_debug "Task docs folder not found at $docs_path"
     return 1
   fi
 }
@@ -75,26 +75,38 @@ get_task_docs_dir_abs() {
 # Returns: path to folder if found, empty string otherwise
 find_task_dir() {
   local issue_key="$1"
+  local task_docs_dir
+  task_docs_dir=$(basename "$TASK_DOCS_DIR")
 
   validate_not_empty "$issue_key" "Issue key"
 
-  if ! task_docs_exists; then
-    log_debug "No .task-docs folder found, cannot search for task $issue_key"
-    return 1
+  local folder=""
+
+  # Strategy 1: Check root task-docs first (most common case)
+  if task_docs_exists; then
+    folder=$(find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
+    if is_not_empty "$folder"; then
+      echo "$folder"
+      return 0
+    fi
   fi
 
-  # Search for folder matching pattern: {ISSUE_KEY}* (e.g., STAR-1234-Feature-Name)
-  # Search up to 3 levels deep to support organized subdirectories
-  local folder
-  folder=$(find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
+  # Strategy 2: Search for task-docs in nested subdirectories (up to 3 levels)
+  # This handles cases where task-docs is in a subfolder (e.g., subproject/.task-docs/)
+  while IFS= read -r task_docs_path; do
+    # Skip empty lines and root task-docs (already checked above)
+    [ -z "$task_docs_path" ] && continue
+    [[ "$task_docs_path" == "$TASK_DOCS_DIR" ]] && continue
 
-  if is_not_empty "$folder"; then
-    echo "$folder"
-    return 0
-  else
-    log_debug "No task folder found for $issue_key"
-    return 1
-  fi
+    folder=$(find "$task_docs_path" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
+    if is_not_empty "$folder"; then
+      echo "$folder"
+      return 0
+    fi
+  done < <(find . -maxdepth 3 -type d -name "$task_docs_dir" 2>/dev/null)
+
+  log_debug "No task folder found for $issue_key in root or nested $task_docs_dir directories"
+  return 1
 }
 
 # Check if task folder exists for given issue key
@@ -103,7 +115,7 @@ task_exists() {
   find_task_dir "$issue_key" >/dev/null 2>&1
 }
 
-# Create a new task folder
+# Create a new task folder with templates
 # Args: issue_key (e.g., "STAR-1234"), slug (e.g., "Feature-Name")
 # Returns: path to created folder
 create_task_folder() {
@@ -123,6 +135,16 @@ create_task_folder() {
   else
     mkdir -p "$task_folder" || error_exit "Failed to create task folder: $task_folder"
     log_success "Created task folder: $task_folder"
+
+    # Render templates if template-utils is available
+    if command -v render_task_planning_docs &>/dev/null; then
+      render_task_planning_docs "$task_folder" "$issue_key"
+    elif [ -f "$SCRIPT_DIR/template-utils.sh" ]; then
+      source "$SCRIPT_DIR/template-utils.sh"
+      render_task_planning_docs "$task_folder" "$issue_key"
+    else
+      log_debug "Template utils not available, skipping template rendering"
+    fi
   fi
 
   echo "$task_folder"
@@ -153,15 +175,35 @@ get_task_folder() {
   return 1
 }
 
-# List all task folders in .task-docs
+# List all task folders in task-docs (root and nested)
 list_all_tasks() {
-  if ! task_docs_exists; then
-    log_info "No .task-docs folder found in current project"
+  local task_docs_dir nested_results
+  task_docs_dir=$(basename "$TASK_DOCS_DIR")
+
+  # Collect results from all task-docs directories
+  local results=""
+
+  # Check root task-docs
+  if task_docs_exists; then
+    results=$(find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null)
+  fi
+
+  # Check nested task-docs directories
+  while IFS= read -r task_docs_path; do
+    [ -z "$task_docs_path" ] && continue
+    [[ "$task_docs_path" == "$TASK_DOCS_DIR" ]] && continue
+    nested_results=$(find "$task_docs_path" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null)
+    if is_not_empty "$nested_results"; then
+      results="${results}"$'\n'"${nested_results}"
+    fi
+  done < <(find . -maxdepth 3 -type d -name "$task_docs_dir" 2>/dev/null)
+
+  if is_empty "$results"; then
+    log_info "No task folders found in $task_docs_dir directories"
     return 0
   fi
 
-  # Find all directories matching issue key pattern (up to 3 levels deep)
-  find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null | sort
+  echo "$results" | sort | uniq
 }
 
 # Count tasks in .task-docs folder

@@ -53,6 +53,8 @@ mode_full() {
   local doc_count=0
   local commit_count=0
   local project_name=""
+  local task_docs_dir
+  task_docs_dir=$(basename "$TASK_DOCS_DIR")
 
   # Pre-compute key findings
   if has_remote; then
@@ -83,7 +85,7 @@ mode_full() {
     echo "  Location:   $task_folder"
   else
     echo "  Task Docs:  ✗ NOT FOUND"
-    echo "  Searched:   .task-docs/**/${issue_key}*/ (up to 3 levels deep)"
+    echo "  Searched:   **/${task_docs_dir}/**/${issue_key}*/ (root and nested, up to 3 levels)"
   fi
   echo "  Commits:    $commit_count commits mentioning $issue_key"
   echo ""
@@ -165,7 +167,7 @@ mode_full() {
   fi
 
   echo "Folder: NOT FOUND"
-  echo "Searched: .task-docs/**/${issue_key}*/ (up to 3 levels deep)"
+  echo "Searched: **/${task_docs_dir}/**/${issue_key}*/ (root and nested, up to 3 levels)"
   echo ""
   echo "No task documentation exists for this issue."
   echo ""
