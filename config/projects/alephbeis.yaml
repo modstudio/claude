@@ -5,7 +5,7 @@ project:
   name: "Alephbeis"
   type: "Laravel"
   description: "Educational platform for Hebrew reading and language skills"
-  path: "~/Projects/alephbeis-app"
+  path: "projects/alephbeis-app"
   git_remote_pattern: "alephbeis"
 
 issue_tracking:
@@ -60,9 +60,8 @@ citation_format:
     - "[TEST: \"Prefer stubs over mocks\"]"
 
 storage:
-  task_docs_dir: ".task-docs/"
-  # Task folder structure: .task-docs/{ISSUE_KEY}-{slug}/
-  # Logs subfolder: .task-docs/{ISSUE_KEY}-{slug}/logs/
+  # Absolute path = external repo, relative path = project-local
+  task_docs_dir: "~/projects/alephbeis-app-docs"
 
 documentation:
   # Project standards location
