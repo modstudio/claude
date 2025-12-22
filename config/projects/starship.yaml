@@ -5,7 +5,7 @@ project:
   name: "Starship"
   type: "Laravel"
   description: "Enterprise supply chain management for medical/dental products"
-  path: "~/Projects/starship"
+  path: "projects/starship"
   git_remote_pattern: "JanusTrade/starship"
 
 issue_tracking:
@@ -65,9 +65,8 @@ citation_format:
     - "[TEST §Core Principles]"
 
 storage:
-  task_docs_dir: ".task-docs/"
-  # Task folder structure: .task-docs/{ISSUE_KEY}-{slug}/
-  # Logs subfolder: .task-docs/{ISSUE_KEY}-{slug}/logs/
+  # Absolute path = external repo, relative path = project-local
+  task_docs_dir: "~/projects/starship-docs/task-docs"
 
 documentation:
   # Project standards location

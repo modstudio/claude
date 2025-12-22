@@ -1,6 +1,6 @@
 #!/bin/bash
-# Task docs folder utilities - PROJECT-LOCAL operations only
-# Version: 2.0.0
+# Task docs folder utilities
+# Version: 3.0.0
 
 # Source common utilities
 # Use BASH_SOURCE if available, otherwise fallback to known location
@@ -15,17 +15,25 @@ source "$SCRIPT_DIR/common.sh"
 # CONFIGURATION
 # ============================================================================
 
-# Task docs folder is ALWAYS project-local
-TASK_DOCS_DIR="./.task-docs"
+# Task docs directory - priority: PROJECT_TASK_DOCS_DIR > TASK_DOCS_DIR > default
+# Set in project YAML (storage.task_docs_dir) or via environment variable
+TASK_DOCS_DIR="${PROJECT_TASK_DOCS_DIR:-${TASK_DOCS_DIR:-./.task-docs}}"
 
 # ============================================================================
 # TASK DOCS FOLDER OPERATIONS
 # ============================================================================
 
-# Get the task docs root directory (project-local)
+# Get the task docs root directory
 # Returns: absolute path to task docs dir if it exists, empty string otherwise
 get_task_docs_dir() {
-  local docs_path="$(pwd)/${TASK_DOCS_DIR#./}"
+  local docs_path
+
+  # Handle absolute vs relative path
+  if [[ "$TASK_DOCS_DIR" == /* ]]; then
+    docs_path="$TASK_DOCS_DIR"
+  else
+    docs_path="$(pwd)/${TASK_DOCS_DIR#./}"
+  fi
 
   if dir_exists "$docs_path"; then
     echo "$docs_path"
@@ -36,34 +44,37 @@ get_task_docs_dir() {
   fi
 }
 
-# Check if .task-docs folder exists in current project
+# Check if task docs folder exists
 task_docs_exists() {
-  dir_exists "$TASK_DOCS_DIR"
+  get_task_docs_dir >/dev/null 2>&1
 }
 
-# Ensure .task-docs folder exists (create if necessary)
+# Ensure task docs folder exists (create if necessary)
 ensure_task_docs_exists() {
   if ! task_docs_exists; then
-    log_info "Creating .task-docs folder in current project"
-    mkdir -p "$TASK_DOCS_DIR" || error_exit "Failed to create .task-docs folder"
+    log_info "Creating task docs folder: $TASK_DOCS_DIR"
+    mkdir -p "$TASK_DOCS_DIR" || error_exit "Failed to create task docs folder"
 
-    # Add to .gitignore if not already there
-    if file_exists ".gitignore"; then
-      if ! grep -q "^\.task-docs$" .gitignore 2>/dev/null; then
-        echo ".task-docs" >> .gitignore
-        log_success "Added .task-docs to .gitignore"
+    # Add to .gitignore only if using a relative (project-local) path
+    if [[ "$TASK_DOCS_DIR" != /* ]]; then
+      local folder_name="${TASK_DOCS_DIR#./}"
+      if file_exists ".gitignore"; then
+        if ! grep -q "^${folder_name}$" .gitignore 2>/dev/null; then
+          echo "$folder_name" >> .gitignore
+          log_success "Added $folder_name to .gitignore"
+        fi
+      else
+        echo "$folder_name" > .gitignore
+        log_success "Created .gitignore with $folder_name entry"
       fi
-    else
-      echo ".task-docs" > .gitignore
-      log_success "Created .gitignore with .task-docs entry"
     fi
   fi
 }
 
-# Get absolute path to .task-docs (ensures it exists)
+# Get absolute path to task docs (ensures it exists)
 get_task_docs_dir_abs() {
   ensure_task_docs_exists
-  abs_path "$TASK_DOCS_DIR"
+  get_task_docs_dir
 }
 
 # ============================================================================
@@ -76,36 +87,20 @@ get_task_docs_dir_abs() {
 find_task_dir() {
   local issue_key="$1"
   local task_docs_dir
-  task_docs_dir=$(basename "$TASK_DOCS_DIR")
+  task_docs_dir=$(get_task_docs_dir) || return 1
 
   validate_not_empty "$issue_key" "Issue key"
 
   local folder=""
 
-  # Strategy 1: Check root task-docs first (most common case)
-  if task_docs_exists; then
-    folder=$(find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
-    if is_not_empty "$folder"; then
-      echo "$folder"
-      return 0
-    fi
+  # Search in task docs directory (up to 3 levels deep)
+  folder=$(find "$task_docs_dir" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
+  if is_not_empty "$folder"; then
+    echo "$folder"
+    return 0
   fi
 
-  # Strategy 2: Search for task-docs in nested subdirectories (up to 3 levels)
-  # This handles cases where task-docs is in a subfolder (e.g., subproject/.task-docs/)
-  while IFS= read -r task_docs_path; do
-    # Skip empty lines and root task-docs (already checked above)
-    [ -z "$task_docs_path" ] && continue
-    [[ "$task_docs_path" == "$TASK_DOCS_DIR" ]] && continue
-
-    folder=$(find "$task_docs_path" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
-    if is_not_empty "$folder"; then
-      echo "$folder"
-      return 0
-    fi
-  done < <(find . -maxdepth 3 -type d -name "$task_docs_dir" 2>/dev/null)
-
-  log_debug "No task folder found for $issue_key in root or nested $task_docs_dir directories"
+  log_debug "No task folder found for $issue_key in $task_docs_dir"
   return 1
 }
 
@@ -127,8 +122,11 @@ create_task_folder() {
 
   ensure_task_docs_exists
 
+  local task_docs_dir
+  task_docs_dir=$(get_task_docs_dir)
+
   local folder_name="${issue_key}-${slug}"
-  local task_folder="$TASK_DOCS_DIR/$folder_name"
+  local task_folder="$task_docs_dir/$folder_name"
 
   if dir_exists "$task_folder"; then
     log_warning "Task folder already exists: $task_folder"
@@ -175,38 +173,23 @@ get_task_folder() {
   return 1
 }
 
-# List all task folders in task-docs (root and nested)
+# List all task folders in task-docs
 list_all_tasks() {
-  local task_docs_dir nested_results
-  task_docs_dir=$(basename "$TASK_DOCS_DIR")
+  local task_docs_dir
+  task_docs_dir=$(get_task_docs_dir) || return 0
 
-  # Collect results from all task-docs directories
-  local results=""
-
-  # Check root task-docs
-  if task_docs_exists; then
-    results=$(find "$TASK_DOCS_DIR" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null)
-  fi
-
-  # Check nested task-docs directories
-  while IFS= read -r task_docs_path; do
-    [ -z "$task_docs_path" ] && continue
-    [[ "$task_docs_path" == "$TASK_DOCS_DIR" ]] && continue
-    nested_results=$(find "$task_docs_path" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null)
-    if is_not_empty "$nested_results"; then
-      results="${results}"$'\n'"${nested_results}"
-    fi
-  done < <(find . -maxdepth 3 -type d -name "$task_docs_dir" 2>/dev/null)
+  local results
+  results=$(find "$task_docs_dir" -maxdepth 3 -type d -name "[A-Z]*-[0-9]*" 2>/dev/null)
 
   if is_empty "$results"; then
-    log_info "No task folders found in $task_docs_dir directories"
+    log_info "No task folders found in $task_docs_dir"
     return 0
   fi
 
   echo "$results" | sort | uniq
 }
 
-# Count tasks in .task-docs folder
+# Count tasks in task docs folder
 count_tasks() {
   list_all_tasks | wc -l | trim
 }
@@ -264,7 +247,7 @@ list_task_documents() {
 # CLEANUP OPERATIONS
 # ============================================================================
 
-# Archive a task folder (move to .task-docs/archive/)
+# Archive a task folder (move to archive/)
 archive_task() {
   local issue_key="$1"
 
@@ -274,7 +257,10 @@ archive_task() {
     return 1
   fi
 
-  local archive_dir="$TASK_DOCS_DIR/archive"
+  local task_docs_dir
+  task_docs_dir=$(get_task_docs_dir)
+
+  local archive_dir="$task_docs_dir/archive"
   ensure_dir "$archive_dir"
 
   local folder_name=$(basename "$folder")

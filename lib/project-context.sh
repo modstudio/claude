@@ -184,8 +184,10 @@ load_project_context() {
   export PROJECT_CITATION_ARCHITECTURE=$(yaml_get "$yaml_file" "citation_format.architecture" || echo '[ARCH: "{quote}"]')
   export PROJECT_CITATION_STYLE=$(yaml_get "$yaml_file" "citation_format.style" || echo '[STYLE: "{quote}"]')
 
-  # Export storage config (project-local .task-docs)
-  export PROJECT_TASK_DOCS_DIR="./.task-docs"  # Always project-local
+  # Export storage config
+  local task_docs_raw=$(yaml_get "$yaml_file" "storage.task_docs_dir" || echo "./.task-docs")
+  # Expand ~ to $HOME
+  export PROJECT_TASK_DOCS_DIR="${task_docs_raw/#\~/$HOME}"
 
   # Export test commands
   export PROJECT_TEST_CMD_ALL=$(yaml_get "$yaml_file" "test_commands.all" || echo "")
@@ -248,7 +250,7 @@ ${COLOR_GREEN}Branching:${COLOR_RESET}
   Pattern:      $PROJECT_BRANCH_PATTERN
 
 ${COLOR_GREEN}Standards:${COLOR_RESET}      $PROJECT_STANDARDS_DIR
-${COLOR_GREEN}Task Docs:${COLOR_RESET}      $PROJECT_TASK_DOCS_DIR (project-local)
+${COLOR_GREEN}Task Docs:${COLOR_RESET}      $PROJECT_TASK_DOCS_DIR
 
 ${COLOR_GREEN}Knowledge Base:${COLOR_RESET}
   Directory:    $PROJECT_KB_DIR
