@@ -17,7 +17,7 @@ You are helping the user update knowledge base documentation to reflect changes 
 
 This provides all `PROJECT_*` variables including:
 - `PROJECT_KB_LOCATION` - Knowledge base location (e.g., `storage/app/youtrack_docs`)
-- `STORAGE_LOCATION` - Project-local .wip folder location
+- `STORAGE_LOCATION` - Project-local .task-docs folder location
 
 ---
 
@@ -55,8 +55,8 @@ ISSUE_KEY=$(extract_issue_key_from_branch "$PROJECT_ISSUE_REGEX")
 # Check for task context
 TASK_FOLDER=""
 if [ -n "$ISSUE_KEY" ]; then
-  source ~/.claude/lib/wip-utils.sh
-  TASK_FOLDER=$(find_task_folder "$ISSUE_KEY")
+  source ~/.claude/lib/task-docs-utils.sh
+  TASK_FOLDER=$(find_task_dir "$ISSUE_KEY")
 fi
 
 # Parse user input
@@ -67,7 +67,7 @@ USER_INPUT="${1:-}"
 
 **Task Mode** - User provided issue key or on task branch with existing task folder:
 - Input matches issue pattern (e.g., `STAR-1234`)
-- On task branch with `.wip/{ISSUE_KEY}-*/` folder
+- On task branch with `.task-docs/{ISSUE_KEY}-*/` folder
 
 **Article Mode** - User provided specific article name/path:
 - Input ends with `.md`
@@ -111,12 +111,12 @@ Follow the appropriate workflow based on user selection:
 **Key Operations:**
 ```bash
 # Load libraries
-source ~/.claude/lib/wip-utils.sh
+source ~/.claude/lib/task-docs-utils.sh
 source ~/.claude/lib/issue-utils.sh
 
 # Get task folder
 ISSUE_KEY="STAR-1234"  # From user or branch
-TASK_FOLDER=$(find_task_folder "$ISSUE_KEY")
+TASK_FOLDER=$(find_task_dir "$ISSUE_KEY")
 
 # Create docs subfolder in task folder
 DOCS_FOLDER="$TASK_FOLDER/docs-updates"
@@ -162,8 +162,8 @@ mkdir -p "$DOCS_FOLDER"
 
 All libraries are in `~/.claude/lib/`:
 
-**wip-utils.sh** - .wip folder operations
-- `ensure_wip_exists`, `find_task_folder`, `create_task_folder`
+**task-docs-utils.sh** - .task-docs folder operations
+- `ensure_task_docs_exists`, `find_task_dir`, `create_task_folder`
 
 **issue-utils.sh** - Issue key operations
 - `extract_issue_key`, `extract_issue_key_from_branch`, `validate_issue_key`
@@ -206,7 +206,7 @@ documentation:
 2. Load project context (provides KB location)
 3. Detect and confirm update mode
 4. Execute selected mode workflow
-5. Create docs-updates folder in task .wip
+5. Create docs-updates folder in task .task-docs
 6. Never overwrite original KB files - create copies
 7. Generate summary when complete
 8. Present for user review before any sync

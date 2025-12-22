@@ -60,8 +60,8 @@ fi
 
 ```bash
 # Find a task folder by issue key
-# Usage: find_task_folder "STAR-1234"
-find_task_folder() {
+# Usage: find_task_dir "STAR-1234"
+find_task_dir() {
   local issue_key="$1"
   local docs_root=$(get_task_docs_dir)
 
@@ -77,7 +77,7 @@ find_task_folder() {
 }
 
 # Usage
-TASK_FOLDER=$(find_task_folder "STAR-1234")
+TASK_FOLDER=$(find_task_dir "STAR-1234")
 if [ $? -eq 0 ] && [ -n "$TASK_FOLDER" ]; then
   echo "Found: $TASK_FOLDER"
 elif [ $? -ne 0 ]; then
@@ -246,14 +246,14 @@ find .task-docs -type d               # Wrong - doesn't check if exists
 # Check if a task folder exists
 task_exists() {
   local issue_key="$1"
-  local folder=$(find_task_folder "$issue_key")
+  local folder=$(find_task_dir "$issue_key")
   [ -n "$folder" ]
 }
 
 # Usage
 if task_exists "STAR-1234"; then
   echo "Task exists"
-  FOLDER=$(find_task_folder "STAR-1234")
+  FOLDER=$(find_task_dir "STAR-1234")
 else
   echo "Task does not exist"
 fi
@@ -265,7 +265,7 @@ fi
 # List all markdown files in a task folder
 get_task_documents() {
   local issue_key="$1"
-  local folder=$(find_task_folder "$issue_key")
+  local folder=$(find_task_dir "$issue_key")
 
   if [ -n "$folder" ]; then
     find "$folder" -maxdepth 1 -name "*.md" -type f
@@ -310,7 +310,7 @@ BRANCH=$(git branch --show-current)
 ISSUE_KEY=$(extract_issue_key_from_branch "$BRANCH")
 
 if [ -n "$ISSUE_KEY" ]; then
-  TASK_FOLDER=$(find_task_folder "$ISSUE_KEY")
+  TASK_FOLDER=$(find_task_dir "$ISSUE_KEY")
   if [ -n "$TASK_FOLDER" ]; then
     # Read specification
     cat "$TASK_FOLDER/02-functional-requirements.md"

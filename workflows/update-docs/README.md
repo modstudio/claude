@@ -37,11 +37,11 @@ Update knowledge base documentation to reflect implementation changes from tasks
         └── article-mode.md              <- Direct article updates
 ```
 
-**Output Location**: Project-local `.wip/{ISSUE_KEY}-{slug}/docs-updates/`
+**Output Location**: Project-local `.task-docs/{ISSUE_KEY}-{slug}/docs-updates/`
 
 **Output Files Created:**
 ```
-.wip/{ISSUE_KEY}-{slug}/
+.task-docs/{ISSUE_KEY}-{slug}/
 └── docs-updates/
     ├── {Article-Name-1}.md              <- Updated article content
     ├── {Article-Name-2}.md              <- Updated article content

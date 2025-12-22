@@ -14,7 +14,7 @@
 ## Assumptions
 
 - Task has been implemented (code changes exist)
-- `.wip/{ISSUE_KEY}-{slug}/` folder exists with planning docs
+- `.task-docs/{ISSUE_KEY}-{slug}/` folder exists with planning docs
 - Knowledge base location is configured in project YAML (`PROJECT_KB_LOCATION`)
 - User wants to update docs to reflect implementation changes
 
@@ -59,7 +59,7 @@ if ! validate_issue_key "$ISSUE_KEY" "$PROJECT_ISSUE_REGEX"; then
 fi
 
 # Find task folder
-TASK_FOLDER=$(find_task_folder "$ISSUE_KEY")
+TASK_FOLDER=$(find_task_dir "$ISSUE_KEY")
 if [ -z "$TASK_FOLDER" ]; then
   echo "ERROR: No task folder found for $ISSUE_KEY"
   exit 1

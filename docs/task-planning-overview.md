@@ -140,7 +140,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - No memory of decisions made
 
 **Task Planning Workflow:**
-- All context persisted in `.wip/{ISSUE_KEY}-{slug}/`
+- All context persisted in `.task-docs/{ISSUE_KEY}-{slug}/`
 - Any session can resume with full context
 - Decisions preserved in decision log
 - Progress tracked across days/weeks
@@ -200,7 +200,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 ## The Document Ecosystem
 
 ```
-.wip/{ISSUE_KEY}-{slug}/
+.task-docs/{ISSUE_KEY}-{slug}/
 |
 +-- 00-status.md                 <- ENTRY POINT
 |   * Current phase & progress
@@ -305,7 +305,7 @@ This workflow embodies a specific philosophy about human-AI collaboration:
 | Aspect | Standard Plan Mode | Task Planning Workflow |
 |--------|-------------------|----------------------|
 | **Documents** | 1 monolithic plan | 7+ specialized documents |
-| **Persistence** | Session only | Permanent in `.wip/` |
+| **Persistence** | Session only | Permanent in `.task-docs/` |
 | **Context** | Lost between sessions | Preserved across sessions |
 | **Collaboration** | AI produces, human accepts | Structured dialogue |
 | **Modes** | Single mode | Default, In Progress |

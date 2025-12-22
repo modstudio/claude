@@ -270,8 +270,6 @@ If you encounter an issue not covered here:
    show_project_context
    ```
 
-4. **Review upgrade plan:** See `/Users/shmuel/claude-workflows-upgrade-plan.md`
-
 ---
 
 ## Reporting Issues

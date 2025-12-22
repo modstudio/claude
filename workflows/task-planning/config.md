@@ -11,14 +11,14 @@
 **IMPORTANT**: The `.task-docs` folder is PROJECT-LOCAL and stored in the project directory.
 
 ```bash
-# Location
-TASK_DOCS_DIR="./.task-docs"  # Or use: $(get_task_docs_dir)
+# Get task docs directory using helper function
+TASK_DOCS_DIR=$(get_task_docs_dir)
 
 # Usage examples
-TASK_FOLDER="./.task-docs/${ISSUE_KEY}-${slug}"
+TASK_FOLDER="${TASK_DOCS_DIR}/${ISSUE_KEY}-${slug}"
 
 # Search command
-find "./.task-docs" -type d -name "${ISSUE_KEY}*"
+find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*"
 ```
 
 ### Why Project-Local?
@@ -87,12 +87,9 @@ Use the helper function for portability:
 TASK_DOCS_DIR=$(get_task_docs_dir)
 find "$TASK_DOCS_DIR" -type d -name "STAR-*"
 
-# Also acceptable ✅
-find .task-docs -type d -name "AB-*"
-
 # Bad ❌
 find ~/.task-docs -type d -name "STAR-*"         # Wrong location
-find /Users/shmuel/.task-docs -type d -name "*"  # Hardcoded path
+find /path/to/project/.task-docs -type d -name "*"  # Hardcoded path
 ```
 
 ---

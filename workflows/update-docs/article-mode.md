@@ -229,7 +229,7 @@ OUTPUT_FILE="$DOCS_FOLDER/{article-name}.md"
 **If no task context (standalone):**
 ```bash
 # Create standalone docs-updates folder
-STANDALONE_FOLDER=".wip/docs-updates-$(date +%Y%m%d)"
+STANDALONE_FOLDER="${TASK_DOCS_DIR}/docs-updates-$(date +%Y%m%d)"
 mkdir -p "$STANDALONE_FOLDER"
 OUTPUT_FILE="$STANDALONE_FOLDER/{article-name}.md"
 ```
@@ -381,7 +381,7 @@ When no task context and user just wants to fix docs:
 
 ```bash
 # Date-stamped folder for ad-hoc updates
-STANDALONE_FOLDER=".wip/docs-updates-$(date +%Y%m%d)"
+STANDALONE_FOLDER="${TASK_DOCS_DIR}/docs-updates-$(date +%Y%m%d)"
 mkdir -p "$STANDALONE_FOLDER"
 ```
 
@@ -399,7 +399,7 @@ mkdir -p "$STANDALONE_FOLDER"
 2. **{Article 2}** - {changes summary}
 
 ## Output Location
-All updated articles are in: `.wip/docs-updates-{date}/`
+All updated articles are in: `${TASK_DOCS_DIR}/docs-updates-{date}/`
 ```
 
 ---
