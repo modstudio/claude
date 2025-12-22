@@ -109,4 +109,25 @@ After auto-fixes, run linter in check mode to verify:
 
 ---
 
+## Handling Remaining Failures
+
+**If linter issues remain after auto-fix:**
+
+Do NOT:
+- Add inline ignores (`// @ts-ignore`, `// phpcs:ignore`, etc.) without user approval
+- Modify linter config exceptions without user approval
+- Simply suppress errors to make checks pass
+
+Instead, invoke the linter failure handling module:
+
+{{MODULE: ~/.claude/modules/code-review/linter-failure-handling.md}}
+
+This ensures:
+1. Root cause analysis of each failure
+2. Best practice solutions based on tech stack
+3. User approval for any suppressions
+4. Process improvement over time
+
+---
+
 **End of Module**

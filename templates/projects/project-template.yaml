@@ -180,15 +180,37 @@ code_quality:
   linter:
     command: "php ./vendor/bin/pint"
     config: ".pint.json"
-  
+
   # Static analysis
   static_analysis:
     command: "php ./vendor/bin/phpstan analyse"
     config: "phpstan.neon"
-  
+
   # Code formatting
   formatter:
     command: "php ./vendor/bin/pint"
+
+# ============================================================================
+# LINTING PREFERENCES (Team Decision)
+# ============================================================================
+
+linting:
+  # Whether to allow generating baseline files for gradual strictness adoption
+  # Baselines track existing issues separately, enforcing rules on new code only
+  # Team decision: useful for legacy codebases, some teams prefer fixing all issues
+  allow_baselines: false
+
+  # Whether to allow inline ignore comments (e.g., // @ts-ignore, // phpcs:ignore)
+  # If false, issues must be fixed via code changes or config adjustments
+  allow_inline_ignores: false
+
+  # Prefer config-level rule adjustments over inline suppressions
+  # When true, recommend adjusting rule configs rather than adding inline ignores
+  prefer_config_over_inline: true
+
+  # Require documented justification for any rule exception
+  # When true, all suppressions must include a comment explaining why
+  require_justification: true
 
 # ============================================================================
 # PROJECT-SPECIFIC SETTINGS

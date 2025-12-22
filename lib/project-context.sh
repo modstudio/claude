@@ -47,10 +47,12 @@ yaml_get_simple() {
     # Get indentation level
     local line_indent=$(echo "$line" | sed 's/^\([[:space:]]*\).*/\1/' | wc -c)
 
-    # Check if this is a key-value pair
-    if [[ "$line" =~ ^[[:space:]]*([a-zA-Z_][a-zA-Z0-9_]*):([[:space:]]*)(.*)$ ]]; then
-      local key="${BASH_REMATCH[1]}"
-      local val="${BASH_REMATCH[3]}"
+    # Check if this is a key-value pair (contains :)
+    if [[ "$line" == *":"* ]]; then
+      # Extract key (everything before first :, trimmed)
+      local key=$(echo "$line" | sed 's/^[[:space:]]*//' | cut -d':' -f1)
+      # Extract value (everything after first :, trimmed)
+      local val=$(echo "$line" | cut -d':' -f2- | sed 's/^[[:space:]]*//')
 
       # Build current path
       if [[ $line_indent -eq 0 ]]; then
@@ -201,6 +203,12 @@ load_project_context() {
   # Export YouTrack-specific config (CRITICAL: MCP tools need project_id, NOT project_key)
   export PROJECT_YOUTRACK_PROJECT_ID=$(yaml_get "$yaml_file" "mcp_tools.youtrack.project_id" || echo "")
   export PROJECT_YOUTRACK_PROJECT_KEY=$(yaml_get "$yaml_file" "issue_tracking.project_key" || echo "")
+
+  # Export linting preferences (team decisions per project)
+  export PROJECT_LINTING_ALLOW_BASELINES=$(yaml_get "$yaml_file" "linting.allow_baselines" || echo "false")
+  export PROJECT_LINTING_ALLOW_INLINE_IGNORES=$(yaml_get "$yaml_file" "linting.allow_inline_ignores" || echo "false")
+  export PROJECT_LINTING_PREFER_CONFIG=$(yaml_get "$yaml_file" "linting.prefer_config_over_inline" || echo "true")
+  export PROJECT_LINTING_REQUIRE_JUSTIFICATION=$(yaml_get "$yaml_file" "linting.require_justification" || echo "true")
 
   log_success "Loaded project context: $PROJECT_NAME ($PROJECT_TYPE)"
   log_debug "  Issue pattern: $PROJECT_ISSUE_PATTERN"
