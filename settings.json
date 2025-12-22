@@ -1,5 +1,4 @@
 {
-  "alwaysThinkingEnabled": true,
   "permissions": {
     "allow": [
       "WebFetch",
@@ -51,5 +50,9 @@
       "Bash(git reset:*)",
       "Bash(rm:*)"
     ]
+  },
+  "alwaysThinkingEnabled": true,
+  "enabledPlugins": {
+    "php-lsp@claude-plugins-official": true
   }
 }
