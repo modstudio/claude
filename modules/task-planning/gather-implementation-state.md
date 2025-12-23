@@ -16,31 +16,53 @@ First step of In Progress Mode - gathering facts about what has been implemented
 
 ---
 
-## Instructions
+## ⚠️ MANDATORY: Run Detection Script FIRST
 
-### Step 1: Get Branch Information
+**Before running any individual git commands, you MUST run:**
 
 ```bash
-# Current branch
-CURRENT_BRANCH=$(git branch --show-current)
+~/.claude/lib/detect-mode.sh --pretty
+```
 
+This gives you the basic context (branch, issue key, task folder, commits ahead, uncommitted count).
+
+**Verify you see this output format:**
+```
+Mode Detection Results
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mode:         {mode}
+Issue Key:    {key or none}
+Branch:       {branch}
+Task Folder:  {path or none}   ← Shows if docs exist!
+Git State:
+  Commits ahead: {N}
+  Uncommitted:   {N}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Only proceed after running the script and confirming the output.**
+
+---
+
+## Instructions
+
+### Step 1: Run Detection Script (MANDATORY)
+
+```bash
+~/.claude/lib/detect-mode.sh --pretty
+```
+
+This provides: Branch, Issue Key, Task Folder, Commits ahead, Uncommitted count.
+
+### Step 2: Get Additional Details (after script)
+
+Once you have the base context from the script, get additional details:
+
+```bash
 # Base branch (usually develop or main)
 BASE_BRANCH="${PROJECT_BASE_BRANCH:-develop}"
 
-# Extract issue key from branch
-ISSUE_KEY=$(echo "$CURRENT_BRANCH" | grep -oE '[A-Z]+-[0-9]+' | head -1)
-```
-
-### Step 2: Count Commits and Changes
-
-```bash
-# Commits ahead of base branch
-COMMITS_AHEAD=$(git rev-list --count ${BASE_BRANCH}..HEAD 2>/dev/null || echo "0")
-
-# Uncommitted changes
-UNCOMMITTED=$(git status --porcelain | wc -l | tr -d ' ')
-
-# Staged changes
+# Staged changes count
 STAGED=$(git diff --cached --name-only | wc -l | tr -d ' ')
 ```
 
@@ -59,19 +81,6 @@ git diff --stat ${BASE_BRANCH}..HEAD 2>/dev/null
 ```bash
 # List commits on this branch (not on base)
 git log ${BASE_BRANCH}..HEAD --oneline --no-merges
-```
-
-### Step 5: Check for Task Docs Folder
-
-```bash
-# Find task docs folder
-TASK_FOLDER=$(find "${TASK_DOCS_DIR:-.task-docs}" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
-
-if [ -n "$TASK_FOLDER" ]; then
-  FOLDER_EXISTS="yes"
-else
-  FOLDER_EXISTS="no"
-fi
 ```
 
 ---

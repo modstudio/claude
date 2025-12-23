@@ -11,63 +11,72 @@ READ-ONLY
 
 ---
 
-## When to Use
-- At workflow start, before asking user to choose mode
-- Must complete in < 5 seconds
-- Does NOT read file contents or fetch from external systems
+## ⚠️ MANDATORY: Run Detection Script
+
+**DO NOT run individual git commands.** You MUST run the detection script:
+
+```bash
+~/.claude/lib/detect-mode.sh --pretty
+```
+
+This is NOT optional. Do NOT proceed until you have run this script and displayed its output.
 
 ---
 
-## What to Gather
+## ✓ Checkpoint: Verify Script Output
 
-```bash
-# 1. Current branch
-CURRENT_BRANCH=$(git branch --show-current)
+After running the script, you MUST see output like this:
 
-# 2. Issue key (extract from branch)
-ISSUE_KEY=$(echo "$CURRENT_BRANCH" | grep -oE "$PROJECT_ISSUE_REGEX")
-
-# 3. Task folder exists? (check only, don't read)
-TASK_FOLDER=$(ls -d "${TASK_DOCS_DIR}/${ISSUE_KEY}"* 2>/dev/null | head -1)
-FOLDER_EXISTS=$([ -n "$TASK_FOLDER" ] && echo "yes" || echo "no")
-
-# 4. Git state counts only
-UNCOMMITTED=$(git status --porcelain | wc -l | tr -d ' ')
-COMMITS_AHEAD=$(git rev-list --count ${PROJECT_BASE_BRANCH}..HEAD 2>/dev/null || echo "0")
 ```
+Mode Detection Results
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mode:         {default|in_progress}
+Confidence:   {high|medium|low}
+
+Issue Key:    {ISSUE_KEY or none}
+Branch:       {branch name}
+Task Folder:  {path or none}    ← CRITICAL: Shows if docs exist!
+
+Git State:
+  Commits ahead: {N}
+  Uncommitted:   {N}
+
+Reason:       {explanation}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**If you don't see this output format, STOP and report the error.**
+
+---
+
+## ✓ Verify Docs Status
+
+After running the script, explicitly confirm:
+
+| Check | Your Result |
+|-------|-------------|
+| Task Folder | ✓ Found at `{path}` / ✗ Not found |
+| Mode | `{mode}` |
+| Issue Key | `{key}` or none |
+
+**Only proceed to next phase after confirming these values.**
 
 ---
 
 ## What NOT to Do
 
+- ❌ **DO NOT run raw git commands** (git branch, git status, git diff, etc.)
+- ❌ Don't bypass the script
 - ❌ Don't read file contents
-- ❌ Don't fetch from YouTrack
-- ❌ Don't search codebase
-- ❌ Don't read task docs contents
-- ❌ Don't run expensive operations
+- ❌ Don't fetch from YouTrack yet
+- ❌ Don't search codebase yet
+- ❌ Don't proceed without showing script output
 
 ---
 
-## Output Format
-
-```markdown
-## Quick Scan
-
-| Check | Result |
-|-------|--------|
-| Branch | `{CURRENT_BRANCH}` |
-| Issue Key | {ISSUE_KEY or "none"} |
-| Task Docs | {✓ Found / ✗ Not found} |
-| Uncommitted | {UNCOMMITTED} files |
-| Commits Ahead | {COMMITS_AHEAD} |
-
-**Suggested Mode**: {mode}
-**Reason**: {brief explanation}
-```
-
----
-
-## Mode Suggestion Logic
+## Mode Suggestion Logic (for reference)
 
 Check conditions in order (first match wins):
 
@@ -89,11 +98,12 @@ Check conditions in order (first match wins):
 
 ---
 
-## Outputs
-- `CURRENT_BRANCH`: Branch name
-- `ISSUE_KEY`: Extracted issue key or empty
-- `FOLDER_EXISTS`: yes/no
-- `TASK_FOLDER`: Path if found
-- `UNCOMMITTED`: Count
+## Outputs (from script)
+- `MODE`: Suggested workflow mode
+- `ISSUE_KEY`: Extracted issue key or none
+- `BRANCH`: Current branch name
+- `TASK_FOLDER`: Path if found, none otherwise
 - `COMMITS_AHEAD`: Count
-- `CONTEXT_SIGNAL`: GREENFIELD / NEW_TASK / EXISTING_TASK / IN_PROGRESS
+- `UNCOMMITTED`: Count
+- `CONFIDENCE`: Detection confidence
+- `REASON`: Explanation

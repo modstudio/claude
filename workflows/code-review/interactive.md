@@ -16,7 +16,7 @@ Each step ends with a **STOP** for user approval (Single Step Rule).
 
 ---
 
-## Phase 0: Project Context
+## Phase 0: Project Context Detection
 
 {{MODULE: ~/.claude/modules/shared/quick-context.md}}
 

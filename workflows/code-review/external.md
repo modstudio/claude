@@ -18,19 +18,37 @@ Evaluate an external code review and independently determine what changes are ac
 ---
 
 ## Mode
-READ-ONLY (analysis) + WRITE (to review log only)
+READ-ONLY (analysis) + WRITE (to review files)
 
 ---
 
-## Phase 0: Project Context
+## Output Files
+
+**This workflow creates TWO files:**
+
+1. **Session Review File** (NEW - for interface display):
+   - Location: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{YYYYMMDD-HHMMSS}.md`
+   - Purpose: Displays evaluation in interface, easy to read
+   - Contains: Summary + detailed analysis for THIS review session
+
+2. **Cumulative Review Log** (APPEND - for circular review prevention):
+   - Location: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
+   - Purpose: Historical record, prevents re-evaluating same suggestions
+   - Contains: All past reviews with decisions and reasoning
+
+**Why two files:**
+- Session file: Clean display, easy reference for current review
+- Cumulative log: Prevents circular review by tracking ALL past decisions
+
+---
+
+## Phase 0: Project Context Detection
 
 {{MODULE: ~/.claude/modules/shared/quick-context.md}}
 
 **Severity Levels:** {{MODULE: ~/.claude/modules/code-review/severity-levels.md}}
 
 **Citation Format:** {{MODULE: ~/.claude/modules/code-review/citation-standards.md}}
-
-**Storage:** Review log at `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
 
 ---
 
@@ -94,24 +112,48 @@ TodoWrite({
 - Categorize by severity
 - Note reviewer source/tool
 
-### 4.2 Load Previous Review History
+### 4.2 Load Previous Review History (CIRCULAR REVIEW PREVENTION)
+
+**CRITICAL: Read cumulative log BEFORE evaluating new suggestions**
 
 ```bash
 TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
 REVIEW_FILE="$TASK_FOLDER/logs/review.md"
 
 if [ -f "$REVIEW_FILE" ]; then
-  echo "Found previous evaluations"
+  echo "=== PREVIOUS REVIEW DECISIONS ==="
   cat "$REVIEW_FILE"
+  echo "=== END PREVIOUS DECISIONS ==="
 fi
 ```
 
-### 4.3 Check for Duplicates
+### 4.3 Check for Duplicates (MANDATORY)
 
-Compare new suggestions with past evaluations:
-- If duplicate: reference previous decision
-- If context changed: re-evaluate
-- If past decision wrong: document learning
+**For EACH new suggestion, check the cumulative log:**
+
+| Check | Action |
+|-------|--------|
+| Same suggestion, same context | **SKIP** - reference past decision |
+| Same suggestion, different context | **RE-EVALUATE** - note context change |
+| Similar suggestion | **REFERENCE** - maintain consistency |
+| New suggestion | **EVALUATE** - proceed normally |
+
+**If duplicate found, output:**
+```markdown
+### Suggestion #N: {Title}
+
+**Status:** DUPLICATE - See Review #{X} from {date}
+
+**Past Decision:** {ACCEPT/MODIFY/REJECT}
+**Past Reasoning:** {brief quote from past review}
+
+**Current Action:** Skipping - past decision still applies
+```
+
+**This prevents:**
+- Re-debating already-decided issues
+- Inconsistent decisions across reviews
+- Wasted evaluation time on resolved topics
 
 ---
 
@@ -145,59 +187,21 @@ For EACH suggestion from external review:
 
 ## Step 6: Generate Evaluation Report
 
-```markdown
-# External Review Evaluation for {ISSUE_KEY}
+**Create NEW session review file for interface display:**
 
-**Date:** {timestamp}
-**External Reviewer:** {source}
-**Evaluator:** Claude Code
-
-## Summary
-- Suggestions Analyzed: {count}
-- ACCEPTED: {count}
-- MODIFIED: {count}
-- REJECTED: {count}
-
-## Analysis Results
-
-### Suggestion #N: {Title}
-
-**External Review Says:**
-> {quote}
-
-**My Analysis:**
-- Issue Verification: CONFIRMED / PARTIALLY VALID / NOT AN ISSUE
-- Violation: [STANDARD §section] (if applicable)
-- Impact: [description]
-
-**Final Decision:** ACCEPT / MODIFY / REJECT
-
-**Reasoning:** {explanation}
-
-{If ACCEPT: code change needed}
-{If MODIFY: alternative solution}
-{If REJECT: why not needed}
-```
+{{MODULE: ~/.claude/modules/code-review/session-review-file.md}}
 
 **STOP - Review report before finalizing**
 
 ---
 
-## Step 7: Record Evaluation
+## Step 7: Record to Cumulative Log (Circular Review Prevention)
 
-**Write to permanent record:**
+**IMPORTANT: This prevents re-evaluating the same suggestions**
 
-Location: `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
+{{MODULE: ~/.claude/modules/code-review/append-review-log.md}}
 
-Append new review section with:
-- Date/time
-- External reviewer source
-- Suggestions analyzed
-- Accept/Modify/Reject counts
-- Detailed decisions
-- Lessons learned
-
-**STOP - Confirm record written**
+**STOP - Confirm record appended to cumulative log**
 
 ---
 

@@ -13,7 +13,7 @@ READ-ONLY (review phases) WRITE-ENABLED (auto-fix phase only)
 
 ---
 
-## Phase 0: Project Context
+## Phase 0: Project Context Detection
 
 {{MODULE: ~/.claude/modules/shared/quick-context.md}}
 

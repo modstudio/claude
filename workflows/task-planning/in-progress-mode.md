@@ -18,11 +18,12 @@
 
 ```
 1. gather-implementation-state → commits, changed files, git state
-2. read-existing-docs → current documentation state
-3. compare-and-sync → identify discrepancies
-4. present-findings → show user what's misaligned
-5. update-docs → sync docs with reality (user confirms)
-6. present-updated-state → final reconciled state
+2. ensure-docs-structure → verify/create all docs exist
+3. read-existing-docs → current documentation state
+4. compare-and-sync → identify discrepancies
+5. present-findings → show user what's misaligned
+6. update-docs → sync docs with reality (user confirms)
+7. present-updated-state → final reconciled state
 ```
 
 **Key difference from Default Mode:**
@@ -83,24 +84,23 @@
 
 ---
 
-## Step 2: Read Existing Docs
+## Step 2: Verify/Create Docs Structure
+
+**MANDATORY: Ensure complete docs structure exists before reading**
+
+{{MODULE: ~/.claude/modules/task-planning/ensure-docs-structure.md}}
+
+---
+
+## Step 3: Read Existing Docs
 
 {{MODULE: ~/.claude/modules/task-planning/resume-existing-task.md}}
-
-**If docs folder exists:**
-- Read all docs
-- Note last updated dates
-- Assess completeness
-
-**If no docs folder:**
-- Create folder and templates
-- Note this is a "code-first" situation
 
 **Output:** `DOCS_STATE` summary
 
 ---
 
-## Step 3: Compare and Sync
+## Step 4: Compare and Sync
 
 {{MODULE: ~/.claude/modules/task-planning/compare-and-sync.md}}
 
@@ -120,7 +120,7 @@
 
 ---
 
-## Step 4: Present Findings
+## Step 5: Present Findings
 
 **Present to user:**
 
@@ -156,7 +156,7 @@
 
 ---
 
-## Step 5: Update Docs (User Confirms)
+## Step 6: Update Docs (User Confirms)
 
 {{MODULE: ~/.claude/modules/shared/approval-gate.md}}
 
@@ -172,7 +172,7 @@
 
 ---
 
-## Step 6: Present Updated State
+## Step 7: Present Updated State
 
 ```markdown
 ## Reconciliation Complete
@@ -198,6 +198,7 @@
 TodoWrite({
   todos: [
     {content: "Gather implementation state", status: "in_progress", activeForm: "Gathering state"},
+    {content: "Verify/create task docs structure", status: "pending", activeForm: "Verifying docs structure"},
     {content: "Read existing documentation", status: "pending", activeForm: "Reading docs"},
     {content: "Compare and identify discrepancies", status: "pending", activeForm: "Comparing"},
     {content: "Present findings to user", status: "pending", activeForm: "Presenting findings"},
@@ -232,6 +233,7 @@ Primary goal of In Progress mode is doc sync, not code review.
 
 **Modules used:**
 - `task-planning/gather-implementation-state.md`
+- `task-planning/ensure-docs-structure.md`
 - `task-planning/resume-existing-task.md`
 - `task-planning/compare-and-sync.md`
 - `task-planning/sync-docs-with-implementation.md`

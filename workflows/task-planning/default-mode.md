@@ -63,11 +63,6 @@
 
 {{MODULE: ~/.claude/modules/shared/quick-context.md}}
 
-**Outputs:**
-- `ISSUE_KEY` - extracted from branch or empty
-- `FOLDER_EXISTS` - yes/no
-- `TASK_FOLDER` - path if found
-
 ---
 
 ## Step 2: Get Context (BRANCH)
