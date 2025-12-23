@@ -188,6 +188,8 @@ load_project_context() {
   local task_docs_raw=$(yaml_get "$yaml_file" "storage.task_docs_dir" || echo "./.task-docs")
   # Expand ~ to $HOME
   export PROJECT_TASK_DOCS_DIR="${task_docs_raw/#\~/$HOME}"
+  # Also export TASK_DOCS_DIR for convenience (used by task-docs-utils.sh)
+  export TASK_DOCS_DIR="$PROJECT_TASK_DOCS_DIR"
 
   # Export test commands
   export PROJECT_TEST_CMD_ALL=$(yaml_get "$yaml_file" "test_commands.all" || echo "")

@@ -7,7 +7,7 @@ You are helping the user with task planning following the Task Planning Workflow
 ## Documentation
 
 **Workflows:** `~/.claude/workflows/task-planning/`
-- `default-mode.md` - Planning workflow (handles both YouTrack and greenfield scenarios)
+- `default-mode.md` - Planning workflow (handles both existing tasks and new tasks)
 - `in-progress-mode.md` - Reconciliation workflow (sync docs with implementation reality)
 
 **Modules:** `~/.claude/modules/`
@@ -77,40 +77,75 @@ Note: First todo is already "completed" because you ran detect-mode.sh in Step 1
 
 ---
 
-### Step 3: Confirm Planning Mode
+### Step 3: Confirm Planning Path
 
-**MANDATORY: Always ask user to confirm mode.**
+**MANDATORY: Always show all three options. Add "(Recommended)" based on detection.**
 
 ```javascript
 AskUserQuestion({
   questions: [{
-    question: "Which planning mode would you like to use?",
-    header: "Planning Mode",
+    question: "What's your starting point?",
+    header: "Planning Path",
     multiSelect: false,
     options: [
-      {label: "Default (Recommended)", description: "Plan a task - supports YouTrack issues, greenfield, and resume scenarios"},
-      {label: "In Progress", description: "Reconciliation - sync existing docs with implementation reality"}
+      {label: "Existing task", description: "I have an issue key or task docs folder"},
+      {label: "New task", description: "Brand new - no issue or docs yet"},
+      {label: "In Progress", description: "Already implementing - sync docs with code"}
     ]
   }]
 })
 ```
 
-Add "(Recommended)" to the suggested mode based on context scan.
+**Recommendation logic:**
+
+| Detection Result | Recommended Option |
+|------------------|-------------------|
+| Commits ahead > 0 OR uncommitted > 0 | In Progress |
+| ISSUE_KEY found OR TASK_FOLDER exists | Existing task |
+| No issue key, no folder, no changes | New task |
 
 ---
 
-### Step 4: Execute Selected Mode
+### Step 3b: Get Task Reference (if "Existing task" selected)
 
-**Based on user selection, load the workflow controller:**
+**Only if user selected "Existing task":**
 
-#### Default Mode (Planning)
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "Provide the issue key or task folder:",
+    header: "Task Reference",
+    multiSelect: false,
+    options: [
+      {label: `${ISSUE_KEY}`, description: "Detected from current branch"},  // Only show if detected
+      {label: "Enter different key", description: "Specify another issue key"}
+    ]
+  }]
+})
+```
+
+If detect-mode found an ISSUE_KEY, show it as first option. Otherwise only show "Enter different key".
+
+---
+
+### Step 4: Execute Selected Path
+
+**Map user selection to workflow:**
+
+| Selection | ISSUE_KEY | Workflow |
+|-----------|-----------|----------|
+| Existing task | From Step 3b (detected or user-provided) | `default-mode.md` |
+| New task | `none` (get context from user) | `default-mode.md` → get-user-context |
+| In Progress | From detection | `in-progress-mode.md` |
+
+---
+
+#### Existing Task / New Task → Default Mode
 → **Controller:** `~/.claude/workflows/task-planning/default-mode.md`
 
-Handles all planning scenarios with two branch points:
-
 **Branch 1: Context Source**
-- Has issue key → fetch from YouTrack
-- No issue key → get context from user (greenfield)
+- Existing task (has issue key) → fetch from YouTrack
+- New task (no issue key) → get context from user
 
 **Branch 2: Docs State**
 - Folder exists → resume existing task
@@ -119,7 +154,6 @@ Handles all planning scenarios with two branch points:
 **Key modules used:**
 | Step | Module |
 |------|--------|
-| Quick context | `modules/shared/quick-context.md` |
 | Fetch issue | `modules/shared/youtrack-fetch-issue.md` |
 | Get user context | `modules/task-planning/get-user-context.md` |
 | Resume existing | `modules/task-planning/resume-existing-task.md` |
@@ -127,7 +161,9 @@ Handles all planning scenarios with two branch points:
 | Planning core | `modules/task-planning/planning-core.md` |
 | Approval gate | `modules/shared/approval-gate.md` |
 
-#### In Progress Mode (Reconciliation)
+---
+
+#### In Progress → Reconciliation Mode
 → **Controller:** `~/.claude/workflows/task-planning/in-progress-mode.md`
 
 Syncs documentation with implementation reality (code-first scenarios).

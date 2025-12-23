@@ -12,6 +12,19 @@ fi
 source "$SCRIPT_DIR/common.sh"
 
 # ============================================================================
+# PROJECT CONTEXT AUTO-LOADING
+# ============================================================================
+
+# Auto-load project context if PROJECT_TASK_DOCS_DIR isn't already set
+# This ensures task-docs-utils.sh works correctly when sourced directly
+if [ -z "${PROJECT_TASK_DOCS_DIR:-}" ]; then
+  if [ -f "$SCRIPT_DIR/project-context.sh" ]; then
+    source "$SCRIPT_DIR/project-context.sh"
+    load_project_context 2>/dev/null || true
+  fi
+fi
+
+# ============================================================================
 # CONFIGURATION
 # ============================================================================
 
