@@ -55,7 +55,7 @@ yaml_get_simple() {
       local val=$(echo "$line" | cut -d':' -f2- | sed 's/^[[:space:]]*//')
 
       # Build current path
-      if [[ $line_indent -eq 0 ]]; then
+      if [[ $line_indent -le 1 ]]; then
         current_section="$key"
       elif [[ "${PARTS[0]}" == "$current_section" ]] && [[ "${PARTS[1]}" == "$key" ]]; then
         # Found the key we're looking for

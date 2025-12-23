@@ -16,44 +16,64 @@ You are helping the user with task planning following the Task Planning Workflow
 
 ---
 
+## ⛔ CRITICAL: Your FIRST Action
+
+**Before ANYTHING else - before TodoWrite, before ANY git command - run this:**
+
+```bash
+~/.claude/lib/detect-mode.sh --pretty
+```
+
+**DO NOT run `git branch`, `git status`, `git diff`, or ANY other git commands.**
+**DO NOT create TodoWrite until AFTER you have run the detect-mode script.**
+
+The script output will show:
+- Mode (default or in_progress)
+- Branch name
+- Issue key
+- **Task Folder** (shows if docs exist!)
+- Git state (commits ahead, uncommitted)
+
+**Only proceed after you see the formatted output from the script.**
+
+---
+
 ## Execution Steps
 
-### Step 1: Initialize Progress Tracking
+### Step 1: Run Detection Script (MANDATORY FIRST ACTION)
+
+**Your very first action must be:**
+
+```bash
+~/.claude/lib/detect-mode.sh --pretty
+```
+
+**After running, confirm these values from the output:**
+
+| Field | Value |
+|-------|-------|
+| Mode | {from script} |
+| Issue Key | {from script} |
+| Task Folder | {path or "none"} |
+| Docs Exist | ✓ Yes / ✗ No |
+
+---
+
+### Step 2: Initialize Progress Tracking
+
+**Now create todo list:**
 
 ```javascript
 TodoWrite({
   todos: [
-    {content: "Detect context and suggest planning mode", status: "in_progress", activeForm: "Detecting context"},
+    {content: "Detect context and suggest planning mode", status: "completed", activeForm: "Context detected"},
     {content: "Confirm planning mode with user", status: "pending", activeForm: "Confirming planning mode"},
     {content: "Execute selected planning workflow", status: "pending", activeForm: "Executing planning workflow"}
   ]
 })
 ```
 
----
-
-### Step 2: Quick Context Scan
-
-→ **Module:** `~/.claude/modules/shared/quick-context.md`
-
-Run quick detection:
-```bash
-~/.claude/lib/bin/detect-mode
-```
-
-Present results:
-```markdown
-## Quick Scan
-
-| Check | Result |
-|-------|--------|
-| Branch | `{branch}` |
-| Issue Key | {key or none} |
-| Task Docs | ✓ Found / ✗ Not found |
-| Uncommitted | {count} files |
-
-**Suggested Mode**: [Default / In Progress]
-```
+Note: First todo is already "completed" because you ran detect-mode.sh in Step 1.
 
 ---
 

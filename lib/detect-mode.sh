@@ -14,6 +14,11 @@ fi
 source "$SCRIPT_DIR/common.sh"
 source "$SCRIPT_DIR/git-utils.sh"
 source "$SCRIPT_DIR/issue-utils.sh"
+source "$SCRIPT_DIR/project-context.sh"
+
+# Load project context to get correct TASK_DOCS_DIR (must be before sourcing task-docs-utils.sh)
+load_project_context 2>/dev/null || true
+
 source "$SCRIPT_DIR/task-docs-utils.sh"
 
 # ============================================================================
