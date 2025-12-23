@@ -55,7 +55,7 @@ git diff --stat ${PROJECT_BASE_BRANCH}..HEAD
 # Read every file in TASK_FOLDER
 ```
 
-### For Default Mode (Greenfield Scenario)
+### For Default Mode (New Task)
 
 When no issue key is available, gather from user:
 - Task overview

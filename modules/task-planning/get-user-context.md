@@ -1,7 +1,7 @@
 # Module: get-user-context
 
 ## Purpose
-Get task context directly from user when no issue key exists (greenfield scenario).
+Get task context directly from user when no issue key exists (new task).
 
 ## Scope
 TASK-PLANNING specific

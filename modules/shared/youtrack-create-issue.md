@@ -4,7 +4,7 @@
 Create a new issue in YouTrack.
 
 ## Scope
-SHARED - Used by: task-planning (greenfield), other workflows
+SHARED - Used by: task-planning (new task), other workflows
 
 ## Mode
 WRITE-ENABLED

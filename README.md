@@ -54,7 +54,7 @@ Reference docs: workflows/name/README.md
 │   │
 │   ├── task-planning/     # Task planning workflows
 │   │   ├── README.md              # Reference documentation
-│   │   ├── default-mode.md        # Planning workflow (YouTrack + greenfield)
+│   │   ├── default-mode.md        # Planning workflow (existing + new tasks)
 │   │   ├── in-progress-mode.md    # Reconciliation workflow
 │   │   └── quick-reference.md     # Quick lookup guide
 │   │
@@ -235,7 +235,7 @@ Multi-mode task planning with YouTrack integration and automatic project detecti
    - Loads standards, test commands, issue patterns
 
 2. **Auto-Detect Planning Mode:**
-   - Default - Planning workflow (handles YouTrack issues and greenfield scenarios)
+   - Default - Planning workflow (handles existing tasks and new tasks)
    - In Progress - Reconciliation workflow (sync docs with implementation)
 
 3. **Execute Selected Mode Workflow**
@@ -251,7 +251,7 @@ Multi-mode task planning with YouTrack integration and automatic project detecti
 
 **Workflows:**
 - Entry: `commands/plan-task-g.md` (orchestrator)
-- Default (Planning): `workflows/task-planning/default-mode.md` - handles YouTrack and greenfield
+- Default (Planning): `workflows/task-planning/default-mode.md` - handles existing and new tasks
 - In Progress (Reconciliation): `workflows/task-planning/in-progress-mode.md` - sync docs with implementation
 
 **See:** `workflows/task-planning/README.md` for details

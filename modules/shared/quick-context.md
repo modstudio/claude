@@ -84,7 +84,7 @@ Check conditions in order (first match wins):
 |-----------|--------|----------------|
 | Uncommitted changes > 0 | `IN_PROGRESS` | In Progress (reconciliation) |
 | Commits ahead > 0 | `IN_PROGRESS` | In Progress (reconciliation) |
-| No issue key, no folder | `GREENFIELD` | Default (greenfield scenario) |
+| No issue key, no folder | `NEW_TASK` | Default (new task) |
 | Issue key, no folder | `NEW_TASK` | Default (new) |
 | Folder exists, 0 commits, 0 uncommitted | `EXISTING_TASK` | Default (resume) |
 

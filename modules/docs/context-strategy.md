@@ -118,7 +118,7 @@ git log -1 --format=%cr HEAD          # "3 days ago"
 - [ ] Any updates since last sync
 ```
 
-#### Default Mode (Greenfield Scenario) - Full Context
+#### Default Mode (New Task) - Full Context
 ```markdown
 ## Full Context Gathering
 

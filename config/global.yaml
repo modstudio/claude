@@ -25,7 +25,7 @@ workflows:
   task_planning:
     enabled: true
     modes:
-      - default       # Planning (handles YouTrack + greenfield scenarios)
+      - default       # Planning (handles existing + new tasks)
       - in_progress   # Reconciliation (sync docs with implementation)
 
   code_review:

@@ -278,7 +278,7 @@ suggest_planning_mode() {
       echo "in_progress"
       ;;
     clean)
-      # No code changes - suggest planning mode (handles both YouTrack and greenfield)
+      # No code changes - suggest planning mode (handles existing and new tasks)
       echo "default"
       ;;
     *)

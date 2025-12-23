@@ -20,8 +20,8 @@
 1. quick-context → ISSUE_KEY?, FOLDER_EXISTS?
 
 2. [BRANCH: Context source]
-   ├─ ISSUE_KEY exists → youtrack-fetch-issue
-   └─ No issue key     → get-user-context
+   ├─ ISSUE_KEY exists → youtrack-fetch-issue (existing task)
+   └─ No issue key     → get-user-context (new task)
 
 3. [BRANCH: Docs state]
    ├─ FOLDER_EXISTS → resume-existing-task
@@ -74,7 +74,7 @@
 - Fetch issue details from YouTrack
 - Get SUMMARY, DESCRIPTION, related issues
 
-### If NO issue key (greenfield):
+### If NO issue key (new task):
 
 {{MODULE: ~/.claude/modules/task-planning/get-user-context.md}}
 
@@ -174,7 +174,7 @@ TodoWrite({ todos });
 | YES | YES | Resume with YouTrack | fetch → resume → core |
 | YES | NO | New from YouTrack | fetch → create → core |
 | NO | YES | Resume orphan docs | user → resume → core |
-| NO | NO | Pure greenfield | user → create → core |
+| NO | NO | New task | user → create → core |
 
 ---
 

@@ -80,7 +80,7 @@ See `~/.claude/modules/shared/plan-mode-discipline.md` for detailed guidance.
     ├── project-context.md                 ← Multi-project loader
     └── task-planning/
         ├── README.md                      ← This file
-        ├── default-mode.md                ← Planning workflow (YouTrack + greenfield)
+        ├── default-mode.md                ← Planning workflow (existing + new tasks)
         ├── in-progress-mode.md            ← Reconciliation workflow
         └── quick-reference.md             ← Quick lookup guide
 ```
@@ -146,7 +146,7 @@ Step 1: Auto-detect mode (checks branch, .task-docs, commits)
 Step 2: Confirm mode with user
 Step 3: Execute selected mode workflow
     ↓
-  [Default] → default-mode.md (planning - handles YouTrack + greenfield)
+  [Default] → default-mode.md (planning - handles existing + new tasks)
   [In Progress] → in-progress-mode.md (reconciliation)
 ```
 
@@ -166,7 +166,7 @@ Default mode handles all planning scenarios through two branch points:
 | Has Issue Key? | Action |
 |----------------|--------|
 | YES | Fetch from YouTrack → get issue details |
-| NO | Get context from user → greenfield scenario |
+| NO | Get context from user → new task |
 
 **Branch 2: Docs State**
 | Folder Exists? | Action |
@@ -188,7 +188,7 @@ Default mode handles all planning scenarios through two branch points:
 | YES | YES | Resume with YouTrack | fetch → resume → core |
 | YES | NO | New from YouTrack | fetch → create → core |
 | NO | YES | Resume orphan docs | user → resume → core |
-| NO | NO | Pure greenfield | user → create → core |
+| NO | NO | New task | user → create → core |
 
 **Typical scenarios:**
 - User provides issue key (e.g., "Let's work on STAR-2228")
@@ -269,7 +269,7 @@ find "$TASK_DOCS_DIR" -type d -name "{ISSUE_KEY}*"
 
 ### Special Cases
 
-**Greenfield Scenario** (no issue key):
+**New Task** (no issue key):
 - Format: `${TASK_DOCS_DIR}/EXPLORATORY-{short-name}/`
 - Handled by Default Mode with `get-user-context` module
 - Can create YouTrack issue later and rename folder
@@ -341,7 +341,7 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 - **Action**: Continue with Default mode planning
 - **Update**: Plan next work with accurate docs as baseline
 
-### Greenfield → Named Task
+### New Task → Named Task
 - **Trigger**: User creates YouTrack issue for exploratory work
 - **Action**: Rename folder from `EXPLORATORY-*` to `{ISSUE_KEY}-*`
 - **Update**: Link docs to issue, continue with Default mode

@@ -64,7 +64,7 @@ determine_mode() {
   CONFIDENCE="medium"
 
   # Two-mode architecture: Default (planning) vs In Progress (reconciliation)
-  # Default mode handles all planning scenarios including greenfield (no issue key)
+  # Default mode handles both existing tasks and new tasks (no issue key)
 
   if [[ "$COMMITS_AHEAD" -gt 0 ]] || [[ "$UNCOMMITTED" -gt 0 ]]; then
     # Code exists - suggest reconciliation mode
@@ -72,9 +72,9 @@ determine_mode() {
     REASON="Found existing work: $COMMITS_AHEAD commits ahead, $UNCOMMITTED uncommitted changes - consider reconciling docs"
     CONFIDENCE="high"
   elif is_empty "$ISSUE_KEY"; then
-    # No issue key - greenfield scenario, handled by Default mode
+    # No issue key - new task scenario, handled by Default mode
     MODE="default"
-    REASON="No issue key found - Default mode will handle as greenfield scenario"
+    REASON="No issue key found - this appears to be a new task"
     CONFIDENCE="medium"
   elif is_not_empty "$TASK_FOLDER"; then
     MODE="default"
@@ -164,7 +164,7 @@ Options:
   --help, -h      Show this help
 
 Modes:
-  default       Planning workflow - handles YouTrack issues and greenfield scenarios
+  default       Planning workflow - handles existing tasks and new tasks
   in_progress   Reconciliation - sync docs with existing implementation
 
 Output Fields:

@@ -177,7 +177,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - One mode: "Plan this"
 
 **Task Planning Workflow:**
-- **Default Mode**: Planning (YouTrack + greenfield scenarios)
+- **Default Mode**: Planning (existing tasks + new tasks)
 - **In Progress Mode**: Reconciliation (sync docs with implementation)
 - Mode detected automatically or selected explicitly
 

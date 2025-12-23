@@ -43,9 +43,9 @@ determine_mode() {
     REASON="Found existing work: $COMMITS_AHEAD commits ahead, $UNCOMMITTED uncommitted changes - consider reconciling docs"
     CONFIDENCE="high"
   elif [ -z "$ISSUE_KEY" ]; then
-    # No issue key - greenfield scenario, handled by Default mode
+    # No issue key - new task scenario, handled by Default mode
     MODE="default"
-    REASON="No issue key found - Default mode will handle as greenfield scenario"
+    REASON="No issue key found - this appears to be a new task"
     CONFIDENCE="medium"
   elif [ -n "$TASK_FOLDER" ]; then
     MODE="default"
@@ -99,7 +99,7 @@ Options:
   --help, -h    Show this help
 
 Modes:
-  default       Planning workflow - handles YouTrack issues and greenfield scenarios
+  default       Planning workflow - handles existing tasks and new tasks
   in_progress   Reconciliation - sync docs with existing implementation
 
 Output Fields:
