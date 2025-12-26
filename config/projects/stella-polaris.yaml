@@ -1,0 +1,141 @@
+# Stella Polaris Project Configuration
+# MCP server for AI-assisted development workflows
+
+project:
+  name: "Stella Polaris"
+  type: "TypeScript"
+  description: "MCP server for project management, task docs, and semantic search"
+  path: "projects/stella-polaris"
+  git_remote_pattern: "JanusTrade/stella-polaris"
+
+issue_tracking:
+  project_key: "SP"
+  pattern: "SP-####"
+  regex: "SP-[0-9]+"
+  system: "none"
+
+branching:
+  base_branch: "develop"
+  hotfix_base_branch: "master"
+  pattern: "{type}/{ISSUE_KEY}-{description}"
+  types:
+    - feature
+    - enhancement
+    - fix
+    - hotfix
+    - technical
+
+storage:
+  task_docs_dir: "~/Projects/stella-polaris-docs/task-docs"
+
+documentation:
+  # Project docs are in separate repo during planning phase
+  knowledge_base:
+    location: "~/Projects/stella-polaris-docs/dev-docs"
+    source: "git"
+    access_method: "bash"
+
+mcp_tools:
+  laravel_boost:
+    enabled: false
+    commands: []
+
+  youtrack:
+    enabled: false
+    commands: []
+
+  playwright:
+    enabled: true
+    commands:
+      - browser_navigate
+      - browser_screenshot
+      - browser_click
+      - browser_type
+      - browser_console
+      - browser_evaluate
+
+tech_stack:
+  runtime:
+    name: "Bun"
+    roles: "runtime + package manager"
+    escape_hatch: "Node.js + pnpm"
+
+  monorepo:
+    tooling: "Turborepo + Bun workspaces"
+
+  frontend:
+    framework: "Next.js 15"
+    react_version: "19"
+    ui: "shadcn/ui + Tailwind"
+
+  backend:
+    framework: "Hono"
+    api: "tRPC + Zod"
+
+  auth:
+    solution: "Better-Auth (Drizzle adapter)"
+
+  jobs:
+    solution: "Trigger.dev"
+    escape_hatch: "BullMQ"
+
+  database:
+    primary: "PostgreSQL + Drizzle ORM"
+    vectors: "pgvector"
+    cache: "Redis"
+
+  dev_tools:
+    linting: "Biome"
+    git_hooks: "Husky + lint-staged + commitlint"
+    testing: "Vitest (unit) + Playwright (E2E)"
+    logging: "Pino"
+    env: "@t3-oss/env"
+
+  infrastructure:
+    containerization: "Docker"
+    hosting: "Fly.io"
+
+docker:
+  required: true
+  compose_file: "./docker-compose.yml"
+  containers:
+    web: "stella_polaris_web"
+    api: "stella_polaris_api"
+    postgres: "postgres"
+    redis: "redis"
+
+test_commands:
+  unit: "bun test"
+  e2e: "bun test:e2e"
+  all: "bun test && bun test:e2e"
+
+linter_commands:
+  lint: "bun lint"
+  format: "bun format"
+
+notes: |
+  Stella Polaris is an MCP server providing AI-assisted development workflows.
+
+  Key domains:
+  - MCP (tools, resources, protocol handling)
+  - Projects (organizations, projects, tenant settings)
+  - Tasks (task docs, decisions, status tracking)
+  - Docs (documents, chunking, versioning)
+  - Search (vector search, filtering, ranking)
+  - AI (embedding providers: OpenAI, Groq, OpenRouter)
+  - Integrations (GitHub, YouTrack, unfurling)
+
+  Tech Stack:
+  - Runtime: Bun (runtime + package manager)
+  - Monorepo: Turborepo + Bun workspaces
+  - Frontend: Next.js 15 + React 19 + shadcn/ui + Tailwind
+  - Backend: Hono + tRPC + Zod
+  - Auth: Better-Auth (Drizzle adapter)
+  - Jobs: Trigger.dev
+  - Database: PostgreSQL + Drizzle ORM + pgvector
+  - Cache: Redis
+  - Testing: Vitest + Playwright
+  - Linting: Biome + Husky
+  - Infra: Docker + Fly.io
+
+  Current status: Planning phase (SP-0001 complete)

@@ -6,6 +6,32 @@
 
 ---
 
+## ⛔ STOP - MANDATORY FIRST ACTION
+
+**YOU MUST CALL TodoWrite RIGHT NOW before reading any other files or running any commands.**
+
+**Do NOT proceed to "Phase 0" until you have called TodoWrite.**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Quick context scan", status: "in_progress", activeForm: "Scanning context"},
+    {content: "Get context (YouTrack or user)", status: "pending", activeForm: "Getting context"},
+    {content: "Handle docs folder (resume or create)", status: "pending", activeForm: "Handling docs folder"},
+    {content: "Search codebase for patterns", status: "pending", activeForm: "Searching codebase"},
+    {content: "Analyze requirements", status: "pending", activeForm: "Analyzing requirements"},
+    {content: "Technical planning", status: "pending", activeForm: "Planning implementation"},
+    {content: "Present plan for approval", status: "pending", activeForm: "Getting approval"},
+    {content: "Finalize documentation", status: "pending", activeForm: "Finalizing docs"},
+    {content: "Start implementation", status: "pending", activeForm: "Starting implementation"}
+  ]
+})
+```
+
+**⛔ DO NOT CONTINUE READING THIS FILE until TodoWrite has been called.**
+
+---
+
 ## Phase 0: Project Context
 
 {{MODULE: ~/.claude/modules/docs/project-variables.md}}
@@ -122,48 +148,6 @@ Shared planning steps:
 4. **Approval gate**
 5. Finalize documentation
 6. Start implementation
-
----
-
-## 📋 MANDATORY: Initialize Todo List
-
-**At workflow start, create todos based on context:**
-
-```javascript
-// Determine initial todos based on quick-context results
-const todos = [
-  {content: "Quick context scan", status: "in_progress", activeForm: "Scanning context"}
-];
-
-// Add context step based on ISSUE_KEY
-if (ISSUE_KEY) {
-  todos.push({content: "Fetch issue from YouTrack", status: "pending", activeForm: "Fetching issue"});
-} else {
-  todos.push({content: "Get task context from user", status: "pending", activeForm: "Getting context"});
-}
-
-// Add folder step based on FOLDER_EXISTS
-if (FOLDER_EXISTS) {
-  todos.push({content: "Read existing docs and assess", status: "pending", activeForm: "Reading docs"});
-} else {
-  todos.push({content: "Create task folder and templates", status: "pending", activeForm: "Creating folder"});
-}
-
-// Planning core steps (always) - will be updated by planning-core module
-todos.push(
-  {content: "Search codebase for patterns", status: "pending", activeForm: "Searching codebase"},
-  {content: "Analyze requirements", status: "pending", activeForm: "Analyzing requirements"},
-  {content: "Technical planning", status: "pending", activeForm: "Planning implementation"},
-  {content: "Present plan for approval", status: "pending", activeForm: "Getting approval"},
-  {content: "Finalize documentation", status: "pending", activeForm: "Finalizing docs"},
-  {content: "Start implementation", status: "pending", activeForm: "Starting implementation"}
-);
-
-TodoWrite({ todos });
-
-// NOTE: When entering planning-core module, it will call TodoWrite to update
-// the first planning step to "in_progress". This is expected behavior.
-```
 
 ---
 

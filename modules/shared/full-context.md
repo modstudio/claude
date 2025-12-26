@@ -67,33 +67,37 @@ When no issue key is available, gather from user:
 
 ### For Code Review Mode
 
-**Run in parallel:**
+**⛔ YOU MUST EXECUTE ALL OF THESE ACTIONS (run in parallel where possible):**
+
+**Action 1: Run gather-context script**
 ```bash
-# 1. Discover commit range
-git log --all --grep="$ISSUE_KEY" --oneline | head -n 50
-git diff ${PROJECT_BASE_BRANCH}..HEAD --stat
-
-# 2. Get all changes (staged, unstaged, untracked)
-git status --short
-git diff --cached --name-status  # Staged
-git diff --name-status           # Unstaged
-
-# 3. Load task documentation
 ~/.claude/lib/bin/gather-context
+```
+This loads task documentation. Read the output.
 
-# 4. Fetch YouTrack issue (if MCP available)
-mcp__youtrack__get_issue({ issue_id: "$ISSUE_KEY" })
+**Action 2: Get git state (run these in parallel)**
+```bash
+git status --short
+git diff --cached --name-status
+git diff --name-status
+git diff ${PROJECT_BASE_BRANCH}..HEAD --stat
 ```
 
-**Categorize files by type:**
+**Action 3: Fetch YouTrack issue (if MCP available and ISSUE_KEY exists)**
+Use: `mcp__youtrack__get_issue` with issue_id = ISSUE_KEY
+
+**Action 4: Read task docs (if TASK_FOLDER exists)**
+Read all .md files in the task folder, especially:
+- `02-functional-requirements.md` - acceptance criteria
+- `03-implementation-plan.md` - planned files, decisions
+
+**⛔ DO NOT proceed to Step 2 until you have executed ALL actions above.**
+
+**Categorize changed files by type:**
 - Backend: `*.php` in app/, database/
 - Frontend: `*.vue`, `*.js`, `*.ts` in resources/
 - Tests: files in tests/
 - Config/Migrations: config/, database/migrations/
-
-**Extract requirements (if task docs exist):**
-- From `02-functional-requirements.md`: acceptance criteria
-- From `03-implementation-plan.md`: planned files, decisions
 
 ---
 

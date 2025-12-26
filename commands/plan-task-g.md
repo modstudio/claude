@@ -16,16 +16,33 @@ You are helping the user with task planning following the Task Planning Workflow
 
 ---
 
-## ⛔ CRITICAL: Your FIRST Action
+## ⛔ MANDATORY FIRST ACTIONS (DO BOTH)
 
-**Before ANYTHING else - before TodoWrite, before ANY git command - run this:**
+**You MUST do BOTH of these actions IMMEDIATELY - in your FIRST response:**
+
+### Action A: Initialize Progress Tracking
+
+**IMMEDIATELY call TodoWrite:**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Detect context (run detect-mode.sh)", status: "in_progress", activeForm: "Detecting context"},
+    {content: "Confirm planning mode with user", status: "pending", activeForm: "Confirming planning mode"},
+    {content: "Execute selected planning workflow", status: "pending", activeForm: "Executing planning workflow"}
+  ]
+})
+```
+
+### Action B: Run Detection Script
+
+**In the SAME response, run:**
 
 ```bash
 ~/.claude/lib/detect-mode.sh --pretty
 ```
 
-**DO NOT run `git branch`, `git status`, `git diff`, or ANY other git commands.**
-**DO NOT create TodoWrite until AFTER you have run the detect-mode script.**
+**DO NOT run `git branch`, `git status`, `git diff`, or ANY other git commands - the script does this.**
 
 The script output will show:
 - Mode (default or in_progress)
@@ -34,21 +51,13 @@ The script output will show:
 - **Task Folder** (shows if docs exist!)
 - Git state (commits ahead, uncommitted)
 
-**Only proceed after you see the formatted output from the script.**
-
 ---
 
 ## Execution Steps
 
-### Step 1: Run Detection Script (MANDATORY FIRST ACTION)
+### Step 1: Initialize and Detect (DONE ABOVE)
 
-**Your very first action must be:**
-
-```bash
-~/.claude/lib/detect-mode.sh --pretty
-```
-
-**After running, confirm these values from the output:**
+After running both actions above, confirm these values from the output:
 
 | Field | Value |
 |-------|-------|
@@ -57,27 +66,21 @@ The script output will show:
 | Task Folder | {path or "none"} |
 | Docs Exist | ✓ Yes / ✗ No |
 
----
-
-### Step 2: Initialize Progress Tracking
-
-**Now create todo list:**
+**Mark first todo complete, second in_progress:**
 
 ```javascript
 TodoWrite({
   todos: [
-    {content: "Detect context and suggest planning mode", status: "completed", activeForm: "Context detected"},
-    {content: "Confirm planning mode with user", status: "pending", activeForm: "Confirming planning mode"},
+    {content: "Detect context (run detect-mode.sh)", status: "completed", activeForm: "Context detected"},
+    {content: "Confirm planning mode with user", status: "in_progress", activeForm: "Confirming planning mode"},
     {content: "Execute selected planning workflow", status: "pending", activeForm: "Executing planning workflow"}
   ]
 })
 ```
 
-Note: First todo is already "completed" because you ran detect-mode.sh in Step 1.
-
 ---
 
-### Step 3: Confirm Planning Path
+### Step 2: Confirm Planning Path
 
 **MANDATORY: Always show all three options. Add "(Recommended)" based on detection.**
 

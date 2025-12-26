@@ -1,0 +1,129 @@
+# North Star Project Configuration
+# MCP server for AI-assisted development workflows
+
+project:
+  name: "North Star"
+  type: "Laravel"
+  description: "MCP server for project management, task docs, and semantic search"
+  path: "projects/north-star"
+  git_remote_pattern: "JanusTrade/north-star"
+
+issue_tracking:
+  project_key: "NS"
+  pattern: "NS-####"
+  regex: "NS-[0-9]+"
+  system: "none"
+
+branching:
+  base_branch: "develop"
+  hotfix_base_branch: "master"
+  pattern: "{type}/{ISSUE_KEY}-{description}"
+  types:
+    - feature
+    - enhancement
+    - fix
+    - hotfix
+    - technical
+
+storage:
+  task_docs_dir: "~/Projects/north-star-docs/task-docs"
+
+documentation:
+  # Project docs are in separate repo during planning phase
+  knowledge_base:
+    location: "~/Projects/north-star-docs/dev-docs"
+    source: "git"
+    access_method: "bash"
+
+mcp_tools:
+  laravel_boost:
+    enabled: true
+    commands:
+      - application-info
+      - database-schema
+      - database-query
+      - list-routes
+      - tinker
+      - search-docs
+      - read-log-entries
+      - browser-logs
+      - last-error
+      - get-config
+      - list-available-config-keys
+
+  youtrack:
+    enabled: false
+    commands: []
+
+  playwright:
+    enabled: false
+    commands: []
+
+tech_stack:
+  backend:
+    framework: "Laravel"
+    version: "12.x"
+    php_version: "8.5+"
+    database: "PostgreSQL 18+ (pgvector 0.8.1)"
+    architecture: "Domain-Driven Design (DDD)"
+
+  frontend:
+    framework: "None (API/MCP only)"
+    notes: "Web UI planned for future"
+
+  infrastructure:
+    queue: "Redis + Laravel Horizon"
+    vector_store: "pgvector"
+    embedding_provider: "OpenAI text-embedding-3-small"
+
+docker:
+  required: true
+  compose_file: "./docker-compose.yml"
+  containers:
+    php: "north_star_server"
+  user_id: 1000
+
+test_commands:
+  unit: "docker compose exec north_star_server ./vendor/bin/phpunit --testsuite=unit"
+  feature: "docker compose exec north_star_server ./vendor/bin/phpunit --testsuite=feature"
+  all: "docker compose exec north_star_server ./vendor/bin/phpunit"
+  specific_file: "docker compose exec north_star_server ./vendor/bin/phpunit {FILE_PATH}"
+
+linter_commands:
+  pint: "docker compose exec north_star_server ./vendor/bin/pint"
+  phpstan: "docker compose exec north_star_server ./vendor/bin/phpstan analyze"
+
+artisan_commands:
+  tinker: "docker compose exec north_star_server php artisan tinker"
+  migrate: "docker compose exec north_star_server php artisan migrate"
+  mcp_serve: "docker compose exec north_star_server php artisan mcp:serve"
+
+notes: |
+  North Star is an MCP server providing AI-assisted development workflows.
+
+  Key domains:
+  - MCP (tools, resources, protocol handling)
+  - Projects (organizations, projects, tenant settings)
+  - Tasks (task docs, decisions, status tracking)
+  - Docs (documents, chunking, versioning)
+  - Search (vector search, filtering, ranking)
+  - AI (embedding providers: OpenAI, Groq, OpenRouter)
+  - Integrations (GitHub, YouTrack, unfurling)
+  - Infrastructure (app settings, secrets, config)
+
+  MCP tools exposed:
+  - project.load, project.list
+  - task.create, task.get, task.update
+  - docs.search
+  - commit_plan.generate
+  - pr.preview, pr.create
+  - release.start
+  - review.start
+
+  Storage approach:
+  - Customer-owned repos for docs and code
+  - North Star syncs and indexes via webhooks
+  - PostgreSQL + pgvector for semantic search
+  - Task docs stored in database only
+
+  Current status: Planning phase

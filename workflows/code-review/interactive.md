@@ -9,6 +9,33 @@ description: Interactive manual code review with step-by-step approval
 
 ---
 
+## ⛔ STOP - MANDATORY FIRST ACTION
+
+**YOU MUST CALL TodoWrite RIGHT NOW before reading any other files or running any commands.**
+
+**Do NOT proceed to "Mode" or "Phase 0" until you have called TodoWrite.**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Specification check", status: "in_progress", activeForm: "Checking specification"},
+    {content: "Context gathering", status: "pending", activeForm: "Gathering context"},
+    {content: "Pre-flight diff intake & risk flags", status: "pending", activeForm: "Running pre-flight"},
+    {content: "Requirements compliance", status: "pending", activeForm: "Checking requirements"},
+    {content: "Architecture review", status: "pending", activeForm: "Reviewing architecture"},
+    {content: "Code quality review", status: "pending", activeForm: "Reviewing code quality"},
+    {content: "Testing review", status: "pending", activeForm: "Reviewing tests"},
+    {content: "Performance & security review", status: "pending", activeForm: "Reviewing performance/security"},
+    {content: "Documentation & deployment check", status: "pending", activeForm: "Checking documentation"},
+    {content: "Final summary report", status: "pending", activeForm: "Generating report"}
+  ]
+})
+```
+
+**⛔ DO NOT CONTINUE READING THIS FILE until TodoWrite has been called.**
+
+---
+
 ## Mode
 READ-ONLY (review phases)
 
@@ -29,27 +56,6 @@ Each step ends with a **STOP** for user approval (Single Step Rule).
 - Comment on code, not people
 - Classify findings by severity
 - Each step ends with STOP for user approval
-
----
-
-## 📋 MANDATORY: Initialize Todo List
-
-```javascript
-TodoWrite({
-  todos: [
-    {content: "Specification check", status: "in_progress", activeForm: "Checking specification"},
-    {content: "Context gathering", status: "pending", activeForm: "Gathering context"},
-    {content: "Pre-flight diff intake & risk flags", status: "pending", activeForm: "Running pre-flight"},
-    {content: "Requirements compliance", status: "pending", activeForm: "Checking requirements"},
-    {content: "Architecture review", status: "pending", activeForm: "Reviewing architecture"},
-    {content: "Code quality review", status: "pending", activeForm: "Reviewing code quality"},
-    {content: "Testing review", status: "pending", activeForm: "Reviewing tests"},
-    {content: "Performance & security review", status: "pending", activeForm: "Reviewing performance/security"},
-    {content: "Documentation & deployment check", status: "pending", activeForm: "Checking documentation"},
-    {content: "Final summary report", status: "pending", activeForm: "Generating report"}
-  ]
-})
-```
 
 ---
 

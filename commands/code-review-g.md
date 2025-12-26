@@ -10,69 +10,30 @@ I'll help you review code changes using project-specific standards and test comm
 
 ---
 
-## ⛔ CRITICAL: Your FIRST Action
+## YOUR FIRST RESPONSE MUST INCLUDE THESE TWO TOOL CALLS:
 
-**Before ANYTHING else - before TodoWrite, before ANY git command - run this:**
+1. **TodoWrite** - Create a todo list with 3 items:
+   - "Detect context (run detect-mode.sh)" status=in_progress activeForm="Detecting context"
+   - "Select review mode" status=pending activeForm="Selecting review mode"
+   - "Execute selected review workflow" status=pending activeForm="Executing review workflow"
 
-```bash
-~/.claude/lib/detect-mode.sh --pretty
-```
+2. **Bash** - Run: `~/.claude/lib/detect-mode.sh --pretty`
 
-**DO NOT run `git branch`, `git status`, `git diff`, or ANY other git commands.**
-**DO NOT create TodoWrite until AFTER you have run the detect-mode script.**
-
-The script output will show:
-- Branch name
-- Issue key
-- **Task Folder** (shows if docs exist!)
-- Git state (commits ahead, uncommitted)
-
-**Only proceed after you see the formatted output from the script.**
+**CALL BOTH TOOLS NOW. Do not read any other files first. Do not run git commands directly.**
 
 ---
 
-## Execution Steps
+## After Detection Script Runs
 
-### Step 1: Run Detection Script (MANDATORY FIRST ACTION)
+Update the todo list:
+- First item → completed
+- Second item → in_progress
 
-**Your very first action must be:**
-
-```bash
-~/.claude/lib/detect-mode.sh --pretty
-```
-
-**After running, confirm these values from the output:**
-
-| Field | Value |
-|-------|-------|
-| Mode | {from script} |
-| Issue Key | {from script} |
-| Task Folder | {path or "none"} |
-| Docs Exist | ✓ Yes / ✗ No |
+Present the detected context as a table.
 
 ---
 
-### Step 2: Initialize Progress Tracking
-
-**Now create todo list:**
-
-```javascript
-TodoWrite({
-  todos: [
-    {content: "Detect context (issue key, branch, git state)", status: "completed", activeForm: "Context detected"},
-    {content: "Select review mode", status: "pending", activeForm: "Selecting review mode"},
-    {content: "Execute selected review workflow", status: "pending", activeForm: "Executing review workflow"}
-  ]
-})
-```
-
-Note: First todo is already "completed" because you ran detect-mode.sh in Step 1.
-
----
-
-### Step 3: Select Review Mode
-
-Mark todo as in_progress: "Select review mode" (first todo should already be completed)
+### Step 2: Select Review Mode
 
 **MANDATORY: Use AskUserQuestion to present ALL 4 options:**
 
@@ -96,9 +57,9 @@ Mark todo as completed: "Select review mode"
 
 ---
 
-### Step 4: Execute Selected Mode
+### Step 3: Execute Selected Mode
 
-Mark todo as in_progress: "Execute selected review workflow"
+**After reading the workflow file, your FIRST action must be to call TodoWrite with the workflow's todo list (shown at top of file). Then follow the workflow steps.**
 
 Follow the appropriate workflow based on user selection:
 

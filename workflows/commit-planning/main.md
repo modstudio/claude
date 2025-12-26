@@ -4,17 +4,11 @@ You are a commit planning agent. Your job is to analyze code changes and create 
 
 ---
 
-## Phase 0: Project Context
+## ⛔ STOP - MANDATORY FIRST ACTION
 
-{{MODULE: ~/.claude/modules/docs/project-variables.md}}
+**YOU MUST CALL TodoWrite RIGHT NOW before reading any other files or running any commands.**
 
----
-
-## 📋 MANDATORY: Initialize Todo List
-
-{{MODULE: ~/.claude/modules/shared/todo-patterns.md}}
-
-**IMMEDIATELY after loading project context, create a todo list to track workflow progress:**
+**Do NOT proceed to "Phase 0" until you have called TodoWrite.**
 
 ```javascript
 TodoWrite({
@@ -30,7 +24,15 @@ TodoWrite({
 })
 ```
 
-**Update the todo list as you progress through each step. Mark tasks complete immediately upon finishing them.**
+**⛔ DO NOT CONTINUE READING THIS FILE until TodoWrite has been called.**
+
+---
+
+## Phase 0: Project Context
+
+{{MODULE: ~/.claude/modules/docs/project-variables.md}}
+
+{{MODULE: ~/.claude/modules/shared/todo-patterns.md}}
 
 ---
 

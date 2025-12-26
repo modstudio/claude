@@ -10,22 +10,11 @@ Running fast checklist review for small changes. This review focuses on critical
 
 ---
 
-## Mode
-READ-ONLY (review) + WRITE-ENABLED (auto-fix only)
+## ⛔ STOP - MANDATORY FIRST ACTION
 
----
+**YOU MUST CALL TodoWrite RIGHT NOW before reading any other files or running any commands.**
 
-## Phase 0: Project Context Detection
-
-{{MODULE: ~/.claude/modules/shared/quick-context.md}}
-
-**Severity Levels:** {{MODULE: ~/.claude/modules/code-review/severity-levels.md}}
-
-**Citation Format:** {{MODULE: ~/.claude/modules/code-review/citation-standards.md}}
-
----
-
-## 📋 MANDATORY: Initialize Todo List
+**Do NOT proceed to "Mode" or "Phase 0" until you have called TodoWrite.**
 
 ```javascript
 TodoWrite({
@@ -38,6 +27,23 @@ TodoWrite({
   ]
 })
 ```
+
+**⛔ DO NOT CONTINUE READING THIS FILE until TodoWrite has been called.**
+
+---
+
+## Mode
+READ-ONLY (review) + WRITE-ENABLED (auto-fix only)
+
+---
+
+## Phase 0: Project Context Detection
+
+{{MODULE: ~/.claude/modules/shared/quick-context.md}}
+
+**Severity Levels:** {{MODULE: ~/.claude/modules/code-review/severity-levels.md}}
+
+**Citation Format:** {{MODULE: ~/.claude/modules/code-review/citation-standards.md}}
 
 ---
 

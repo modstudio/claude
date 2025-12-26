@@ -1,13 +1,37 @@
 # Standardized TodoWrite Patterns
 
 **Module:** TodoWrite Progress Tracking
-**Version:** 2.0.0
+**Version:** 2.1.0
 
 ## Purpose
 Define standard patterns for using TodoWrite to track workflow progress consistently.
 
 ## Scope
 SHARED - Used by: all workflows
+
+---
+
+## ⛔ CRITICAL: TodoWrite MUST Be First Action
+
+**Every workflow MUST initialize TodoWrite as its VERY FIRST action.**
+
+When entering any workflow:
+1. **FIRST:** Call TodoWrite with the workflow's todo list (first item `in_progress`)
+2. **THEN:** Load project context and begin execution
+
+**Why:** Agents skip TodoWrite if it comes after other actions. Making it first ensures visibility.
+
+---
+
+## Workflow Transition Pattern
+
+When transitioning from an entry point to a specific workflow:
+
+1. Entry point creates initial 3-step todos (detect, select mode, execute)
+2. When entering the selected workflow, **RELOAD** the todo list with that workflow's specific todos
+3. The new todos replace the entry point todos entirely
+
+**Example:** `/plan-task-g` → selects "Default Mode" → reloads with 9-step planning todos
 
 ---
 

@@ -17,6 +17,32 @@ Evaluate an external code review and independently determine what changes are ac
 
 ---
 
+## ⛔ STOP - MANDATORY FIRST ACTION
+
+**YOU MUST CALL TodoWrite RIGHT NOW before reading any other files or running any commands.**
+
+**Do NOT proceed to "Mode" or "Output Files" until you have called TodoWrite.**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Load project standards", status: "in_progress", activeForm: "Loading standards"},
+    {content: "Load current code state", status: "pending", activeForm: "Loading code state"},
+    {content: "Wait for external review text", status: "pending", activeForm: "Waiting for review"},
+    {content: "Parse external review and check history", status: "pending", activeForm: "Parsing review"},
+    {content: "Perform independent analysis", status: "pending", activeForm: "Analyzing independently"},
+    {content: "Generate evaluation report", status: "pending", activeForm: "Generating evaluation"},
+    {content: "Record evaluation to permanent file", status: "pending", activeForm: "Recording evaluation"},
+    {content: "Apply changes if approved", status: "pending", activeForm: "Applying changes"},
+    {content: "Generate final summary", status: "pending", activeForm: "Generating summary"}
+  ]
+})
+```
+
+**⛔ DO NOT CONTINUE READING THIS FILE until TodoWrite has been called.**
+
+---
+
 ## Mode
 READ-ONLY (analysis) + WRITE (to review files)
 
@@ -49,26 +75,6 @@ READ-ONLY (analysis) + WRITE (to review files)
 **Severity Levels:** {{MODULE: ~/.claude/modules/code-review/severity-levels.md}}
 
 **Citation Format:** {{MODULE: ~/.claude/modules/code-review/citation-standards.md}}
-
----
-
-## 📋 MANDATORY: Initialize Todo List
-
-```javascript
-TodoWrite({
-  todos: [
-    {content: "Load project standards", status: "in_progress", activeForm: "Loading standards"},
-    {content: "Load current code state", status: "pending", activeForm: "Loading code state"},
-    {content: "Wait for external review text", status: "pending", activeForm: "Waiting for review"},
-    {content: "Parse external review and check history", status: "pending", activeForm: "Parsing review"},
-    {content: "Perform independent analysis", status: "pending", activeForm: "Analyzing independently"},
-    {content: "Generate evaluation report", status: "pending", activeForm: "Generating evaluation"},
-    {content: "Record evaluation to permanent file", status: "pending", activeForm: "Recording evaluation"},
-    {content: "Apply changes if approved", status: "pending", activeForm: "Applying changes"},
-    {content: "Generate final summary", status: "pending", activeForm: "Generating summary"}
-  ]
-})
-```
 
 ---
 

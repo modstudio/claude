@@ -6,6 +6,30 @@
 
 ---
 
+## ⛔ STOP - MANDATORY FIRST ACTION
+
+**YOU MUST CALL TodoWrite RIGHT NOW before reading any other files or running any commands.**
+
+**Do NOT proceed to "Phase 0" until you have called TodoWrite.**
+
+```javascript
+TodoWrite({
+  todos: [
+    {content: "Gather implementation state", status: "in_progress", activeForm: "Gathering state"},
+    {content: "Verify/create task docs structure", status: "pending", activeForm: "Verifying docs structure"},
+    {content: "Read existing documentation", status: "pending", activeForm: "Reading docs"},
+    {content: "Compare and identify discrepancies", status: "pending", activeForm: "Comparing"},
+    {content: "Present findings to user", status: "pending", activeForm: "Presenting findings"},
+    {content: "Update docs with user confirmation", status: "pending", activeForm: "Syncing docs"},
+    {content: "Present updated state", status: "pending", activeForm: "Presenting result"}
+  ]
+})
+```
+
+**⛔ DO NOT CONTINUE READING THIS FILE until TodoWrite has been called.**
+
+---
+
 ## Phase 0: Project Context
 
 {{MODULE: ~/.claude/modules/docs/project-variables.md}}
@@ -188,24 +212,6 @@
 ### Next steps:
 1. {next action}
 2. {next action}
-```
-
----
-
-## 📋 MANDATORY: Initialize Todo List
-
-```javascript
-TodoWrite({
-  todos: [
-    {content: "Gather implementation state", status: "in_progress", activeForm: "Gathering state"},
-    {content: "Verify/create task docs structure", status: "pending", activeForm: "Verifying docs structure"},
-    {content: "Read existing documentation", status: "pending", activeForm: "Reading docs"},
-    {content: "Compare and identify discrepancies", status: "pending", activeForm: "Comparing"},
-    {content: "Present findings to user", status: "pending", activeForm: "Presenting findings"},
-    {content: "Update docs with user confirmation", status: "pending", activeForm: "Syncing docs"},
-    {content: "Present updated state", status: "pending", activeForm: "Presenting result"}
-  ]
-})
 ```
 
 ---
