@@ -85,11 +85,11 @@ See `~/.claude/modules/shared/plan-mode-discipline.md` for detailed guidance.
         └── quick-reference.md             ← Quick lookup guide
 ```
 
-**Storage Configuration**: Project-local `${TASK_DOCS_DIR}` folder (must exist in project directory)
+**Storage Configuration**: Project-local `${PROJECT_TASK_DOCS_DIR}` folder (must exist in project directory)
 
 **Project Files (Created by Workflows):**
 ```
-${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
+${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 ├── 00-status.md                  ← Status & Overview (index)
 ├── 01-task-description.md        ← Task Description (high-level overview)
 ├── 02-functional-requirements.md ← Functional Requirements (detailed)
@@ -99,7 +99,7 @@ ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
     ├── decisions.md              ← Decision Log (ADR-style)
     └── review.md                 ← External review feedback
 ```
-*Where `${TASK_DOCS_DIR}` defaults to `./.task-docs/` - PROJECT-LOCAL in the project directory (add to .gitignore)*
+*Where `${PROJECT_TASK_DOCS_DIR}` defaults to `./.task-docs/` - PROJECT-LOCAL in the project directory (add to .gitignore)*
 
 ---
 
@@ -113,14 +113,14 @@ Workflow automatically detects which project you're in:
 cd ~/Projects/starship
 # Detects: Starship (from YAML: starship.yaml)
 # Issue pattern: STAR-####
-# Storage: $TASK_DOCS_DIR/STAR-####-{slug}/ (from global.yaml)
+# Storage: $PROJECT_TASK_DOCS_DIR/STAR-####-{slug}/ (from global.yaml)
 # Standards: .ai/rules/
 # Tests: Docker + PHPUnit
 
 cd ~/Projects/alephbeis-app
 # Detects: Alephbeis (from YAML: alephbeis.yaml)
 # Issue pattern: AB-####
-# Storage: $TASK_DOCS_DIR/AB-####-{slug}/ (from global.yaml)
+# Storage: $PROJECT_TASK_DOCS_DIR/AB-####-{slug}/ (from global.yaml)
 # Standards: .ai/rules/
 # Tests: Docker + PHPUnit
 ```
@@ -230,9 +230,9 @@ Default mode handles all planning scenarios through two branch points:
 
 ### Standard Naming
 
-**Format**: `${TASK_DOCS_DIR}/{ISSUE_KEY}/`
+**Format**: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}/`
 
-- `${TASK_DOCS_DIR}` is PROJECT-LOCAL in the project directory (must exist, add to .gitignore)
+- `${PROJECT_TASK_DOCS_DIR}` is PROJECT-LOCAL in the project directory (must exist, add to .gitignore)
 - Use issue key from YouTrack (e.g., STAR-2228, AB-1390)
 - Same as git branch name (without type prefix like `feature/`)
 - Provides context when browsing directories
@@ -246,10 +246,10 @@ Default mode handles all planning scenarios through two branch points:
 5. Slug format: Title-Case-With-Hyphens (same as git branch naming)
 
 **Examples**:
-- `${TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/` ✅
-- `${TASK_DOCS_DIR}/AB-1390-TypeError-in-GenerateWordCharacterSet/` ✅
-- ~~`${TASK_DOCS_DIR}/STAR-2228/`~~ ❌ (missing context)
-- ~~`${TASK_DOCS_DIR}/feature/STAR-2233/`~~ ❌ (don't include type prefix)
+- `${PROJECT_TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/` ✅
+- `${PROJECT_TASK_DOCS_DIR}/AB-1390-TypeError-in-GenerateWordCharacterSet/` ✅
+- ~~`${PROJECT_TASK_DOCS_DIR}/STAR-2228/`~~ ❌ (missing context)
+- ~~`${PROJECT_TASK_DOCS_DIR}/feature/STAR-2233/`~~ ❌ (don't include type prefix)
 
 **Searching for existing folders**:
 ```bash
@@ -257,29 +257,29 @@ Default mode handles all planning scenarios through two branch points:
 TASK_DOCS_DIR=$(get_task_docs_dir)
 
 # Check if folder exists
-if [ -z "$TASK_DOCS_DIR" ]; then
+if [ -z "$PROJECT_TASK_DOCS_DIR" ]; then
   echo "ERROR: No task docs folder found. Create with: mkdir .task-docs"
   exit 1
 fi
 
 # Search for task
-find "$TASK_DOCS_DIR" -type d -name "{ISSUE_KEY}*"
+find "$PROJECT_TASK_DOCS_DIR" -type d -name "{ISSUE_KEY}*"
 ```
-- Example: `find "$TASK_DOCS_DIR" -type d -name "STAR-2228*"` → finds `${TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/`
+- Example: `find "$PROJECT_TASK_DOCS_DIR" -type d -name "STAR-2228*"` → finds `${PROJECT_TASK_DOCS_DIR}/STAR-2228-Warehouse-Queue/`
 
 ### Special Cases
 
 **New Task** (no issue key):
-- Format: `${TASK_DOCS_DIR}/EXPLORATORY-{short-name}/`
+- Format: `${PROJECT_TASK_DOCS_DIR}/DRAFT-{short-name}/`
 - Handled by Default Mode with `get-user-context` module
 - Can create YouTrack issue later and rename folder
-- Example: `${TASK_DOCS_DIR}/EXPLORATORY-auth-prototype/` → `${TASK_DOCS_DIR}/STAR-2250-Auth-Prototype/`
+- Example: `${PROJECT_TASK_DOCS_DIR}/DRAFT-auth-prototype/` → `${PROJECT_TASK_DOCS_DIR}/STAR-2250-Auth-Prototype/`
 
 ---
 
 ## Document Structure
 
-All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`:
+All tasks use this standardized structure in `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`:
 
 ### Required Documents
 
@@ -343,7 +343,7 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 
 ### New Task → Named Task
 - **Trigger**: User creates YouTrack issue for exploratory work
-- **Action**: Rename folder from `EXPLORATORY-*` to `{ISSUE_KEY}-*`
+- **Action**: Rename folder from `DRAFT-*` to `{ISSUE_KEY}-*`
 - **Update**: Link docs to issue, continue with Default mode
 
 ### Health Check (Any Time)
@@ -382,11 +382,11 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 **When to Clean Up**
 
 **After task complete and deployed**:
-- Keep `${TASK_DOCS_DIR}/{ISSUE_KEY}/` folder for reference
+- Keep `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}/` folder for reference
 - No automatic deletion
 
 **Manual cleanup** (user decides):
-- Archive to `${TASK_DOCS_DIR}/archive/{ISSUE_KEY}/` if desired
+- Archive to `${PROJECT_TASK_DOCS_DIR}/archive/{ISSUE_KEY}/` if desired
 - Delete if no longer needed
 
 **What to Commit to Git**
@@ -407,7 +407,7 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 **Agent Behavior**:
 
 1. **When user mentions task key** (e.g., "Let's work on STAR-2233"):
-   - Proactively search for `${TASK_DOCS_DIR}/STAR-2233*` (glob pattern to find matching directory)
+   - Proactively search for `${PROJECT_TASK_DOCS_DIR}/STAR-2233*` (glob pattern to find matching directory)
    - Auto-detect appropriate mode
    - Suggest mode to user
    - If not found, offer to run planning workflow
@@ -418,7 +418,7 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
    - Auto-detect and suggest mode
 
 3. **When user is already working on task**:
-   - Search for `${TASK_DOCS_DIR}/{ISSUE_KEY}*` (glob pattern)
+   - Search for `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}*` (glob pattern)
    - Auto-detect → likely In Progress Mode
    - If missing task docs folder, offer to create documentation
 
@@ -472,7 +472,7 @@ All tasks use this standardized structure in `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug
 ## Troubleshooting
 
 ### Problem: Can't find documentation
-**Solution**: Check `${TASK_DOCS_DIR}/` directory or use glob pattern `${TASK_DOCS_DIR}/{ISSUE_KEY}*`
+**Solution**: Check `${PROJECT_TASK_DOCS_DIR}/` directory or use glob pattern `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}*`
 
 ### Problem: Existing docs are messy
 **Solution**: Use **In Progress Mode** to review, then offer reorganization options
@@ -525,7 +525,7 @@ citation_format:
   style: "[STYLE: \"{direct-quote}\"]"
 
 storage:
-  location: "${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
+  location: "${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
 
 test_commands:
   all: "docker compose ... exec starship_server ./vendor/bin/phpunit"
@@ -550,7 +550,7 @@ citation_format:
   architecture: "[ARCH: \"{direct-quote}\"]"
 
 storage:
-  location: "${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
+  location: "${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
 
 test_commands:
   all: "docker compose exec alephbeis_app ./vendor/bin/phpunit"
@@ -590,7 +590,7 @@ standards:
   location: ".docs/rules/"
 
 storage:
-  location: "${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
+  location: "${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/"
 
 test_commands:
   all: "npm test"

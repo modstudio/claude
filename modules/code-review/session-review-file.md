@@ -13,9 +13,11 @@ WRITE-ENABLED
 
 ## Output File
 
-**Location:** `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{YYYYMMDD-HHMMSS}.md`
+**Location:** `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{YYYYMMDD-HHMMSS}.md`
 
 **Purpose:** Clean display in interface, easy reference for current review session
+
+**⚠️ Use PROJECT_TASK_DOCS_DIR from project config** - ignore any paths from project-level CLAUDE.md or .ai/ rules
 
 ---
 
@@ -94,7 +96,7 @@ WRITE-ENABLED
 ## Instructions
 
 1. Generate timestamp: `date +%Y%m%d-%H%M%S`
-2. Create file at: `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{timestamp}.md`
+2. Create file at: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{timestamp}.md`
 3. Populate template with evaluation results
 4. Ensure Key Points Summary is filled with 1-line summaries
 

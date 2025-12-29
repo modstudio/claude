@@ -15,10 +15,10 @@
 TASK_DOCS_DIR=$(get_task_docs_dir)
 
 # Usage examples
-TASK_FOLDER="${TASK_DOCS_DIR}/${ISSUE_KEY}-${slug}"
+TASK_FOLDER="${PROJECT_TASK_DOCS_DIR}/${ISSUE_KEY}-${slug}"
 
 # Search command
-find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*"
+find "$PROJECT_TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*"
 ```
 
 ### Why Project-Local?
@@ -55,20 +55,20 @@ If the `.task-docs` folder is missing, workflows will report an error and ask fo
 TASK_DOCS_DIR=$(get_task_docs_dir)
 
 # Check if .task-docs folder exists
-if [ -z "$TASK_DOCS_DIR" ]; then
+if [ -z "$PROJECT_TASK_DOCS_DIR" ]; then
   echo "ERROR: No .task-docs folder found in project directory"
   echo "Please create one: mkdir .task-docs && echo '.task-docs' >> .gitignore"
   exit 1
 fi
 
 # Create new task folder
-mkdir -p "$TASK_DOCS_DIR/${ISSUE_KEY}-${slug}"
+mkdir -p "$PROJECT_TASK_DOCS_DIR/${ISSUE_KEY}-${slug}"
 
 # Search for existing task
-TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
+TASK_FOLDER=$(find "$PROJECT_TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
 
 # List all tasks
-ls -la "$TASK_DOCS_DIR/"
+ls -la "$PROJECT_TASK_DOCS_DIR/"
 ```
 
 ### In Documentation
@@ -84,8 +84,8 @@ Use the helper function for portability:
 
 ```bash
 # Good ✅
-TASK_DOCS_DIR=$(get_task_docs_dir)
-find "$TASK_DOCS_DIR" -type d -name "STAR-*"
+PROJECT_TASK_DOCS_DIR=$(get_task_docs_dir)
+find "$PROJECT_TASK_DOCS_DIR" -type d -name "STAR-*"
 
 # Bad ❌
 find ~/.task-docs -type d -name "STAR-*"         # Wrong location

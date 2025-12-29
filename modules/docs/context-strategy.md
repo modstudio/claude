@@ -32,7 +32,7 @@ git branch --show-current
 # Extract using regex from branch name
 
 # 3. Task folder existence (yes/no, don't read contents)
-ls -d "${TASK_DOCS_DIR}/${ISSUE_KEY}"* 2>/dev/null | head -1
+ls -d "${PROJECT_TASK_DOCS_DIR}/${ISSUE_KEY}"* 2>/dev/null | head -1
 
 # 4. Git state summary (counts only)
 git status --porcelain | wc -l        # uncommitted changes count
@@ -150,7 +150,7 @@ git log -1 --format=%cr HEAD          # "3 days ago"
 - **Status**: Open (not started)
 
 ### Task Documentation
-- **Folder**: `${TASK_DOCS_DIR}/STAR-1234/` ✓ exists
+- **Folder**: `${PROJECT_TASK_DOCS_DIR}/STAR-1234/` ✓ exists
 - **Status**: Planning (from 00-status.md)
 - **Last Updated**: 2 days ago
 - **Completeness**: 4/6 docs exist

@@ -4,12 +4,12 @@ This directory contains standardized templates for task planning documentation.
 
 ## Purpose
 
-These templates are used by the Task Planning Workflow to create consistent documentation structure for all tasks in `${TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX/` folders.
+These templates are used by the Task Planning Workflow to create consistent documentation structure for all tasks in `${PROJECT_TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX/` folders.
 
 ## Template Structure
 
 ```
-${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
+${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 ├── 00-status.md                  # Status & Overview (central tracking)
 ├── 01-task-description.md        # Task Description (high-level overview)
 ├── 02-functional-requirements.md # Functional Requirements (detailed)
@@ -35,7 +35,7 @@ ${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 
 ## Usage
 
-**Manual**: Copy all templates to new `${TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX/` folder and fill in placeholders.
+**Manual**: Copy all templates to new `${PROJECT_TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX/` folder and fill in placeholders.
 
 **Automated**: Use `/plan-task-g` slash command - all templates (including logs folder) are created automatically.
 

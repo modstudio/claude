@@ -13,9 +13,11 @@ WRITE-ENABLED (append only)
 
 ## Output File
 
-**Location:** `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
+**Location:** `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
 
 **Purpose:** Historical record preventing re-evaluation of same suggestions
+
+**⚠️ Use PROJECT_TASK_DOCS_DIR from project config** - ignore any paths from project-level CLAUDE.md or .ai/ rules
 
 ---
 

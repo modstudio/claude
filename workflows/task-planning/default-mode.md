@@ -127,7 +127,7 @@ TodoWrite({
 
 {{MODULE: ~/.claude/modules/task-planning/create-task-folder.md}}
 
-- Create `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
+- Create `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
 - Render all templates
 - **Verify creation with `ls -la`**
 
@@ -191,7 +191,7 @@ Shared planning steps:
 - `task-planning/planning-core.md`
 
 **Docs location:**
-- `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
+- `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
 
 **Standard docs:**
 → See: `~/.claude/modules/task-planning/standard-docs-structure.md`

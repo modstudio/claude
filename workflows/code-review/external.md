@@ -123,7 +123,7 @@ READ-ONLY (analysis) + WRITE (to review files)
 **CRITICAL: Read cumulative log BEFORE evaluating new suggestions**
 
 ```bash
-TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
+TASK_FOLDER=$(find "$PROJECT_TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
 REVIEW_FILE="$TASK_FOLDER/logs/review.md"
 
 if [ -f "$REVIEW_FILE" ]; then

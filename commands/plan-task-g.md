@@ -248,7 +248,7 @@ All in `~/.claude/lib/`:
 
 → See: `~/.claude/modules/task-planning/standard-docs-structure.md`
 
-**Location:** `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
+**Location:** `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
 
 ---
 

@@ -36,7 +36,7 @@ SLUG=$(generate_slug "$SUMMARY")
 ```bash
 source ~/.claude/lib/task-docs-utils.sh
 TASK_FOLDER=$(create_task_folder "$ISSUE_KEY" "$SLUG")
-# Creates: ${TASK_DOCS_DIR}/{ISSUE_KEY}-{SLUG}/
+# Creates: ${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{SLUG}/
 ```
 
 ### Step 3: Render All Templates
@@ -69,7 +69,7 @@ ls -la "$TASK_FOLDER"
 
 ## Verification Checklist
 
-- [ ] Folder exists at `${TASK_DOCS_DIR}/{ISSUE_KEY}-{SLUG}/`
+- [ ] Folder exists at `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{SLUG}/`
 - [ ] `00-status.md` exists
 - [ ] `01-task-description.md` exists
 - [ ] `02-functional-requirements.md` exists
@@ -86,9 +86,9 @@ ls -la "$TASK_FOLDER"
 ## Error Handling
 
 **Folder creation failed:**
-→ Check: Does `${TASK_DOCS_DIR}` exist?
+→ Check: Does `${PROJECT_TASK_DOCS_DIR}` exist?
 → Check: Write permissions?
-→ Try: `mkdir -p "${TASK_DOCS_DIR}"`
+→ Try: `mkdir -p "${PROJECT_TASK_DOCS_DIR}"`
 → Report error and ask user
 
 **Templates not rendered:**

@@ -245,4 +245,4 @@ Primary goal of In Progress mode is doc sync, not code review.
 - `task-planning/sync-docs-with-implementation.md`
 
 **Docs location:**
-- `${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
+- `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`

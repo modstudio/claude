@@ -20,7 +20,7 @@ When `CONTEXT_SIGNAL == "EXISTING_TASK"` (task folder exists)
 
 ```bash
 # Read all docs in order
-TASK_FOLDER="${TASK_DOCS_DIR}/${ISSUE_KEY}*"
+TASK_FOLDER="${PROJECT_TASK_DOCS_DIR}/${ISSUE_KEY}*"
 
 # Read each file
 cat "$TASK_FOLDER/00-status.md"

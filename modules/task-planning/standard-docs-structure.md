@@ -11,10 +11,10 @@ TASK-PLANNING - Used by all task-planning modes
 ## Folder Location
 
 ```
-${TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
+${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 ```
 
-- `TASK_DOCS_DIR`: Project-local `.task-docs/` directory
+- `PROJECT_TASK_DOCS_DIR`: From project config (`~/.claude/config/projects/`)
 - `ISSUE_KEY`: YouTrack issue key (e.g., STAR-1234)
 - `slug`: Title-cased summary (e.g., Fix-Login-Error)
 

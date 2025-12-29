@@ -57,9 +57,9 @@ Ask user:
 
 ```bash
 # For exploratory work without YouTrack issue
-ISSUE_KEY="EXPLORATORY"
+ISSUE_KEY="DRAFT"
 SLUG=$(generate_slug "$SUMMARY")
-# Result: EXPLORATORY-{slug}
+# Result: DRAFT-{slug}
 ```
 
 ### Step 5: Offer to Create YouTrack Issue
@@ -76,7 +76,7 @@ Which would you prefer?
 
 **If user wants YouTrack issue:**
 → Module: `~/.claude/modules/shared/youtrack-create-issue.md`
-→ Use returned ISSUE_KEY instead of EXPLORATORY
+→ Use returned ISSUE_KEY instead of DRAFT
 
 ---
 
@@ -101,7 +101,7 @@ Which would you prefer?
 ---
 
 ## Outputs
-- `ISSUE_KEY` - "EXPLORATORY" or real key if created
+- `ISSUE_KEY` - "DRAFT" or real key if created
 - `SUMMARY` - Task title from user
 - `TASK_TYPE` - feature/bugfix/refactor/exploration
 - `USER_CONTEXT` - Additional context gathered

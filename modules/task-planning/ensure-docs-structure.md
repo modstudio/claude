@@ -29,7 +29,7 @@ WRITE-ENABLED (only for creating missing docs)
 ### Step 1: Check Folder Exists
 
 ```bash
-TASK_FOLDER=$(find "$TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
+TASK_FOLDER=$(find "$PROJECT_TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev/null | head -1)
 
 if [ -z "$TASK_FOLDER" ]; then
   echo "FOLDER_MISSING"
