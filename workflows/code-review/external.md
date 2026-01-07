@@ -31,9 +31,9 @@ TodoWrite({
     {content: "Wait for external review text", status: "pending", activeForm: "Waiting for review"},
     {content: "Parse external review and check history", status: "pending", activeForm: "Parsing review"},
     {content: "Perform independent analysis", status: "pending", activeForm: "Analyzing independently"},
-    {content: "Generate evaluation report", status: "pending", activeForm: "Generating evaluation"},
-    {content: "Record evaluation to permanent file", status: "pending", activeForm: "Recording evaluation"},
-    {content: "Apply changes if approved", status: "pending", activeForm: "Applying changes"},
+    {content: "Output evaluation to chat", status: "pending", activeForm: "Outputting evaluation"},
+    {content: "Ask user about applying changes", status: "pending", activeForm: "Asking about changes"},
+    {content: "Apply changes and record (if approved)", status: "pending", activeForm: "Applying changes"},
     {content: "Generate final summary", status: "pending", activeForm: "Generating summary"}
   ]
 })
@@ -50,21 +50,27 @@ READ-ONLY (analysis) + WRITE (to review files)
 
 ## Output Files
 
-**This workflow creates TWO files:**
+**⚠️ FILES ARE ONLY CREATED WHEN CHANGES ARE APPLIED**
 
-1. **Session Review File** (NEW - for interface display):
+| Scenario | Output |
+|----------|--------|
+| Evaluating only (no changes) | Chat output only - NO files |
+| Applying changes | Create files (see below) |
+
+**When user chooses to apply changes, create:**
+
+1. **Session Review File** (NEW):
    - Location: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{YYYYMMDD-HHMMSS}.md`
-   - Purpose: Displays evaluation in interface, easy to read
-   - Contains: Summary + detailed analysis for THIS review session
+   - Purpose: Record of what was changed and why
 
-2. **Cumulative Review Log** (APPEND - for circular review prevention):
+2. **Cumulative Review Log** (APPEND):
    - Location: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
-   - Purpose: Historical record, prevents re-evaluating same suggestions
-   - Contains: All past reviews with decisions and reasoning
+   - Purpose: Historical record preventing re-evaluation of same suggestions
 
-**Why two files:**
-- Session file: Clean display, easy reference for current review
-- Cumulative log: Prevents circular review by tracking ALL past decisions
+**DO NOT create files if:**
+- User just wants evaluation/opinion
+- No changes are applied
+- User says "just review" or "what do you think"
 
 ---
 
@@ -191,39 +197,53 @@ For EACH suggestion from external review:
 
 ---
 
-## Step 6: Generate Evaluation Report
+## Step 6: Output Evaluation to Chat
 
-**Create NEW session review file for interface display:**
+**Output evaluation summary directly to chat:**
 
-{{MODULE: ~/.claude/modules/code-review/session-review-file.md}}
+```markdown
+# External Review Evaluation
 
-**STOP - Review report before finalizing**
+**Summary:**
+- Analyzed: {count} suggestions
+- Accepted: {count} (would apply)
+- Modified: {count} (would apply differently)
+- Rejected: {count} (not needed)
+
+[For each suggestion: brief verdict and reasoning]
+```
+
+**DO NOT create any files at this step.**
 
 ---
 
-## Step 7: Record to Cumulative Log (Circular Review Prevention)
-
-**IMPORTANT: This prevents re-evaluating the same suggestions**
-
-{{MODULE: ~/.claude/modules/code-review/append-review-log.md}}
-
-**STOP - Confirm record appended to cumulative log**
-
----
-
-## Step 8: Apply Changes (Optional)
+## Step 7: Ask User About Changes
 
 **Ask user:**
 > "Evaluation complete. Would you like me to:
 > - [ ] Apply all ACCEPTED changes
 > - [ ] Apply CRITICAL changes only
 > - [ ] Show patches for manual review
-> - [ ] Skip implementation"
+> - [ ] Skip implementation (done)"
 
-If approved:
+---
+
+## Step 8: Apply Changes (Only if user approves)
+
+**If user chooses to apply changes:**
+
 1. Apply changes using Edit tool
 2. Run verification tests
 3. Report results
+4. **THEN create record files:**
+
+{{MODULE: ~/.claude/modules/code-review/session-review-file.md}}
+
+{{MODULE: ~/.claude/modules/code-review/append-review-log.md}}
+
+**If user skips implementation:**
+- Do NOT create any files
+- Evaluation was chat-only
 
 ---
 
@@ -239,11 +259,11 @@ If approved:
 - Rejected: {count}
 
 **Changes Applied:** {Yes/No}
-**Evaluation Record:** Saved to {REVIEW_FILE}
+**Files Created:** {Only if changes were applied}
 
 **Next Steps:**
 [If changes applied: review, test, commit]
-[If no changes: external review identified no actionable issues]
+[If no changes: done - evaluation was informational only]
 ```
 
 ---

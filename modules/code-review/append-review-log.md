@@ -6,6 +6,10 @@ Append evaluation summary to cumulative review log for circular review preventio
 ## Scope
 CODE-REVIEW - External review workflow
 
+## ⚠️ WHEN TO USE
+**ONLY call this module when changes are being applied.**
+Do NOT create/append files for evaluation-only reviews.
+
 ## Mode
 WRITE-ENABLED (append only)
 

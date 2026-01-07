@@ -6,6 +6,10 @@ Create a NEW session review file for interface display with key points summary.
 ## Scope
 CODE-REVIEW - External review workflow
 
+## ⚠️ WHEN TO USE
+**ONLY call this module when changes are being applied.**
+Do NOT create files for evaluation-only reviews.
+
 ## Mode
 WRITE-ENABLED
 

@@ -216,9 +216,15 @@ Path: `file:line`
 
 ---
 
-## Outputs
+## Output Destination
 
-Complete markdown report with all sections above.
+**⚠️ CRITICAL: Output to CHAT ONLY**
+
+- **DO NOT create a file** - output the report directly in chat
+- **DO NOT save to any folder** (no artifacts, no .wip, no task-docs)
+- The user will copy/save the report if needed
+
+**Why:** Report reviews are for immediate feedback. File creation clutters the workspace and causes confusion about where reports live.
 
 ---
 
