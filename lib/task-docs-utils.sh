@@ -107,7 +107,8 @@ find_task_dir() {
   local folder=""
 
   # Search in task docs directory (up to 3 levels deep)
-  folder=$(find "$task_docs_dir" -maxdepth 3 -type d -name "${issue_key}*" 2>/dev/null | head -1)
+  # Use *${issue_key}* to match folders with numeric prefixes like "02-STAR-274-..."
+  folder=$(find "$task_docs_dir" -maxdepth 3 -type d -name "*${issue_key}*" 2>/dev/null | head -1)
   if is_not_empty "$folder"; then
     echo "$folder"
     return 0
