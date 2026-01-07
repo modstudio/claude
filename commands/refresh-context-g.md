@@ -1,3 +1,7 @@
+---
+description: Refresh context and project state (global)
+---
+
 # Refresh Context
 
 Re-run context detection to refresh memory about current state.
