@@ -66,7 +66,7 @@ citation_format:
 
 storage:
   # Absolute path = external repo, relative path = project-local
-  task_docs_dir: "~/projects/starship-docs/task-docs"
+  task_docs_dir: "~/Projects/starship-docs/task-docs"
 
 documentation:
   # Project standards location
