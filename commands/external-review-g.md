@@ -18,6 +18,7 @@ Evaluate an external code review (from AI tools, developers, linters) against pr
    - "Evaluate each suggestion" status=pending activeForm="Evaluating"
    - "Present verdict" status=pending activeForm="Presenting verdict"
    - "Apply changes if approved" status=pending activeForm="Applying changes"
+   - "Update review log" status=pending activeForm="Updating review log"
 
 2. **Bash** - Run: `~/.claude/lib/detect-mode.sh --pretty`
 

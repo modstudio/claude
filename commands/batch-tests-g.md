@@ -14,7 +14,7 @@ Run all tests organized in batches, fix failures as you go, and iterate until gr
    - "Discover and organize tests into batches" status=in_progress activeForm="Organizing tests"
    - "Run batch 1" status=pending activeForm="Running batch 1"
    - "Fix failing tests" status=pending activeForm="Fixing tests"
-   - "Run full suite verification" status=pending activeForm="Verifying all tests"
+   - "Ask user to loop or finish" status=pending activeForm="Confirming next step"
 
 2. **Bash** - Discover test files:
    ```bash
@@ -205,59 +205,25 @@ docker compose exec -u1000 starship_server ./vendor/bin/phpunit --testsuite=unit
 
 ---
 
-## Step 7: Full Suite Verification
+## Step 7: Ask About Another Loop
 
-**After all batches pass individually:**
-
-```bash
-# Run complete test suite
-docker compose exec -u1000 starship_server ./vendor/bin/phpunit
-```
-
-**Present results:**
-
-```markdown
-## Full Test Suite Results
-
-**Status:** {PASS/FAIL}
-
-| Metric | Value |
-|--------|-------|
-| Total Tests | {N} |
-| Passed | {N} |
-| Failed | {N} |
-| Time | {X}s |
-
-### Batches Completed
-- [x] Batch 1: Unit ({N} tests)
-- [x] Batch 2: Feature ({N} tests)
-- [x] Batch 3: Functional ({N} tests)
-- [x] Batch 4: Acceptance ({N} tests)
-
-### Fixes Applied
-- {file}: {what was fixed}
-- {file}: {what was fixed}
-```
-
----
-
-## Step 8: Ask About Another Run
+**After all batches complete:**
 
 ```javascript
 AskUserQuestion({
   questions: [{
-    question: "All tests passing! Would you like to run the full suite again to confirm?",
-    header: "Verify",
+    question: "All batches complete! Would you like to run through the batches again?",
+    header: "Loop",
     multiSelect: false,
     options: [
-      {label: "Run full suite again", description: "One more complete run to confirm everything passes"},
-      {label: "Done", description: "Tests are passing, we're done"}
+      {label: "Run batches again", description: "Loop through all batches one more time"},
+      {label: "Done", description: "All batches passing, we're done"}
     ]
   }]
 })
 ```
 
-**If another run:** Go back to Step 7
+**If loop again:** Go back to Step 2 (Run Batch 1)
 **If done:** Present final summary
 
 ---
