@@ -35,7 +35,7 @@ Present the detected context as a table.
 
 ### Step 2: Select Review Mode
 
-**MANDATORY: Use AskUserQuestion to present ALL 4 options:**
+**MANDATORY: Use AskUserQuestion to present ALL 5 options:**
 
 ```javascript
 AskUserQuestion({
@@ -45,6 +45,7 @@ AskUserQuestion({
     multiSelect: false,
     options: [
       {label: "Report Review (Recommended)", description: "Comprehensive automated review with detailed report. Best for feature branches."},
+      {label: "Bug Zapper", description: "Hunt for actual bugs - traces dependencies, verifies existence, finds type mismatches. Not about style."},
       {label: "Quick Review", description: "Fast checklist for small PRs (<500 lines). Checks critical issues and runs modified tests."},
       {label: "Interactive Review", description: "Manual step-by-step with STOP points. Best for complex changes."},
       {label: "External Review Evaluation", description: "Evaluate external review against project standards."}
@@ -76,6 +77,25 @@ Follow the appropriate workflow based on user selection:
 - `generate-report.md` - Final report compilation
 
 **Best for:** Feature branches, regular PR reviews
+
+#### Bug Zapper
+**Workflow:** `~/.claude/workflows/code-review/bug-zapper.md`
+
+**Modules used:**
+- `shared/quick-context.md` - Quick context detection
+- `bugs-review.md` - Bug hunting patterns
+
+**Focus areas:**
+- Dependency chain tracing (up and down)
+- Existence verification (classes, methods, properties)
+- Type mismatch detection
+- Null safety analysis
+- Logic error detection
+- Copy-paste bug detection
+
+**NOT about:** Architecture, style, standards, requirements
+
+**Best for:** Finding actual bugs before they crash in production
 
 #### Quick Review
 **Workflow:** `~/.claude/workflows/code-review/quick.md`
@@ -116,6 +136,7 @@ commands/code-review-g.md (entry point)
   │
   └── Select Mode:
       ├── workflows/code-review/report.md
+      ├── workflows/code-review/bug-zapper.md    <- Bug hunting mode
       ├── workflows/code-review/quick.md
       ├── workflows/code-review/interactive.md
       └── workflows/code-review/external.md
@@ -126,6 +147,7 @@ commands/code-review-g.md (entry point)
               ├── modules/code-review/architecture-review.md
               ├── modules/code-review/correctness-review.md
               ├── modules/code-review/code-quality-review.md
+              ├── modules/code-review/bugs-review.md           <- Bug detection patterns
               ├── modules/code-review/test-review.md
               ├── modules/code-review/generate-report.md
               ├── modules/code-review/critical-checks.md
@@ -141,12 +163,13 @@ commands/code-review-g.md (entry point)
 
 ## Mode Comparison
 
-| Mode | Automated | Lines Changed | Output |
-|------|-----------|---------------|--------|
-| Report | Yes | Any | Comprehensive report |
-| Quick | Yes | <500 | Pass/Fail report |
-| Interactive | Manual | Any | Step-by-step findings |
-| External | Yes | Any | Accept/Reject analysis |
+| Mode | Automated | Focus | Output |
+|------|-----------|-------|--------|
+| Report | Yes | Everything | Comprehensive report |
+| Bug Zapper | Yes | Actual bugs only | Bug list with fixes |
+| Quick | Yes | Critical issues | Pass/Fail report |
+| Interactive | Manual | Everything | Step-by-step findings |
+| External | Yes | Evaluating feedback | Accept/Reject analysis |
 
 ---
 
