@@ -17,6 +17,7 @@ TodoWrite({
     {content: "Review task docs", status: "pending", activeForm: "Reviewing docs"},
     {content: "Review implementation", status: "pending", activeForm: "Reviewing implementation"},
     {content: "Identify divergences", status: "pending", activeForm: "Identifying divergences"},
+    {content: "Ask user how to handle divergences", status: "pending", activeForm: "Asking user about divergences"},
     {content: "Rewrite docs to match implementation", status: "pending", activeForm: "Rewriting docs"},
     {content: "Update ADRs for divergences", status: "pending", activeForm: "Updating ADRs"}
   ]
@@ -153,6 +154,62 @@ git log ${PROJECT_BASE_BRANCH:-develop}..HEAD --oneline
 | Architecture change | Yes | Rewrite + ADR |
 
 **Output `DIVERGENCES` list to chat.**
+
+---
+
+## Step 4.5: Ask User How to Handle Divergences
+
+**Present divergences to user and ask for direction:**
+
+Use `AskUserQuestion` to get user guidance on how to handle each category of divergence.
+
+### Divergence Categories
+
+| Category | Description |
+|----------|-------------|
+| **Added** | Items in implementation but not in docs (new features/code added) |
+| **Not Implemented** | Items in docs but not in code (planned but skipped) |
+| **Changed** | Items that differ between docs and implementation |
+
+### Ask User
+
+**For each significant divergence, present options:**
+
+```javascript
+AskUserQuestion({
+  questions: [
+    {
+      question: "How should I handle the divergences found?",
+      header: "Divergences",
+      multiSelect: false,
+      options: [
+        {
+          label: "Update docs to match code",
+          description: "Rewrite documentation to reflect actual implementation (recommended)"
+        },
+        {
+          label: "Review each divergence",
+          description: "Go through each divergence individually and decide"
+        },
+        {
+          label: "Show divergences only",
+          description: "Just list the divergences without making changes"
+        }
+      ]
+    }
+  ]
+})
+```
+
+**If user chooses "Review each divergence":**
+
+For each divergence, ask:
+
+- **Added items:** "Document this new feature?" / "Leave undocumented?"
+- **Not implemented:** "Remove from docs?" / "Mark as future work?" / "Flag as TODO?"
+- **Changed items:** "Update docs to match?" / "Keep original docs?" / "Note the difference in ADR?"
+
+**Proceed to Step 5 based on user direction.**
 
 ---
 
