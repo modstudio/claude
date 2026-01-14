@@ -17,6 +17,7 @@ Synchronize task documentation to match the actual implementation. Rewrite docs 
    - "Review task docs" status=pending activeForm="Reviewing docs"
    - "Review implementation" status=pending activeForm="Reviewing implementation"
    - "Identify divergences" status=pending activeForm="Identifying divergences"
+   - "Get user approval for divergence handling" status=pending activeForm="Getting user approval"
    - "Rewrite docs to match implementation" status=pending activeForm="Rewriting docs"
    - "Update ADRs for divergences" status=pending activeForm="Updating ADRs"
 
