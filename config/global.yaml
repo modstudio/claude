@@ -1,5 +1,5 @@
 # Claude Code Global Configuration
-# Single source of truth for global settings used across all workflows
+# Single source of truth for global settings used across all skills
 
 # Storage Configuration
 storage:
@@ -20,8 +20,8 @@ storage:
   # IMPORTANT: .task-docs is created in the PROJECT directory (where you run commands)
   # NOT in ~/.claude/ or $HOME/.task-docs
 
-# Workflow Configuration
-workflows:
+# Skill Configuration
+skills:
   task_planning:
     enabled: true
     modes:
@@ -35,6 +35,16 @@ workflows:
       - quick
       - report
       - external
+      - bug_zapper
+
+  commit_planning:
+    enabled: true
+
+  update_docs:
+    enabled: true
+    modes:
+      - task
+      - article
 
   release:
     enabled: true

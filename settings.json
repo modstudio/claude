@@ -52,8 +52,9 @@
       "Bash(rm:*)"
     ]
   },
-  "alwaysThinkingEnabled": true,
   "enabledPlugins": {
-    "php-lsp@claude-plugins-official": true
-  }
+    "php-lsp@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true
 }
