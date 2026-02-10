@@ -1,10 +1,10 @@
 # Claude Code - Personal Configuration
 
-This directory contains personal Claude Code workflows, commands, and templates with **multi-project support via YAML configuration**.
+This directory contains personal Claude Code skills, commands, and templates with **multi-project support via YAML configuration**.
 
 ## Architecture: Orchestrator Pattern
 
-This configuration follows an **orchestrator pattern** where slash commands act as lightweight dispatchers that load project context, select modes, and delegate to specialized workflow implementations.
+This configuration follows an **orchestrator pattern** where slash commands act as lightweight dispatchers that load project context, select modes, and delegate to specialized skill implementations.
 
 ```
 ┌──────────────┐
@@ -18,18 +18,18 @@ This configuration follows an **orchestrator pattern** where slash commands act 
 │ - Load project context      │    - Detects project from YAML
 │ - Auto-detect mode/level    │    - Suggests based on context
 │ - Ask user to confirm       │    - Via AskUserQuestion
-│ - Dispatch to workflow      │    - Executes selected mode
+│ - Dispatch to skill         │    - Executes selected mode
 └──────┬──────────────────────┘
        │
        v
 ┌─────────────────────────────┐
-│ workflows/name/mode.md      │  ← Mode implementation
+│ skills/name/mode.md         │  ← Mode implementation
 │ - Uses project config       │    - Standards from YAML
 │ - Detailed steps            │    - Complete process
 │ - Returns to orchestrator   │    - Can switch modes
 └─────────────────────────────┘
 
-Reference docs: workflows/name/README.md
+Reference docs: skills/name/README.md
 ```
 
 ## Directory Structure
@@ -37,103 +37,165 @@ Reference docs: workflows/name/README.md
 ```
 ~/.claude/
 ├── config/
-│   └── projects/          # Project configurations
-│       ├── starship.yaml      # Starship project config
-│       ├── alephbeis.yaml     # Alephbeis project config
-│       └── generic.yaml       # Fallback for unknown projects
+│   ├── global.yaml            # Global settings (storage, defaults)
+│   └── projects/              # Project configurations
+│       ├── starship.yaml          # Starship project config
+│       ├── alephbeis.yaml         # Alephbeis project config
+│       ├── north-star.yaml        # North Star project config
+│       ├── stella-polaris.yaml    # Stella Polaris project config
+│       └── generic.yaml           # Fallback for unknown projects
 │
-├── commands/               # Orchestrators (invoked via /command-g)
-│   ├── plan-task-g.md     # → workflows/task-planning/
-│   ├── code-review-g.md   # → workflows/code-review/
-│   ├── release-g.md       # → workflows/release/
-│   ├── commit-plan-g.md   # → workflows/commit-planning/
-│   └── update-docs-g.md   # → workflows/update-docs/
+├── commands/                  # Orchestrators (invoked via /command-g)
+│   ├── plan-task-g.md         # → skills/task-planning/
+│   ├── new-task-g.md          # → skills/task-planning/ (new task shortcut)
+│   ├── code-review-g.md       # → skills/code-review/
+│   ├── bug-zapper-g.md        # → skills/code-review/bug-zapper.md
+│   ├── external-review-g.md   # → skills/code-review/external.md
+│   ├── release-g.md           # → skills/release/
+│   ├── commit-plan-g.md       # → skills/commit-planning/
+│   ├── update-docs-g.md       # → skills/update-docs/
+│   ├── sync-docs-g.md         # → skills/task-planning/sync-docs.md
+│   ├── batch-tests-g.md       # Run tests in batches, fix iteratively
+│   └── refresh-context-g.md   # Re-detect project context
 │
-├── workflows/              # Detailed workflow implementations
-│   ├── project-context.md # Multi-project config loader
+├── skills/                    # Detailed skill implementations
+│   ├── project-context.md     # Multi-project config loader
+│   ├── helpers.md             # Common functions across skills
 │   │
-│   ├── task-planning/     # Task planning workflows
+│   ├── task-planning/         # Task planning skills
 │   │   ├── README.md              # Reference documentation
-│   │   ├── default-mode.md        # Planning workflow (existing + new tasks)
-│   │   ├── in-progress-mode.md    # Reconciliation workflow
+│   │   ├── config.md              # Configuration reference
+│   │   ├── default-mode.md        # Planning skill (existing + new tasks)
+│   │   ├── in-progress-mode.md    # Reconciliation skill
+│   │   ├── sync-docs.md           # Sync docs with implementation
 │   │   └── quick-reference.md     # Quick lookup guide
 │   │
-│   ├── code-review/       # Code review workflows
+│   ├── code-review/           # Code review skills
 │   │   ├── README.md              # Reference documentation
-│   │   ├── interactive.md         # Manual step-by-step review
-│   │   ├── quick.md               # Fast review for small PRs
 │   │   ├── report.md              # Automated comprehensive review
+│   │   ├── bug-zapper.md          # Bug hunting (dependencies, types)
+│   │   ├── quick.md               # Fast review for small PRs
+│   │   ├── interactive.md         # Manual step-by-step review
 │   │   └── external.md            # Evaluate external reviews
 │   │
-│   ├── release/           # Release workflows
+│   ├── release/               # Release skills
 │   │   ├── README.md              # Reference documentation
-│   │   └── main.md                # CI/CD release workflow
+│   │   └── main.md                # CI/CD release skill
 │   │
-│   ├── commit-planning/   # Commit planning workflow
+│   ├── commit-planning/       # Commit planning skill
 │   │   ├── README.md              # Reference documentation
 │   │   └── main.md                # Commit planning implementation
 │   │
-│   └── update-docs/        # Documentation update workflow
+│   └── update-docs/           # Documentation update skill
 │       ├── README.md              # Reference documentation
-│       ├── knowledge-base.md      # Update knowledge base docs
-│       ├── inline.md              # Update inline code docs
-│       └── api.md                 # Update API documentation
+│       ├── task-mode.md           # Update docs from task changes
+│       └── article-mode.md        # Update specific articles
 │
-├── templates/               # Document templates
-│   └── task-planning/
-│       ├── 00-status.md
-│       ├── 01-task-description.md
-│       ├── 02-functional-requirements.md
-│       ├── 03-implementation-plan.md
-│       ├── 04-todo.md
-│       └── logs/
-│           ├── decisions.md      # ADR-style decisions
-│           └── review.md         # External review feedback
+├── templates/                 # Document templates
+│   ├── task-planning/
+│   │   ├── README.md                 # Template usage guide
+│   │   ├── 00-status.md
+│   │   ├── 01-task-description.md
+│   │   ├── 02-functional-requirements.md
+│   │   ├── 03-implementation-plan.md
+│   │   ├── 04-todo.md
+│   │   └── logs/
+│   │       ├── decisions.md       # ADR-style decisions
+│   │       └── review.md          # External review feedback
+│   ├── code-review/
+│   │   ├── interactive-notes.md   # Interactive review notes
+│   │   ├── quick-checklist.md     # Quick review checklist
+│   │   └── review-report.md       # Full review report
+│   ├── update-docs/
+│   │   ├── updated-article.md     # Updated article template
+│   │   ├── summary.md             # Update summary template
+│   │   └── review-checklist.md    # Review checklist template
+│   └── projects/
+│       ├── project-template.yaml  # Full project config template
+│       ├── minimal-template.yaml  # Minimal project config
+│       └── README.md              # Template usage guide
 │
-├── lib/                     # Shell libraries and CLI tools
-│   ├── bin/                     # User-facing CLI wrappers (call these)
-│   │   ├── gather-context       # Gather task context for agents
-│   │   └── detect-mode          # Detect planning mode from git state
+├── lib/                       # Shell libraries and CLI tools
+│   ├── bin/                       # User-facing CLI wrappers (call these)
+│   │   ├── gather-context         # Gather task context for agents
+│   │   └── detect-mode            # Detect planning mode from git state
 │   │
-│   ├── posix/                   # POSIX fallback scripts (sh/dash/zsh)
-│   │   ├── core.sh              # Shared POSIX utilities
-│   │   ├── gather-context.sh    # Minimal context gatherer
-│   │   └── detect-mode.sh       # Minimal mode detector
+│   ├── posix/                     # POSIX fallback scripts (sh/dash/zsh)
+│   │   ├── core.sh                # Shared POSIX utilities
+│   │   ├── gather-context.sh      # Minimal context gatherer
+│   │   └── detect-mode.sh         # Minimal mode detector
 │   │
-│   ├── common.sh                # Bash logging, colors, error handling
-│   ├── git-utils.sh             # Git operations
-│   ├── issue-utils.sh           # Issue key extraction/validation
-│   ├── task-docs-utils.sh       # Task docs folder management
-│   ├── todo-utils.sh            # TodoWrite JSON patterns
-│   ├── template-utils.sh        # Template rendering
-│   ├── project-context.sh       # YAML config loading
-│   ├── gather-context.sh        # Bash-enhanced (rich output)
-│   └── detect-mode.sh           # Bash-enhanced (--pretty option)
+│   ├── common.sh                  # Bash logging, colors, error handling
+│   ├── git-utils.sh               # Git operations
+│   ├── issue-utils.sh             # Issue key extraction/validation
+│   ├── task-docs-utils.sh         # Task docs folder management
+│   ├── todo-utils.sh              # TodoWrite JSON patterns
+│   ├── template-utils.sh          # Template rendering
+│   ├── project-context.sh         # YAML config loading
+│   ├── gather-context.sh          # Bash-enhanced (rich output)
+│   └── detect-mode.sh             # Bash-enhanced (--pretty option)
 │
-├── modules/                 # Reusable rule/guideline modules
-│   ├── shared/                   # Cross-workflow modules
-│   │   ├── quick-context.md          # Fast context scan for mode detection
-│   │   ├── full-context.md           # Complete context gathering
-│   │   ├── approval-gate.md          # Approval checkpoint pattern
-│   │   ├── todo-patterns.md          # TodoWrite patterns
-│   │   ├── youtrack-fetch-issue.md   # YouTrack issue fetching
-│   │   └── ...                       # Other shared modules
+├── modules/                   # Reusable rule/guideline modules
+│   ├── shared/                    # Cross-skill modules (9 modules)
+│   │   ├── quick-context.md           # Fast context scan for mode detection
+│   │   ├── full-context.md            # Complete context gathering
+│   │   ├── approval-gate.md           # Approval checkpoint pattern
+│   │   ├── plan-mode-discipline.md    # Read-only planning discipline
+│   │   ├── todo-patterns.md           # TodoWrite patterns
+│   │   ├── standards-loading.md       # Load project standards
+│   │   ├── git-safety-checks.md       # Git safety validations
+│   │   ├── youtrack-fetch-issue.md    # YouTrack issue fetching
+│   │   └── youtrack-create-issue.md   # YouTrack issue creation
 │   │
-│   ├── code-review/              # Code review specific
-│   │   ├── review-rules.md           # Review guidelines
-│   │   ├── severity-levels.md        # Issue classification
-│   │   └── citation-standards.md     # Citation formats
+│   ├── code-review/               # Code review specific (16 modules)
+│   │   ├── review-rules.md            # Review guidelines
+│   │   ├── severity-levels.md         # Issue classification
+│   │   ├── citation-standards.md      # Citation formats
+│   │   ├── architecture-review.md     # Architecture compliance
+│   │   ├── correctness-review.md      # Logic and robustness
+│   │   ├── code-quality-review.md     # Style and quality
+│   │   ├── bugs-review.md             # Bug detection patterns
+│   │   ├── test-review.md             # Test quality and execution
+│   │   ├── auto-fix-phase.md          # Linter and debug cleanup
+│   │   ├── generate-report.md         # Report compilation
+│   │   ├── critical-checks.md         # Quick critical checks
+│   │   ├── performance-security.md    # Performance and security
+│   │   ├── linter-failure-handling.md  # Handle linter failures
+│   │   ├── bug-categories.md          # Bug type classification
+│   │   ├── session-review-file.md     # Session review output
+│   │   └── append-review-log.md       # Cumulative review log
 │   │
-│   ├── task-planning/            # Task planning specific
-│   │   ├── planning-core.md          # Core planning logic
-│   │   ├── create-task-folder.md     # Folder creation
-│   │   └── ...                       # Other planning modules
+│   ├── task-planning/             # Task planning specific (14 modules)
+│   │   ├── planning-core.md           # Core planning logic
+│   │   ├── create-task-folder.md      # Folder creation
+│   │   ├── ensure-docs-structure.md   # Verify docs exist
+│   │   ├── get-user-context.md        # Get context from user
+│   │   ├── analyze-requirements.md    # Requirements analysis
+│   │   ├── technical-planning.md      # Technical plan creation
+│   │   ├── search-codebase.md         # Codebase exploration
+│   │   ├── resume-existing-task.md    # Resume existing task
+│   │   ├── start-implementation.md    # Begin implementation
+│   │   ├── finalize-documentation.md  # Finalize docs
+│   │   ├── gather-implementation-state.md  # Git/code state
+│   │   ├── compare-and-sync.md        # Compare planned vs actual
+│   │   ├── sync-docs-with-implementation.md  # Sync docs
+│   │   └── standard-docs-structure.md # Standard doc structure
 │   │
-│   └── docs/                     # Documentation update modules
-│       ├── context-strategy.md       # Context gathering strategy
-│       └── style-guide-loading.md    # Style guide loading
+│   └── docs/                      # Documentation update modules
+│       ├── context-strategy.md        # Context gathering strategy
+│       ├── project-variables.md       # PROJECT_* variable reference
+│       └── style-guide-loading.md     # Style guide loading
 │
-└── README.md                # This file
+├── docs/                      # Conceptual documentation
+│   ├── task-planning-overview.md  # High-level overview
+│   └── troubleshooting.md         # Troubleshooting guide
+│
+├── tests/                     # Validation scripts
+│   ├── validate-modules.sh        # Check module references
+│   ├── validate-yaml.sh           # Validate YAML configurations
+│   └── shell-compatibility.sh     # Shell compatibility tests
+│
+└── README.md                  # This file
 ```
 
 ## Multi-Project Support
@@ -171,7 +233,7 @@ mcp_tools:
 
 ### Project Detection
 
-Workflows automatically detect which project you're in:
+Skills automatically detect which project you're in:
 
 ```bash
 cd ~/Projects/starship
@@ -216,7 +278,7 @@ cd ~/Projects/alephbeis-app
    # Should load your YAML file
    ```
 
-**See:** `workflows/project-context.md` for full documentation
+**See:** `skills/project-context.md` for full documentation
 
 ---
 
@@ -235,26 +297,26 @@ Multi-mode task planning with YouTrack integration and automatic project detecti
    - Loads standards, test commands, issue patterns
 
 2. **Auto-Detect Planning Mode:**
-   - Default - Planning workflow (handles existing tasks and new tasks)
-   - In Progress - Reconciliation workflow (sync docs with implementation)
+   - Default - Planning skill (handles existing tasks and new tasks)
+   - In Progress - Reconciliation skill (sync docs with implementation)
 
-3. **Execute Selected Mode Workflow**
+3. **Execute Selected Mode Skill**
 
 **Features:**
 - **Project-aware** - Uses YAML configuration
-- Auto-detects appropriate mode based on context (branch, .task-docs folder, commits)
-- Creates standardized documentation in `.task-docs/{PROJECT_KEY}-XXXX-{slug}/`
+- Auto-detects appropriate mode based on context (branch, task docs folder, commits)
+- Creates standardized documentation in `${PROJECT_TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX-{slug}/`
 - Fetches task from YouTrack (if available)
 - Searches for relevant business docs (if available)
 - Creates detailed implementation plan
 - Mode transitions (Default ↔ In Progress)
 
-**Workflows:**
+**Skills:**
 - Entry: `commands/plan-task-g.md` (orchestrator)
-- Default (Planning): `workflows/task-planning/default-mode.md` - handles existing and new tasks
-- In Progress (Reconciliation): `workflows/task-planning/in-progress-mode.md` - sync docs with implementation
+- Default (Planning): `skills/task-planning/default-mode.md` - handles existing and new tasks
+- In Progress (Reconciliation): `skills/task-planning/in-progress-mode.md` - sync docs with implementation
 
-**See:** `workflows/task-planning/README.md` for details
+**See:** `skills/task-planning/README.md` for details
 
 ---
 
@@ -288,17 +350,17 @@ Multi-mode code review with **automatic project detection** and severity analysi
 - Evaluates linter output (PHPCS, ESLint, PHPStan)
 - Independently verifies each suggestion
 - Accept/Modify/Reject decisions with reasoning
-- Records to `.task-docs/{ISSUE_KEY}-{slug}/logs/review.md`
+- Records to `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
 - Builds review history for learning over time
 
-**Workflows:**
+**Skills:**
 - Entry: `commands/code-review-g.md` (Phase 0 loads project)
-- Interactive: `workflows/code-review/interactive.md`
-- Quick: `workflows/code-review/quick.md`
-- Report: `workflows/code-review/report.md`
-- External: `workflows/code-review/external.md`
+- Interactive: `skills/code-review/interactive.md`
+- Quick: `skills/code-review/quick.md`
+- Report: `skills/code-review/report.md`
+- External: `skills/code-review/external.md`
 
-**See:** `workflows/code-review/README.md` for details
+**See:** `skills/code-review/README.md` for details
 
 ---
 
@@ -316,7 +378,7 @@ Guide releases through CI/CD pipeline with multi-level validation.
    - Feature + Develop - Merge to develop + staging deployment
    - Full Release - Production deployment (develop → master)
 
-3. **Execute Selected Level Workflow**
+3. **Execute Selected Level Skill**
 
 **Features:**
 - **Project-aware** - Uses YAML configuration
@@ -326,11 +388,11 @@ Guide releases through CI/CD pipeline with multi-level validation.
 - Optional YouTrack status update (if configured)
 - Error handling with retry logic
 
-**Workflows:**
+**Skills:**
 - Entry: `commands/release-g.md` (orchestrator)
-- Implementation: `workflows/release/main.md`
+- Implementation: `skills/release/main.md`
 
-**See:** `workflows/release/README.md` for details
+**See:** `skills/release/README.md` for details
 
 ---
 
@@ -376,19 +438,19 @@ Create focused commit plan with clear, structured commit messages.
 - Should be on feature branch (not master/develop)
 - Branch name should include issue key (e.g., `feature/STAR-2233-Add-Feature`)
 
-**Workflows:**
+**Skills:**
 - Entry: `commands/commit-plan-g.md` (orchestrator)
-- Implementation: `workflows/commit-planning/main.md`
+- Implementation: `skills/commit-planning/main.md`
 
-**See:** `workflows/commit-planning/README.md` for details
+**See:** `skills/commit-planning/README.md` for details
 
 ---
 
 ### `/project-context`
 
-Load project-specific configuration for use by other workflows.
+Load project-specific configuration for use by other skills.
 
-**Usage:** Called automatically by `/code-review-g` and other workflows
+**Usage:** Called automatically by `/code-review-g` and other skills
 
 **Can invoke directly:**
 ```bash
@@ -402,45 +464,193 @@ Load project-specific configuration for use by other workflows.
 - Standards file locations
 - Citation formats
 - Test commands
-- Storage locations (`.task-docs/{ISSUE_KEY}/`)
+- Storage locations (`${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}/`)
 - MCP tool availability
 
-**Workflow:** `workflows/project-context.md`
+**Skill:** `skills/project-context.md`
 
 ---
 
 ### `/update-docs-g`
 
-Update documentation to reflect implementation changes.
+Update knowledge base documentation to reflect implementation changes.
 
-**Usage:** `/update-docs-g`
+**Usage:** `/update-docs-g STAR-1234` or `/update-docs-g Article-Name.md` or `/update-docs-g --broad`
 
 **Flow:**
 1. **Phase 0: Load Project Context** (automatic)
    - Detects project from YAML
    - Loads documentation standards and style guides
-   - Identifies documentation locations
+   - Identifies knowledge base location
 
 2. **Select Update Mode:**
-   - Knowledge Base - Update `.task-docs/` and knowledge base files
-   - Inline - Update code comments and docblocks
-   - API - Update API documentation (OpenAPI, etc.)
+   - Task Mode - Update docs based on task implementation changes
+   - Article Mode - Update specific articles directly
+   - Broad Mode - Scan recent tasks for documentation gaps
 
-3. **Execute Selected Mode Workflow**
+3. **Execute Selected Mode Skill**
 
 **Features:**
 - **Project-aware** - Uses YAML configuration
 - **Style-guide compliant** - Follows project documentation standards
 - **Diff-aware** - Analyzes what changed to update relevant docs
-- **Non-destructive** - Preserves existing documentation structure
+- **Non-destructive** - Creates copies in `${PROJECT_TASK_DOCS_DIR}/`, never overwrites originals
 
-**Workflows:**
+**Skills:**
 - Entry: `commands/update-docs-g.md` (orchestrator)
-- Knowledge Base: `workflows/update-docs/knowledge-base.md`
-- Inline: `workflows/update-docs/inline.md`
-- API: `workflows/update-docs/api.md`
+- Task Mode: `skills/update-docs/task-mode.md`
+- Article Mode: `skills/update-docs/article-mode.md`
 
-**See:** `workflows/update-docs/README.md` for details
+**See:** `skills/update-docs/README.md` for details
+
+---
+
+### `/batch-tests-g`
+
+Run all tests organized in batches, fix failures iteratively until green.
+
+**Usage:** `/batch-tests-g`
+
+**Flow:**
+1. Discover and organize tests into batches (~50 tests each)
+2. Present batch plan for approval
+3. Run each batch sequentially
+4. Fix failures as encountered (analyze, fix, rerun single test)
+5. Rerun batch to confirm all pass
+6. Proceed to next batch
+7. Ask to loop again or finish
+
+**Features:**
+- Groups tests by domain/directory
+- Targets ~50 tests per batch for manageability
+- Fixes tests as you go (no accumulating failures)
+- Tracks every fix with TodoWrite
+- Final summary of all changes applied
+
+---
+
+### `/bug-zapper-g`
+
+Hunt for actual bugs by tracing dependencies and verifying correctness.
+
+**Usage:** `/bug-zapper-g`
+
+**Focus:** Will this code crash? Do things exist? Do types match?
+**Not about:** Architecture, standards, style, or requirements.
+
+**Flow:**
+1. Detect context and get user approval
+2. Load review history (check for rejected suggestions)
+3. Gather full context (files, dependencies)
+4. Phase 1: Dependency chain analysis (trace up and down)
+5. Phase 2: Existence verification (classes, methods, properties)
+6. Phase 3: Type mismatch detection
+7. Phase 4: Null safety analysis
+8. Phase 5: Logic error detection
+9. Phase 6: Resource & state bugs
+10. Phase 7: Copy-paste bug detection
+11. Generate bug report
+
+**Features:**
+- **Review-aware** - Skips previously rejected suggestions
+- **Comprehensive** - 7-phase static analysis checklist
+- **Evidence-based** - Specific file:line references with code examples
+- **Non-destructive** - Static analysis only, no code changes
+- Severity ratings: CRITICAL / MAJOR / MINOR
+
+**Skills:**
+- Entry: `commands/bug-zapper-g.md` (orchestrator)
+- Implementation: `skills/code-review/bug-zapper.md`
+
+---
+
+### `/external-review-g`
+
+Evaluate external code reviews (from AI tools, developers, linters) against project standards.
+
+**Usage:** `/external-review-g`
+
+**Flow:**
+1. Detect context
+2. User pastes external review text
+3. Parse suggestions and check for duplicates against review history
+4. Independently evaluate each suggestion against project standards
+5. Present verdict (ACCEPT / MODIFY / REJECT) with reasoning
+6. Apply changes if approved
+7. Update review log
+
+**Features:**
+- **User-first** - Gets review text immediately, loads context in background
+- **Independent** - Evaluates against project standards, not a rubber stamp
+- **History-aware** - Checks past review decisions to avoid re-raising rejected items
+- **Non-destructive** - Verdicts go to chat; files only created when changes applied
+
+**Skills:**
+- Entry: `commands/external-review-g.md` (orchestrator)
+- Implementation: `skills/code-review/external.md`
+
+---
+
+### `/new-task-g`
+
+Plan a new task, ignoring current branch state entirely.
+
+**Usage:** `/new-task-g`
+
+**Flow:**
+1. Get task type from user (feature, bug fix, refactor, enhancement)
+2. Get or create YouTrack issue (or proceed without one)
+3. Create task documentation in `${PROJECT_TASK_DOCS_DIR}/`
+4. Plan implementation
+5. Offer worktree, branch switch, or save plan for later
+
+**Features:**
+- **Ignores current state** - Does not check branch, commits, or uncommitted changes
+- **Worktree support** - Create git worktree to work on new task without disturbing current work
+- **Full planning** - Creates all standard task docs (00-status through 04-todo + logs)
+- **Flexible start** - Can proceed with or without YouTrack issue
+
+---
+
+### `/refresh-context-g`
+
+Re-run context detection to refresh memory about current state.
+
+**Usage:** `/refresh-context-g`
+
+**Flow:**
+1. Quick context scan (detect-mode.sh, branch, issue key, task folder)
+2. Full context if needed (git state, changed files, dependencies)
+
+**Skills:**
+- Entry: `commands/refresh-context-g.md`
+- Uses: `modules/shared/quick-context.md`, `modules/shared/full-context.md`
+
+---
+
+### `/sync-docs-g`
+
+Synchronize task documentation to match the actual implementation.
+
+**Usage:** `/sync-docs-g`
+
+**Flow:**
+1. Detect context
+2. Review all task documentation (00-status through 04-todo + logs)
+3. Review actual implementation (commits, changed files, code structure)
+4. Identify divergences (planned vs implemented)
+5. Get user approval for divergence handling
+6. Rewrite docs to match implementation (as if current code was always the plan)
+7. Create ADRs for significant divergences
+
+**Features:**
+- **Rewrite, don't annotate** - Docs read cleanly, no "deviation" markers
+- **ADR-based history** - Divergences captured in decision log, not inline
+- **Comprehensive** - Updates all 5 core docs plus decision log
+
+**Skills:**
+- Entry: `commands/sync-docs-g.md` (orchestrator)
+- Implementation: `skills/task-planning/sync-docs.md`
 
 ---
 
@@ -451,17 +661,17 @@ Update documentation to reflect implementation changes.
   - Load project context (Phase 0)
   - Auto-detect mode/level based on context
   - Ask user to confirm via AskUserQuestion
-  - Dispatch to appropriate workflow
+  - Dispatch to appropriate skill
   - ~50-300 lines
 
-- **Workflows** (`workflows/*/`): Mode implementations
+- **Skills** (`skills/*/`): Mode implementations
   - Use project configuration from YAML
   - Complete business logic for specific mode
   - Detailed steps and error handling
   - 100-1000+ lines per mode
   - Reusable across projects
 
-- **README.md** (`workflows/*/README.md`): Reference documentation
+- **README.md** (`skills/*/README.md`): Reference documentation
   - Overview of all modes
   - Conventions and best practices
   - Troubleshooting
@@ -469,19 +679,19 @@ Update documentation to reflect implementation changes.
 
 ### 2. Separation of Concerns
 - **Commands** = User interface (CLI invocation)
-- **Workflows** = Implementation (what to do)
+- **Skills** = Implementation (what to do)
 - **Templates** = Document structure (how to format)
 - **Projects** = Configuration (YAML per project)
 
 ### 3. Configuration as Data
 - **YAML files** contain project settings
-- **Workflows** read configuration, not hardcode
-- **Easy maintenance** - update YAML, not workflow code
+- **Skills** read configuration, not hardcode
+- **Easy maintenance** - update YAML, not skill code
 - **Extensible** - add projects by dropping YAML files
 
 ### 4. Discoverable & Self-Documenting
 - Each command has `description:` frontmatter for `/` autocomplete
-- Workflows reference each other with full paths
+- Skills reference each other with full paths
 - README documents all available commands
 - YAML files are human-readable configuration
 
@@ -489,7 +699,7 @@ Update documentation to reflect implementation changes.
 - **Auto-detection** from directory path or git remote
 - **Project-specific** standards, tests, citations
 - **Graceful fallback** to generic.yaml if unknown
-- **One workflow** works everywhere
+- **One skill** works everywhere
 
 ## Templates
 
@@ -520,22 +730,22 @@ Update documentation to reflect implementation changes.
 ## Global vs Project Configuration
 
 ### Global (`~/.claude/`) - Personal
-- **You control** - Your preferences and workflows
+- **You control** - Your preferences and skills
 - **Not committed to git**
 - **Cross-project** - Works in all projects
 - **Contains:**
   - Project YAML configs (`config/projects/*.yaml`)
-  - Reusable workflows (`workflows/`)
+  - Reusable skills (`skills/`)
   - Templates (`templates/`)
   - Commands (`commands/`)
 
 ### Project (`.ai/` or `.claude/`) - Team
-- **Team controls** - Shared standards and workflows
+- **Team controls** - Shared standards and skills
 - **Committed to git**
 - **Project-specific** - Tailored to project needs
 - **Referenced by:**
   - YAML `standards.location: ".ai/rules/"`
-  - Workflows load from these paths
+  - Skills load from these paths
   - Team conventions documented here
 
 **Both coexist:** Project commands override global when present.
@@ -544,12 +754,12 @@ Update documentation to reflect implementation changes.
 
 ## Storage Conventions
 
-### `.task-docs/` Directory Structure
+### `${PROJECT_TASK_DOCS_DIR}` Directory Structure
 
-All workflows use `.task-docs/{ISSUE_KEY}-{slug}/` for task-specific files:
+All skills use `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` for task-specific files:
 
 ```
-{project}/.task-docs/
+${PROJECT_TASK_DOCS_DIR}/
 ├── {ISSUE_KEY}-{slug}/              # Example: STAR-2233-Add-Feature
 │   ├── 00-status.md                 # Task status & overview (index)
 │   ├── 01-task-description.md       # Task description (high-level)
@@ -572,7 +782,7 @@ All workflows use `.task-docs/{ISSUE_KEY}-{slug}/` for task-specific files:
 ```
 
 **Universal Convention** (same for all projects):
-- **Format**: `.task-docs/{ISSUE_KEY}-{slug}/` where slug matches branch name
+- **Format**: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` where slug matches branch name
 - **Issue key**: Extracted from branch name (STAR-####, AB-####, etc.)
 - **Slug**: Title-Case-With-Hyphens from issue title (same as branch)
 - **Root docs (00-04)**: Always created at planning start
@@ -585,7 +795,7 @@ All workflows use `.task-docs/{ISSUE_KEY}-{slug}/` for task-specific files:
 
 ## Integration with YouTrack
 
-Many workflows integrate with YouTrack MCP server:
+Many skills integrate with YouTrack MCP server:
 - Fetch issue details: `mcp__youtrack__get_issue`
 - Update issue status: `mcp__youtrack__update_issue`
 - Search issues: `mcp__youtrack__search_issues`
@@ -600,7 +810,7 @@ Many workflows integrate with YouTrack MCP server:
 
 ## Integration with Laravel Projects
 
-Code review and task planning workflows integrate with Laravel Boost MCP:
+Code review and task planning skills integrate with Laravel Boost MCP:
 - `mcp__laravel-boost__database-schema` - Database structure
 - `mcp__laravel-boost__search-docs` - Laravel ecosystem docs
 - `mcp__laravel-boost__application-info` - App info and packages
@@ -628,18 +838,18 @@ description: Brief description for autocomplete
 
 ## Phase 0: Load Project Context
 
-Execute `/project-context` workflow to get project configuration.
+Execute `/project-context` skill to get project configuration.
 
 ## Ask Questions
 
-Ask mode, parse arguments, then dispatch to workflow.
+Ask mode, parse arguments, then dispatch to skill.
 
-Load and execute workflow from `~/.claude/workflows/new-command/main.md`.
+Load and execute skill from `~/.claude/skills/new-command/main.md`.
 ```
 
-2. **Create workflow** in `workflows/new-command/main.md`:
+2. **Create skill** in `skills/new-command/main.md`:
 ```markdown
-# Workflow Name
+# Skill Name
 
 ## Phase 0: Project Context Available
 
@@ -662,7 +872,7 @@ Detailed steps, error handling, etc.
 
 ## Shell Libraries (`lib/`)
 
-The `lib/` directory contains shell utilities used by workflows and commands.
+The `lib/` directory contains shell utilities used by skills and commands.
 
 ### Structure
 
@@ -696,12 +906,12 @@ lib/
 ~/.claude/lib/bin/detect-mode --pretty  # (bash only - colored output)
 ```
 
-### In Workflows
+### In Skills
 
-Workflows call the bin wrappers:
+Skills call the bin wrappers:
 
 ```bash
-# In commands/*.md or workflows/*.md
+# In commands/*.md or skills/*.md
 ~/.claude/lib/bin/detect-mode
 ~/.claude/lib/bin/gather-context
 ```
@@ -739,7 +949,7 @@ source ~/.claude/lib/project-context.sh  # YAML config loading
 
 - **YAML configs** (`config/projects/*.yaml`): When adding projects or changing project settings
 - **Commands** (`commands/*.md`): When changing invocation interface
-- **Workflows** (`workflows/*/`): When improving implementation
+- **Skills** (`skills/*/`): When improving implementation
 - **Templates** (`templates/`): When standardizing new document types
 - **README**: When adding/changing commands or structure
 
@@ -748,7 +958,7 @@ source ~/.claude/lib/project-context.sh  # YAML config loading
 - ✅ One YAML per project in `config/projects/`
 - ✅ Commands stay thin (<200 lines)
 - ✅ Commands load project context (Phase 0)
-- ✅ Workflows use configuration, don't hardcode
+- ✅ Skills use configuration, don't hardcode
 - ✅ Templates centralized in `templates/`
 - ✅ Full paths in all references
 - ✅ Document new commands in this README
@@ -772,22 +982,22 @@ source ~/.claude/lib/project-context.sh  # YAML config loading
   - Added `lib/posix/` fallback scripts (POSIX-compliant)
   - Bash-enhanced versions with rich output (`--pretty`)
   - Removed redundant modules (replaced by scripts)
-  - Updated all workflow references to use `lib/bin/`
+  - Updated all skill references to use `lib/bin/`
   - Standardized variable naming (`_DIR` suffix)
 
 - **2025-11-14 v3.0**: Multi-project YAML configuration
   - Added `config/projects/` directory for YAML configs
   - Created `starship.yaml`, `alephbeis.yaml`, `generic.yaml`
-  - Added `project-context.md` workflow (YAML loader)
+  - Added `project-context.md` skill (YAML loader)
   - Updated `code-review-g.md` with Phase 0 (load context)
   - Moved template to `templates/task-planning/logs/review.md`
-  - Optimized external review workflow (previous reviews in Phase 4.2)
+  - Optimized external review skill (previous reviews in Phase 4.2)
   - Centralized all templates in `templates/` folder
   - Comprehensive documentation updates
 
 - **2025-11-14 v2.0**: Reorganized to thin controller pattern
   - Moved dispatchers to `commands/`
-  - Organized workflows into subdirectories
+  - Organized skills into subdirectories
   - Standardized all commands to follow same pattern
   - Updated all internal references
   - Created comprehensive documentation
@@ -819,12 +1029,12 @@ code ~/.claude/config/projects/newproject.yaml
 ```bash
 # Extract issue key from branch and find task folder
 ISSUE_KEY=$(git branch --show-current | grep -oE '[A-Z]+-[0-9]+')
-cat .task-docs/${ISSUE_KEY}*/logs/review.md
+cat ${PROJECT_TASK_DOCS_DIR}/${ISSUE_KEY}*/logs/review.md
 ```
 
 ---
 
 **Maintained by:** Shmuel (Personal)
-**Pattern:** Thin Controller → YAML Config → Workflow Implementation
-**Purpose:** Cross-project AI-assisted development workflows
-**Version:** 3.0 (YAML-based multi-project)
+**Pattern:** Thin Controller → YAML Config → Skill Implementation
+**Purpose:** Cross-project AI-assisted development skills
+**Version:** 3.1 (Shell library reorganization)
