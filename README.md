@@ -45,10 +45,20 @@ Reference docs: skills/name/README.md
 │       ├── stella-polaris.yaml    # Stella Polaris project config
 │       └── generic.yaml           # Fallback for unknown projects
 │
+├── agents/                    # Agent definitions (for multi-agent skills)
+│   ├── bug-hunter-backend.md      # PHP/Laravel bug detection (16 phases)
+│   ├── bug-hunter-frontend.md     # Vue/JS/TS bug detection (13 phases)
+│   ├── arch-reviewer.md           # Architecture compliance agent
+│   ├── correctness-reviewer.md    # Logic + perf + security agent
+│   ├── quality-reviewer.md        # Code quality & style agent
+│   ├── test-reviewer.md           # Test quality + execution agent
+│   └── dead-code-reviewer.md      # Dead code + refactor remnants agent
+│
 ├── commands/                  # Orchestrators (invoked via /command-g)
 │   ├── plan-task-g.md         # → skills/task-planning/
 │   ├── new-task-g.md          # → skills/task-planning/ (new task shortcut)
 │   ├── code-review-g.md       # → skills/code-review/
+│   ├── deep-review-g.md       # → skills/deep-review/ (parallel multi-agent)
 │   ├── bug-zapper-g.md        # → skills/code-review/bug-zapper.md
 │   ├── external-review-g.md   # → skills/code-review/external.md
 │   ├── release-g.md           # → skills/release/
@@ -77,6 +87,10 @@ Reference docs: skills/name/README.md
 │   │   ├── quick.md               # Fast review for small PRs
 │   │   ├── interactive.md         # Manual step-by-step review
 │   │   └── external.md            # Evaluate external reviews
+│   │
+│   ├── deep-review/           # Deep review (parallel multi-agent)
+│   │   ├── README.md              # Reference documentation
+│   │   └── main.md               # Orchestrator (fan-out/fan-in)
 │   │
 │   ├── release/               # Release skills
 │   │   ├── README.md              # Reference documentation
@@ -147,7 +161,7 @@ Reference docs: skills/name/README.md
 │   │   ├── youtrack-fetch-issue.md    # YouTrack issue fetching
 │   │   └── youtrack-create-issue.md   # YouTrack issue creation
 │   │
-│   ├── code-review/               # Code review specific (16 modules)
+│   ├── code-review/               # Code review specific (17 modules)
 │   │   ├── review-rules.md            # Review guidelines
 │   │   ├── severity-levels.md         # Issue classification
 │   │   ├── citation-standards.md      # Citation formats
@@ -162,6 +176,7 @@ Reference docs: skills/name/README.md
 │   │   ├── performance-security.md    # Performance and security
 │   │   ├── linter-failure-handling.md  # Handle linter failures
 │   │   ├── bug-categories.md          # Bug type classification
+│   │   ├── dead-code-review.md        # Dead code detection
 │   │   ├── session-review-file.md     # Session review output
 │   │   └── append-review-log.md       # Cumulative review log
 │   │
@@ -361,6 +376,59 @@ Multi-mode code review with **automatic project detection** and severity analysi
 - External: `skills/code-review/external.md`
 
 **See:** `skills/code-review/README.md` for details
+
+---
+
+### `/deep-review-g`
+
+**Parallel multi-agent deep code review** with 7 specialized agents running simultaneously.
+
+**Flow:**
+1. **Phase 0: Detect Context** (automatic)
+   - Runs detect-mode.sh
+   - Presents context table
+   - User confirms scope
+
+2. **Gather Context & Auto-Fix:**
+   - Full context gathering (git state, YouTrack, task docs)
+   - Optional auto-fix phase (linter, debug cleanup)
+
+3. **Launch 7 Parallel Agents:**
+   - **bug-hunter-backend** — PHP/Laravel bugs (16 phases: deps, types, null safety, type juggling, TOCTOU, framework misuse, contracts, deviant behavior, etc.)
+   - **bug-hunter-frontend** — Vue/JS/TS bugs (13 phases: reactivity, async hazards, cleanup lifecycle, shadowing, coercion, etc.)
+   - **arch-reviewer** — Architecture compliance (DDD, patterns, Vue 3 readiness)
+   - **correctness-reviewer** — Logic correctness, performance, security (OWASP)
+   - **quality-reviewer** — Code quality & style (naming, typing, PSR-12)
+   - **test-reviewer** — Test quality, coverage, and execution
+   - **dead-code-reviewer** — Unused code, orphaned files, refactor remnants
+
+4. **Synthesize Results:**
+   - Deduplicate findings across agents
+   - Frontend-backend contract mismatch check
+   - Cross-validate CRITICAL findings
+   - Normalize severity levels
+   - Resolve conflicts between agents
+
+5. **Present Unified Report**
+
+**Features:**
+- **7x analysis capacity** — Each agent gets ~200k context window
+- **2-3x faster** — Agents run in parallel
+- **Read-first permissions** — All read ops auto-approved, no interaction pauses
+- **Cross-validation** — Multiple agents flagging same issue = higher confidence
+- **Dead code detection** — Dedicated agent for post-refactor cleanup
+- **Review-aware** — Checks past review decisions to avoid re-raising rejected items
+- **Project-aware** — Uses YAML configuration
+
+**When to use:** Large refactors (>20 files), critical code paths, pre-release reviews.
+**Standard alternative:** `/code-review-g` Report mode (single context, faster for small PRs).
+
+**Skills:**
+- Entry: `commands/deep-review-g.md` (orchestrator)
+- Implementation: `skills/deep-review/main.md`
+- Agents: `agents/bug-hunter-backend.md`, `agents/bug-hunter-frontend.md`, `agents/arch-reviewer.md`, `agents/correctness-reviewer.md`, `agents/quality-reviewer.md`, `agents/test-reviewer.md`, `agents/dead-code-reviewer.md`
+
+**See:** `skills/deep-review/README.md` for details
 
 ---
 
