@@ -12,7 +12,7 @@ history.jsonl
 /plans/
 /statsig/
 /projects/
-/agents/
+# /agents/ — removed: now used for custom agent definitions
 /file-history/
 /conversations/
 /cache/
@@ -27,3 +27,4 @@ stats-cache.json
 .task-docs
 /paste-cache/
 /tasks/
+/image-cache/
