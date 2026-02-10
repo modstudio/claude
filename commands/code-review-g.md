@@ -6,7 +6,7 @@ description: Code review - multi-mode with interactive/quick/report/external (gl
 
 I'll help you review code changes using project-specific standards and test commands.
 
-**Workflow Documentation**: `~/.claude/workflows/code-review/`
+**Skill Documentation**: `~/.claude/skills/code-review/`
 
 ---
 
@@ -15,7 +15,7 @@ I'll help you review code changes using project-specific standards and test comm
 1. **TodoWrite** - Create a todo list with 3 items:
    - "Detect context (run detect-mode.sh)" status=in_progress activeForm="Detecting context"
    - "Select review mode" status=pending activeForm="Selecting review mode"
-   - "Execute selected review workflow" status=pending activeForm="Executing review workflow"
+   - "Execute selected review skill" status=pending activeForm="Executing review skill"
 
 2. **Bash** - Run: `~/.claude/lib/detect-mode.sh --pretty`
 
@@ -60,12 +60,12 @@ Mark todo as completed: "Select review mode"
 
 ### Step 3: Execute Selected Mode
 
-**After reading the workflow file, your FIRST action must be to call TodoWrite with the workflow's todo list (shown at top of file). Then follow the workflow steps.**
+**After reading the skill file, your FIRST action must be to call TodoWrite with the skill's todo list (shown at top of file). Then follow the skill steps.**
 
-Follow the appropriate workflow based on user selection:
+Follow the appropriate skill based on user selection:
 
 #### Report Review (Recommended)
-**Workflow:** `~/.claude/workflows/code-review/report.md`
+**Skill:** `~/.claude/skills/code-review/report.md`
 
 **Modules used:**
 - `shared/full-context.md` - Context gathering (Code Review Mode)
@@ -79,7 +79,7 @@ Follow the appropriate workflow based on user selection:
 **Best for:** Feature branches, regular PR reviews
 
 #### Bug Zapper
-**Workflow:** `~/.claude/workflows/code-review/bug-zapper.md`
+**Skill:** `~/.claude/skills/code-review/bug-zapper.md`
 
 **Modules used:**
 - `shared/quick-context.md` - Quick context detection
@@ -98,7 +98,7 @@ Follow the appropriate workflow based on user selection:
 **Best for:** Finding actual bugs before they crash in production
 
 #### Quick Review
-**Workflow:** `~/.claude/workflows/code-review/quick.md`
+**Skill:** `~/.claude/skills/code-review/quick.md`
 
 **Modules used:**
 - `critical-checks.md` - Quick checks for critical file types
@@ -108,7 +108,7 @@ Follow the appropriate workflow based on user selection:
 **Best for:** Small PRs, bug fixes (<500 lines)
 
 #### Interactive Review
-**Workflow:** `~/.claude/workflows/code-review/interactive.md`
+**Skill:** `~/.claude/skills/code-review/interactive.md`
 
 **Modules used:**
 - All review modules with STOP points between each
@@ -117,7 +117,7 @@ Follow the appropriate workflow based on user selection:
 **Best for:** Complex multi-commit changes, need full control
 
 #### External Review Evaluation
-**Workflow:** `~/.claude/workflows/code-review/external.md`
+**Skill:** `~/.claude/skills/code-review/external.md`
 
 **Modules used:**
 - `shared/full-context.md` - Context gathering (Code Review Mode)
@@ -135,11 +135,11 @@ commands/code-review-g.md (entry point)
   ├── modules/shared/quick-context.md
   │
   └── Select Mode:
-      ├── workflows/code-review/report.md
-      ├── workflows/code-review/bug-zapper.md    <- Bug hunting mode
-      ├── workflows/code-review/quick.md
-      ├── workflows/code-review/interactive.md
-      └── workflows/code-review/external.md
+      ├── skills/code-review/report.md
+      ├── skills/code-review/bug-zapper.md    <- Bug hunting mode
+      ├── skills/code-review/quick.md
+      ├── skills/code-review/interactive.md
+      └── skills/code-review/external.md
           │
           └── Each calls shared modules:
               ├── modules/shared/full-context.md (Code Review Mode)
@@ -203,7 +203,7 @@ git diff --name-only $PROJECT_BASE_BRANCH...HEAD -- '*.php' | xargs -I {} php-cs
 
 1. **FIRST:** Create TodoWrite with all steps
 2. **Follow todos in order** - mark in_progress → completed
-3. **Context loading happens in the workflow** - each mode loads what it needs
+3. **Context loading happens in the skill** - each mode loads what it needs
 4. Reference standards with proper citations
 5. Run tests using project test commands
 

@@ -4,7 +4,7 @@
 Discover and load documentation style guides for consistent knowledge base updates.
 
 ## Scope
-DOCS - Used by: update-docs workflows (task-mode, article-mode)
+DOCS - Used by: update-docs skills (task-mode, article-mode)
 
 ## Mode
 READ-ONLY
@@ -13,7 +13,7 @@ READ-ONLY
 
 ## When to Use
 - Before creating or updating any knowledge base article
-- At the start of update-docs workflow
+- At the start of update-docs skill
 - When verifying documentation changes against project standards
 
 ---

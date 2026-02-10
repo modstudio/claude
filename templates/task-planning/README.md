@@ -4,7 +4,7 @@ This directory contains standardized templates for task planning documentation.
 
 ## Purpose
 
-These templates are used by the Task Planning Workflow to create consistent documentation structure for all tasks in `${PROJECT_TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX/` folders.
+These templates are used by the Task Planning Skill to create consistent documentation structure for all tasks in `${PROJECT_TASK_DOCS_DIR}/{PROJECT_KEY}-XXXX/` folders.
 
 ## Template Structure
 
@@ -44,7 +44,7 @@ ${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 All documents are created at the start of planning, even if initially empty:
 - **Root docs**: Created with boilerplate during Phase 1 (Discovery)
 - **logs/decisions.md**: Created empty, populated during Phase 2-3 (Requirements/Planning)
-- **logs/review.md**: Created empty, populated during code review workflow
+- **logs/review.md**: Created empty, populated during code review skill
 
 ## Placeholders
 

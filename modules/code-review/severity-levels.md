@@ -7,7 +7,7 @@
 Define severity levels for classifying code review findings and task blockers consistently.
 
 ## Scope
-CODE-REVIEW - Used by: all code review workflows, task planning
+CODE-REVIEW - Used by: all code review skills, task planning
 
 ---
 

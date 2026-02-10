@@ -1,5 +1,5 @@
 #!/bin/bash
-# Validate all module references in workflows and commands
+# Validate all module references in skills and commands
 # Version: 1.0.0
 #
 # Checks that all {{MODULE: path}} references point to existing files.
@@ -24,9 +24,9 @@ BROKEN_REFS=0
 # ============================================================================
 
 validate_module_refs() {
-  local search_dirs=("$CLAUDE_DIR/workflows" "$CLAUDE_DIR/commands")
+  local search_dirs=("$CLAUDE_DIR/skills" "$CLAUDE_DIR/commands")
 
-  log_info "Validating module references in workflows and commands"
+  log_info "Validating module references in skills and commands"
   echo ""
 
   for dir in "${search_dirs[@]}"; do

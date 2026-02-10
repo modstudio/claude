@@ -47,7 +47,7 @@ generate_todos_json() {
 }
 
 # ============================================================================
-# PREDEFINED WORKFLOW TODOS
+# PREDEFINED SKILL TODOS
 # ============================================================================
 
 # Get task planning todos (Default Mode)
@@ -129,7 +129,7 @@ init_workflow_todos() {
       todos_json=$(get_commit_planning_todos)
       ;;
     *)
-      log_error "Unknown workflow type: $workflow_type"
+      log_error "Unknown skill type: $workflow_type"
       return 1
       ;;
   esac
@@ -169,7 +169,7 @@ advance_todo() {
       todos_json=$(get_commit_planning_todos)
       ;;
     *)
-      log_error "Unknown workflow type: $workflow_type"
+      log_error "Unknown skill type: $workflow_type"
       return 1
       ;;
   esac
@@ -215,7 +215,7 @@ format_todos_markdown() {
 }
 
 # ============================================================================
-# WORKFLOW-SPECIFIC HELPERS
+# SKILL-SPECIFIC HELPERS
 # ============================================================================
 
 # Get phase-specific todos for task planning

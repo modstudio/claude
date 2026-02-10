@@ -7,7 +7,7 @@
 Define safety checks for git operations to prevent accidental damage to protected branches.
 
 ## Scope
-SHARED - Used by: commit-planning, release workflows
+SHARED - Used by: commit-planning, release skills
 
 ---
 

@@ -4,7 +4,7 @@
 Append evaluation summary to cumulative review log for circular review prevention.
 
 ## Scope
-CODE-REVIEW - External review workflow
+CODE-REVIEW - External review skill
 
 ## ⚠️ WHEN TO USE
 **ONLY call this module when changes are being applied.**

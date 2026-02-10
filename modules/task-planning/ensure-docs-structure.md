@@ -12,7 +12,7 @@ WRITE-ENABLED (only for creating missing docs)
 ---
 
 ## When to Use
-- Before reading docs in any workflow
+- Before reading docs in any skill
 - In-Progress mode (before reconciliation)
 - Any time you need to ensure docs exist
 

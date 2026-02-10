@@ -1,5 +1,5 @@
 #!/bin/bash
-# Common utilities, error handling, and logging for Claude Code workflows
+# Common utilities, error handling, and logging for Claude Code skills
 # Version: 2.0.0
 
 set -euo pipefail  # Exit on error, undefined var, pipe failure

@@ -11,7 +11,7 @@
 
 **Error:** `.task-docs folder not found in project directory`
 
-**Cause:** Project doesn't have a `.task-docs/` folder yet (it's project-local, not global)
+**Cause:** Project doesn't have a task docs folder yet (`${PROJECT_TASK_DOCS_DIR}` is project-local, not global)
 
 **Fix:**
 ```bash
@@ -23,7 +23,7 @@ mkdir .task-docs
 echo '.task-docs' >> .gitignore
 ```
 
-**Why this happens:** In v2.0+, `.task-docs` is project-local (each project has its own), not global (`~/.task-docs`).
+**Why this happens:** In v2.0+, `${PROJECT_TASK_DOCS_DIR}` is project-local (each project has its own).
 
 ---
 
@@ -153,11 +153,11 @@ echo $PROJECT_ISSUE_REGEX  # After loading project context
 
 ### Task Folder Already Exists
 
-**Warning:** `Task folder already exists: .task-docs/STAR-1234-Feature-Name`
+**Warning:** `Task folder already exists: ${PROJECT_TASK_DOCS_DIR}/STAR-1234-Feature-Name`
 
 **Cause:** Trying to create a task folder that already exists
 
-**Not an error:** This is usually fine - workflows will use the existing folder
+**Not an error:** This is usually fine - skills will use the existing folder
 
 **If you want to start fresh:**
 ```bash
@@ -189,7 +189,7 @@ cd /path/to/your/project
 
 ### Permission Denied
 
-**Error:** `Permission denied` when creating .task-docs or running scripts
+**Error:** `Permission denied` when creating task docs folder or running scripts
 
 **Cause:** File permissions or ownership issues
 

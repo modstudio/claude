@@ -4,7 +4,7 @@
 Fetch issue details from YouTrack.
 
 ## Scope
-SHARED - Used by: task-planning, code-review, release workflows
+SHARED - Used by: task-planning, code-review, release skills
 
 ## Mode
 READ-ONLY

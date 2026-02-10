@@ -4,31 +4,31 @@
 **Version:** 2.1.0
 
 ## Purpose
-Define standard patterns for using TodoWrite to track workflow progress consistently.
+Define standard patterns for using TodoWrite to track skill progress consistently.
 
 ## Scope
-SHARED - Used by: all workflows
+SHARED - Used by: all skills
 
 ---
 
 ## ⛔ CRITICAL: TodoWrite MUST Be First Action
 
-**Every workflow MUST initialize TodoWrite as its VERY FIRST action.**
+**Every skill MUST initialize TodoWrite as its VERY FIRST action.**
 
-When entering any workflow:
-1. **FIRST:** Call TodoWrite with the workflow's todo list (first item `in_progress`)
+When entering any skill:
+1. **FIRST:** Call TodoWrite with the skill's todo list (first item `in_progress`)
 2. **THEN:** Load project context and begin execution
 
 **Why:** Agents skip TodoWrite if it comes after other actions. Making it first ensures visibility.
 
 ---
 
-## Workflow Transition Pattern
+## Skill Transition Pattern
 
-When transitioning from an entry point to a specific workflow:
+When transitioning from an entry point to a specific skill:
 
 1. Entry point creates initial 3-step todos (detect, select mode, execute)
-2. When entering the selected workflow, **RELOAD** the todo list with that workflow's specific todos
+2. When entering the selected skill, **RELOAD** the todo list with that skill's specific todos
 3. The new todos replace the entry point todos entirely
 
 **Example:** `/plan-task-g` → selects "Default Mode" → reloads with 9-step planning todos
@@ -37,7 +37,7 @@ When transitioning from an entry point to a specific workflow:
 
 ## Initializing Progress Tracking
 
-Use the **TodoWrite** tool to track workflow progress.
+Use the **TodoWrite** tool to track skill progress.
 
 ### Getting Standard Todos
 
@@ -102,8 +102,8 @@ TODOS_JSON=$(init_workflow_todos "task_planning")  # or code_review, release, co
 
 ### ✅ DO
 
-1. **Initialize at workflow start**
-   - Always create todo list at the beginning of workflow execution
+1. **Initialize at skill start**
+   - Always create todo list at the beginning of skill execution
 
 2. **Keep ONE item in_progress**
    - Exactly one todo should be "in_progress" at any time
@@ -121,7 +121,7 @@ TODOS_JSON=$(init_workflow_todos "task_planning")  # or code_review, release, co
 ### ❌ DON'T
 
 1. **Don't skip initialization**
-   - Every workflow needs progress tracking
+   - Every skill needs progress tracking
 
 2. **Don't have multiple in_progress**
    - Only ONE step at a time
@@ -163,23 +163,23 @@ PHASE_TODOS=$(get_task_planning_phase_todos 2)
 # (Use TodoWrite tool with the JSON)
 ```
 
-This provides more granular tracking within each major workflow phase.
+This provides more granular tracking within each major skill phase.
 
 ---
 
 ## Benefits
 
 - ✅ **Visibility** - User always knows current progress
-- ✅ **Consistency** - Same pattern across all workflows
+- ✅ **Consistency** - Same pattern across all skills
 - ✅ **Clarity** - Clear what's done, what's current, what's next
 - ✅ **Accountability** - Track every step explicitly
-- ✅ **Debugging** - Easy to see where workflow stopped if error occurs
+- ✅ **Debugging** - Easy to see where skill stopped if error occurs
 
 ---
 
 ## Integration Example
 
-In your workflow documentation:
+In your skill documentation:
 
 ```markdown
 ## Step 1: Load Project Context

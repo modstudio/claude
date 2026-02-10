@@ -7,7 +7,7 @@
 Document all PROJECT_* variables available after project configuration is loaded.
 
 ## Scope
-DOCS - Reference for: all workflows using project context
+DOCS - Reference for: all skills using project context
 
 **Type:** Reference documentation (not an action module)
 
@@ -15,12 +15,12 @@ DOCS - Reference for: all workflows using project context
 
 ## How Context Is Loaded
 
-Project context is loaded by the parent command (e.g., `/code-review-g`, `/release-g`, `/commit-plan-g`) before the workflow starts. The command:
+Project context is loaded by the parent command (e.g., `/code-review-g`, `/release-g`, `/commit-plan-g`) before the skill starts. The command:
 
 1. Detects the current project from git remote or working directory
 2. Loads the appropriate YAML config from `~/.claude/config/projects/`
 3. Extracts issue key from branch name using the project's regex pattern
-4. Sets all variables for use in the workflow
+4. Sets all variables for use in the skill
 
 ---
 
@@ -123,7 +123,7 @@ $PROJECT_TEST_CMD_UNIT tests/Unit/MyTest.php
 
 Task docs are stored at: `{PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
 
-Example: `.task-docs/STAR-1234-add-feature/`
+Example: `${PROJECT_TASK_DOCS_DIR}/STAR-1234-add-feature/`
 
 ---
 

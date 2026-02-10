@@ -7,13 +7,13 @@
 Define consistent citation formats for referencing project standards in code review findings.
 
 ## Scope
-CODE-REVIEW - Used by: all code review workflows
+CODE-REVIEW - Used by: all code review skills
 
 ---
 
 ## SSOT Principle (Single Source of Truth)
 
-**Never duplicate rules inside workflows or reports.**
+**Never duplicate rules inside skills or reports.**
 
 1. **Consult** standard files from `PROJECT_STANDARDS_DIR` (e.g., `.ai/rules/`)
 2. **Cite** findings using the project's citation format

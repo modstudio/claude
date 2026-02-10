@@ -226,10 +226,10 @@ is_working_directory_clean() {
 }
 
 # ============================================================================
-# WORKFLOW DETECTION
+# STATE DETECTION
 # ============================================================================
 
-# Detect current git workflow state
+# Detect current git state
 # Returns: "clean", "uncommitted", "commits", "both"
 detect_git_state() {
   require_git_repo

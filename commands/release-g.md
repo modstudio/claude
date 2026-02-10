@@ -6,7 +6,7 @@ description: CI/CD release with feature/develop/production levels (global)
 
 I'll help you guide a release through the CI/CD pipeline.
 
-**Workflow:** `~/.claude/workflows/release/main.md`
+**Skill:** `~/.claude/skills/release/main.md`
 
 ---
 
@@ -21,7 +21,7 @@ TodoWrite({
   todos: [
     {content: "Detect context (issue key, branch, git state)", status: "pending", activeForm: "Detecting context"},
     {content: "Select release level and CI mode", status: "pending", activeForm: "Selecting options"},
-    {content: "Execute release workflow", status: "pending", activeForm: "Executing release workflow"}
+    {content: "Execute release skill", status: "pending", activeForm: "Executing release skill"}
   ]
 })
 ```
@@ -85,11 +85,11 @@ Mark todo as completed: "Select release level and CI mode"
 
 ---
 
-### Step 4: Execute Release Workflow
+### Step 4: Execute Release Skill
 
-Mark todo as in_progress: "Execute release workflow"
+Mark todo as in_progress: "Execute release skill"
 
-Follow: `~/.claude/workflows/release/main.md`
+Follow: `~/.claude/skills/release/main.md`
 
 **Levels based on selection:**
 - **Feature Only:** Level 1
@@ -136,7 +136,7 @@ git diff --name-only $PROJECT_BASE_BRANCH...HEAD -- '*.php' | xargs -I {} php-cs
 
 ## Key Reminders
 
-1. **FIRST:** Create TodoWrite with all 3 steps (this enforces the workflow order)
+1. **FIRST:** Create TodoWrite with all 3 steps (this enforces the skill order)
 2. **Follow todos in order** - mark in_progress → completed for each
 3. **Both questions (level + CI mode) asked together** - cannot skip either
 4. CI quality failures: only fix code we actually changed (see above)

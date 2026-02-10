@@ -2,16 +2,16 @@
 description: Task planning with YouTrack integration - multi-project support (global)
 ---
 
-You are helping the user with task planning following the Task Planning Workflow.
+You are helping the user with task planning following the Task Planning Skill.
 
 ## Documentation
 
-**Workflows:** `~/.claude/workflows/task-planning/`
-- `default-mode.md` - Planning workflow (handles both existing tasks and new tasks)
-- `in-progress-mode.md` - Reconciliation workflow (sync docs with implementation reality)
+**Skills:** `~/.claude/skills/task-planning/`
+- `default-mode.md` - Planning skill (handles both existing tasks and new tasks)
+- `in-progress-mode.md` - Reconciliation skill (sync docs with implementation reality)
 
 **Modules:** `~/.claude/modules/`
-- `shared/` - Cross-workflow modules (youtrack, approval-gate, quick-context)
+- `shared/` - Cross-skill modules (youtrack, approval-gate, quick-context)
 - `task-planning/` - Task-planning specific modules (planning-core, get-user-context, etc.)
 
 ---
@@ -29,7 +29,7 @@ TodoWrite({
   todos: [
     {content: "Detect context (run detect-mode.sh)", status: "in_progress", activeForm: "Detecting context"},
     {content: "Confirm planning mode with user", status: "pending", activeForm: "Confirming planning mode"},
-    {content: "Execute selected planning workflow", status: "pending", activeForm: "Executing planning workflow"}
+    {content: "Execute selected planning skill", status: "pending", activeForm: "Executing planning skill"}
   ]
 })
 ```
@@ -73,7 +73,7 @@ TodoWrite({
   todos: [
     {content: "Detect context (run detect-mode.sh)", status: "completed", activeForm: "Context detected"},
     {content: "Confirm planning mode with user", status: "in_progress", activeForm: "Confirming planning mode"},
-    {content: "Execute selected planning workflow", status: "pending", activeForm: "Executing planning workflow"}
+    {content: "Execute selected planning skill", status: "pending", activeForm: "Executing planning skill"}
   ]
 })
 ```
@@ -133,9 +133,9 @@ If detect-mode found an ISSUE_KEY, show it as first option. Otherwise only show 
 
 ### Step 4: Execute Selected Path
 
-**Map user selection to workflow:**
+**Map user selection to skill:**
 
-| Selection | ISSUE_KEY | Workflow |
+| Selection | ISSUE_KEY | Skill |
 |-----------|-----------|----------|
 | Existing task | From Step 3b (detected or user-provided) | `default-mode.md` |
 | New task | `none` (get context from user) | `default-mode.md` → get-user-context |
@@ -144,7 +144,7 @@ If detect-mode found an ISSUE_KEY, show it as first option. Otherwise only show 
 ---
 
 #### Existing Task / New Task → Default Mode
-→ **Controller:** `~/.claude/workflows/task-planning/default-mode.md`
+→ **Controller:** `~/.claude/skills/task-planning/default-mode.md`
 
 **Branch 1: Context Source**
 - Existing task (has issue key) → fetch from YouTrack
@@ -167,7 +167,7 @@ If detect-mode found an ISSUE_KEY, show it as first option. Otherwise only show 
 ---
 
 #### In Progress → Reconciliation Mode
-→ **Controller:** `~/.claude/workflows/task-planning/in-progress-mode.md`
+→ **Controller:** `~/.claude/skills/task-planning/in-progress-mode.md`
 
 Syncs documentation with implementation reality (code-first scenarios).
 
@@ -183,7 +183,7 @@ Syncs documentation with implementation reality (code-first scenarios).
 
 ## Module Execution Pattern
 
-For each todo in the workflow:
+For each todo in the skill:
 
 1. **Read** the module file
 2. **Follow** its instructions exactly

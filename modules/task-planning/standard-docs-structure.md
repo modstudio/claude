@@ -18,7 +18,7 @@ ${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 - `ISSUE_KEY`: YouTrack issue key (e.g., STAR-1234)
 - `slug`: Title-cased summary (e.g., Fix-Login-Error)
 
-**Example:** `.task-docs/STAR-1234-Fix-Login-Error/`
+**Example:** `${PROJECT_TASK_DOCS_DIR}/STAR-1234-Fix-Login-Error/`
 
 ---
 

@@ -4,10 +4,10 @@
 **Version:** 1.0.0
 
 ## Purpose
-Define the two-phase context gathering strategy: light scan for mode detection, full scan for workflow execution.
+Define the two-phase context gathering strategy: light scan for mode detection, full scan for skill execution.
 
 ## Scope
-DOCS - Reference for: task-planning, update-docs workflows
+DOCS - Reference for: task-planning, update-docs skills
 
 **Problem**: Full context is hundreds of lines, hidden by default, user can't see key findings.
 

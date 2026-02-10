@@ -65,7 +65,7 @@ Each review section should include:
 **Reviewer:** {External source - AI tool/human/linter/etc}
 **Branch:** {branch-name}
 **Commit Range/State:** {git commit hash or range}
-**Evaluator:** Claude Code (external review workflow)
+**Evaluator:** Claude Code (external review skill)
 
 ### Context
 

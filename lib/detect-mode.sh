@@ -1,5 +1,5 @@
 #!/bin/bash
-# Detect appropriate planning/workflow mode based on current state (bash-enhanced)
+# Detect appropriate planning/skill mode based on current state (bash-enhanced)
 # Version: 2.0.0
 # Features: Colored output, rich error handling, comprehensive git analysis
 
@@ -156,7 +156,7 @@ show_help() {
   cat << 'EOF'
 Usage: detect-mode [OPTIONS]
 
-Detect appropriate planning/workflow mode based on current git state.
+Detect appropriate planning/skill mode based on current git state.
 
 Options:
   --json, -j      Output in JSON format
@@ -164,7 +164,7 @@ Options:
   --help, -h      Show this help
 
 Modes:
-  default       Planning workflow - handles existing tasks and new tasks
+  default       Planning skill - handles existing tasks and new tasks
   in_progress   Reconciliation - sync docs with existing implementation
 
 Output Fields:

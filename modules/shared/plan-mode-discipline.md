@@ -7,7 +7,7 @@
 Enforce separation between planning (read-only) and implementation (write) phases.
 
 ## Scope
-SHARED - Used by: task-planning workflows
+SHARED - Used by: task-planning skills
 
 **Core principle**: Separate planning from implementation. Never modify anything during planning.
 
@@ -50,7 +50,7 @@ Plan Mode ensures:
 
 ### Task Docs Exception
 
-**Task docs folder (`.task-docs/`) may be created and written to during planning.**
+**Task docs folder (`${PROJECT_TASK_DOCS_DIR}/`) may be created and written to during planning.**
 
 This is intentional because:
 - Task docs track planning progress and decisions
@@ -58,7 +58,7 @@ This is intentional because:
 - The approval gate controls **implementation**, not documentation
 
 **During planning, you MAY:**
-- Create `.task-docs/{ISSUE_KEY}-{slug}/` folder
+- Create `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` folder
 - Write to task planning documents (00-status.md, 02-functional-requirements.md, etc.)
 - Update decision logs and notes
 
@@ -66,7 +66,7 @@ This is intentional because:
 - Creating git branches
 - Modifying project source code
 - Installing dependencies
-- Any changes outside `.task-docs/`
+- Any changes outside `${PROJECT_TASK_DOCS_DIR}/`
 
 **Read-only Bash allowed:**
 - `git status`, `git log`, `git diff`, `git branch --list`

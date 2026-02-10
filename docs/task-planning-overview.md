@@ -1,10 +1,10 @@
-# Task Planning Workflow: A Human-AI Project Management System
+# Task Planning Skill: A Human-AI Project Management System
 
 ## Executive Summary
 
-This task planning workflow represents a paradigm shift from simple "plan mode" to a **comprehensive project management system** purpose-built for the intersection of human intelligence and AI capabilities.
+This task planning skill represents a paradigm shift from simple "plan mode" to a **comprehensive project management system** purpose-built for the intersection of human intelligence and AI capabilities.
 
-Where standard plan mode produces a single document and moves on, this workflow creates a **living documentation ecosystem** that supports the entire development lifecycle - from initial discovery through implementation, review, and completion.
+Where standard plan mode produces a single document and moves on, this skill creates a **living documentation ecosystem** that supports the entire development lifecycle - from initial discovery through implementation, review, and completion.
 
 ---
 
@@ -12,10 +12,10 @@ Where standard plan mode produces a single document and moves on, this workflow 
 
 ### Separation of Concerns
 
-Unlike monolithic planning approaches, this workflow recognizes that different aspects of a task require different types of thinking, documentation, and interaction:
+Unlike monolithic planning approaches, this skill recognizes that different aspects of a task require different types of thinking, documentation, and interaction:
 
 ```
-Standard Plan Mode          |  Task Planning Workflow
+Standard Plan Mode          |  Task Planning Skill
 ----------------------------|----------------------------------------
 Single plan document        |  Specialized documents by purpose:
                             |
@@ -32,11 +32,11 @@ Each document serves a distinct purpose, can be updated independently, and provi
 
 ---
 
-## The Interactive Human-AI Workflow
+## The Interactive Human-AI Skill
 
 ### Phase-Based Collaboration
 
-The workflow doesn't just plan - it creates a **structured dialogue** between developer and AI agent:
+The skill doesn't just plan - it creates a **structured dialogue** between developer and AI agent:
 
 ```
 +----------------------------------------------------------------+
@@ -139,8 +139,8 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - Must re-explain task each session
 - No memory of decisions made
 
-**Task Planning Workflow:**
-- All context persisted in `.task-docs/{ISSUE_KEY}-{slug}/`
+**Task Planning Skill:**
+- All context persisted in `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
 - Any session can resume with full context
 - Decisions preserved in decision log
 - Progress tracked across days/weeks
@@ -152,7 +152,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - Hard to find specific information
 - Updates affect entire plan
 
-**Task Planning Workflow:**
+**Task Planning Skill:**
 - Each document has one purpose
 - Quick access to specific information
 - Independent updates without side effects
@@ -165,7 +165,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - Binary interaction
 - Human expertise underutilized
 
-**Task Planning Workflow:**
+**Task Planning Skill:**
 - Structured dialogue at each phase
 - Human provides domain knowledge, AI provides analysis
 - Questions surfaced and answered collaboratively
@@ -176,7 +176,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 **Standard Plan Mode:**
 - One mode: "Plan this"
 
-**Task Planning Workflow:**
+**Task Planning Skill:**
 - **Default Mode**: Planning (existing tasks + new tasks)
 - **In Progress Mode**: Reconciliation (sync docs with implementation)
 - Mode detected automatically or selected explicitly
@@ -188,10 +188,10 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - No link to issue tracking
 - No connection to code reviews
 
-**Task Planning Workflow:**
+**Task Planning Skill:**
 - YouTrack integration for issue context
 - Knowledge base integration for domain rules
-- Code review workflow integration
+- Code review skill integration
 - Git branch management
 - Test execution integration
 
@@ -200,7 +200,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 ## The Document Ecosystem
 
 ```
-.task-docs/{ISSUE_KEY}-{slug}/
+${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 |
 +-- 00-status.md                 <- ENTRY POINT
 |   * Current phase & progress
@@ -256,7 +256,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 - **Knowledge transfer**: New team members can understand any task
 - **Audit trail**: Full history of decisions and changes
 - **Review efficiency**: Reviews build on previous feedback
-- **Consistent process**: Same workflow across all tasks
+- **Consistent process**: Same skill across all tasks
 
 ### For AI Agents
 
@@ -269,7 +269,7 @@ The workflow doesn't just plan - it creates a **structured dialogue** between de
 
 ## The Human-AI Partnership
 
-This workflow embodies a specific philosophy about human-AI collaboration:
+This skill embodies a specific philosophy about human-AI collaboration:
 
 ```
 +------------------------------------------------------------+
@@ -287,7 +287,7 @@ This workflow embodies a specific philosophy about human-AI collaboration:
 |                    | SYNERGY |                             |
 |                    +---------+                             |
 |                                                            |
-|   The workflow creates structured touchpoints where        |
+|   The skill creates structured touchpoints where        |
 |   human insight and AI capability combine:                 |
 |                                                            |
 |   * Discovery: AI gathers, human validates                 |
@@ -302,16 +302,16 @@ This workflow embodies a specific philosophy about human-AI collaboration:
 
 ## Comparison Summary
 
-| Aspect | Standard Plan Mode | Task Planning Workflow |
+| Aspect | Standard Plan Mode | Task Planning Skill |
 |--------|-------------------|----------------------|
 | **Documents** | 1 monolithic plan | 7+ specialized documents |
-| **Persistence** | Session only | Permanent in `.task-docs/` |
+| **Persistence** | Session only | Permanent in `${PROJECT_TASK_DOCS_DIR}/` |
 | **Context** | Lost between sessions | Preserved across sessions |
 | **Collaboration** | AI produces, human accepts | Structured dialogue |
 | **Modes** | Single mode | Default, In Progress |
 | **Integration** | Standalone | YouTrack, KB, Git, Tests |
 | **Decisions** | Implicit | Explicit decision log |
-| **Reviews** | Not supported | Full review workflow |
+| **Reviews** | Not supported | Full review skill |
 | **Progress** | Not tracked | Real-time status & todo |
 | **Resume** | Start over | Instant context reload |
 
@@ -319,7 +319,7 @@ This workflow embodies a specific philosophy about human-AI collaboration:
 
 ## Conclusion
 
-This task planning workflow transforms AI assistance from a simple "give me a plan" interaction into a **comprehensive project management partnership**. It recognizes that:
+This task planning skill transforms AI assistance from a simple "give me a plan" interaction into a **comprehensive project management partnership**. It recognizes that:
 
 1. **Tasks are complex** - requiring multiple types of documentation
 2. **Development is iterative** - requiring persistent context
@@ -330,4 +330,4 @@ The result is a system where human developers and AI agents work together effect
 
 ---
 
-*This workflow is purpose-built for the intersection of human intelligence and AI capability - neither replacing the other, but amplifying both.*
+*This skill is purpose-built for the intersection of human intelligence and AI capability - neither replacing the other, but amplifying both.*

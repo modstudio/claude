@@ -6,7 +6,7 @@ description: Sync task documentation with actual implementation (global)
 
 Synchronize task documentation to match the actual implementation. Rewrite docs as if the current implementation was the original plan.
 
-**Workflow Documentation**: `~/.claude/workflows/task-planning/sync-docs.md`
+**Skill Documentation**: `~/.claude/skills/task-planning/sync-docs.md`
 
 ---
 

@@ -7,7 +7,7 @@
 Define how to discover and load project coding standards from the standards directory.
 
 ## Scope
-SHARED - Used by: code-review, task-planning workflows
+SHARED - Used by: code-review, task-planning skills
 
 ---
 

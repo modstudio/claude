@@ -4,7 +4,7 @@ description: Update knowledge base documentation to reflect implementation chang
 
 You are helping the user update knowledge base documentation to reflect changes made during development.
 
-**Workflow Documentation**: `~/.claude/workflows/update-docs/`
+**Skill Documentation**: `~/.claude/skills/update-docs/`
 - `README.md` - Overview and quick reference
 - `task-mode.md` - Update docs based on task implementation changes
 - `article-mode.md` - Update specific articles directly
@@ -17,20 +17,20 @@ You are helping the user update knowledge base documentation to reflect changes 
 
 This provides all `PROJECT_*` variables including:
 - `PROJECT_KB_LOCATION` - Knowledge base location (e.g., `storage/app/youtrack_docs`)
-- `STORAGE_LOCATION` - Project-local .task-docs folder location
+- `STORAGE_LOCATION` - Project-local task docs folder location (`${PROJECT_TASK_DOCS_DIR}`)
 
 ---
 
 ## Step 1: Initialize Progress Tracking
 
-**IMMEDIATELY create a todo list to track workflow progress:**
+**IMMEDIATELY create a todo list to track skill progress:**
 
 ```javascript
 TodoWrite({
   todos: [
     {content: "Detect documentation update mode", status: "in_progress", activeForm: "Detecting update mode"},
     {content: "Confirm mode with user", status: "pending", activeForm: "Confirming mode"},
-    {content: "Execute selected mode workflow", status: "pending", activeForm: "Executing workflow"},
+    {content: "Execute selected mode skill", status: "pending", activeForm: "Executing skill"},
     {content: "Generate summary and review checklist", status: "pending", activeForm: "Generating summary"}
   ]
 })
@@ -67,7 +67,7 @@ USER_INPUT="${1:-}"
 
 **Task Mode** - User provided issue key or on task branch with existing task folder:
 - Input matches issue pattern (e.g., `STAR-1234`)
-- On task branch with `.task-docs/{ISSUE_KEY}-*/` folder
+- On task branch with `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-*/` folder
 
 **Article Mode** - User provided specific article name/path:
 - Input ends with `.md`
@@ -94,9 +94,9 @@ Ask user to confirm the detected mode:
 
 ## Step 4: Execute Selected Mode
 
-Follow the appropriate workflow based on user selection:
+Follow the appropriate skill based on user selection:
 
-### Task Mode (`~/.claude/workflows/update-docs/task-mode.md`)
+### Task Mode (`~/.claude/skills/update-docs/task-mode.md`)
 
 **Standard task-based documentation update:**
 
@@ -130,7 +130,7 @@ mkdir -p "$DOCS_FOLDER"
 
 ---
 
-### Article Mode (`~/.claude/workflows/update-docs/article-mode.md`)
+### Article Mode (`~/.claude/skills/update-docs/article-mode.md`)
 
 **Direct article update:**
 
@@ -162,7 +162,7 @@ mkdir -p "$DOCS_FOLDER"
 
 All libraries are in `~/.claude/lib/`:
 
-**task-docs-utils.sh** - .task-docs folder operations
+**task-docs-utils.sh** - Task docs folder operations
 - `ensure_task_docs_exists`, `find_task_dir`, `create_task_folder`
 
 **issue-utils.sh** - Issue key operations
@@ -187,7 +187,7 @@ All libraries are in `~/.claude/lib/`:
 
 ## Knowledge Base Integration
 
-The workflow reads knowledge base configuration from project YAML:
+The skill reads knowledge base configuration from project YAML:
 
 ```yaml
 documentation:
@@ -205,8 +205,8 @@ documentation:
 1. Initialize TodoWrite first
 2. Load project context (provides KB location)
 3. Detect and confirm update mode
-4. Execute selected mode workflow
-5. Create docs-updates folder in task .task-docs
+4. Execute selected mode skill
+5. Create docs-updates folder in `${PROJECT_TASK_DOCS_DIR}`
 6. Never overwrite original KB files - create copies
 7. Generate summary when complete
 8. Present for user review before any sync

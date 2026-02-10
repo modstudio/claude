@@ -6,7 +6,7 @@ description: Create focused commit plan with clear messages (global)
 
 I'll help you create a focused commit plan with clear, structured commit messages.
 
-**Workflow:** `~/.claude/workflows/commit-planning/main.md`
+**Skill:** `~/.claude/skills/commit-planning/main.md`
 
 ---
 
@@ -70,7 +70,7 @@ Mark todo as completed: "Analyze changes and group by logical units"
 
 Mark todo as in_progress: "Generate commit messages per standards"
 
-Follow: `~/.claude/workflows/commit-planning/main.md`
+Follow: `~/.claude/skills/commit-planning/main.md`
 
 **For each commit unit:**
 1. Create message following `$PROJECT_STANDARDS_DIR` format

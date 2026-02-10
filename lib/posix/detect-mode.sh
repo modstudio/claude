@@ -1,5 +1,5 @@
 #!/bin/sh
-# Detect appropriate planning/workflow mode based on current state
+# Detect appropriate planning/skill mode based on current state
 # Version: 1.1.0
 # Shell compatibility: POSIX sh (works in bash, zsh, dash, sh)
 
@@ -92,14 +92,14 @@ show_help() {
   cat << 'EOF'
 Usage: detect-mode.sh [OPTIONS]
 
-Detect appropriate planning/workflow mode based on current git state.
+Detect appropriate planning/skill mode based on current git state.
 
 Options:
   --json, -j    Output in JSON format
   --help, -h    Show this help
 
 Modes:
-  default       Planning workflow - handles existing tasks and new tasks
+  default       Planning skill - handles existing tasks and new tasks
   in_progress   Reconciliation - sync docs with existing implementation
 
 Output Fields:
