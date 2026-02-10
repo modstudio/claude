@@ -63,9 +63,9 @@ READ-ONLY (analysis) + WRITE (to review files)
    - Location: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review-{YYYYMMDD-HHMMSS}.md`
    - Purpose: Record of what was changed and why
 
-2. **Cumulative Review Log** (APPEND):
+2. **Cumulative Review Log** (APPEND — **always written if there are rejections**):
    - Location: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
-   - Purpose: Historical record preventing re-evaluation of same suggestions
+   - Purpose: Record rejected findings so they aren't re-raised in future reviews
 
 **DO NOT create files if:**
 - User just wants evaluation/opinion
@@ -124,7 +124,7 @@ READ-ONLY (analysis) + WRITE (to review files)
 - Categorize by severity
 - Note reviewer source/tool
 
-### 4.2 Load Previous Review History (CIRCULAR REVIEW PREVENTION)
+### 4.2 Load Previous Rejection History
 
 **CRITICAL: Read cumulative log BEFORE evaluating new suggestions**
 
@@ -133,39 +133,31 @@ TASK_FOLDER=$(find "$PROJECT_TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*" 2>/dev
 REVIEW_FILE="$TASK_FOLDER/logs/review.md"
 
 if [ -f "$REVIEW_FILE" ]; then
-  echo "=== PREVIOUS REVIEW DECISIONS ==="
+  echo "=== PREVIOUSLY REJECTED FINDINGS ==="
   cat "$REVIEW_FILE"
-  echo "=== END PREVIOUS DECISIONS ==="
+  echo "=== END REJECTED FINDINGS ==="
 fi
 ```
 
-### 4.3 Check for Duplicates (MANDATORY)
+### 4.3 Check Against Past Rejections (MANDATORY)
 
-**For EACH new suggestion, check the cumulative log:**
+**For EACH new suggestion, check if it was previously rejected:**
 
 | Check | Action |
 |-------|--------|
-| Same suggestion, same context | **SKIP** - reference past decision |
-| Same suggestion, different context | **RE-EVALUATE** - note context change |
-| Similar suggestion | **REFERENCE** - maintain consistency |
-| New suggestion | **EVALUATE** - proceed normally |
+| Same as past rejection, same context | **SKIP** — cite past decision |
+| Same as past rejection, code has changed | **RE-EVALUATE** — context changed |
+| Similar to past rejection | **REFERENCE** for consistency |
+| No match in log | **EVALUATE** normally |
 
-**If duplicate found, output:**
+**If match found, output:**
 ```markdown
 ### Suggestion #N: {Title}
 
-**Status:** DUPLICATE - See Review #{X} from {date}
-
-**Past Decision:** {ACCEPT/MODIFY/REJECT}
-**Past Reasoning:** {brief quote from past review}
-
-**Current Action:** Skipping - past decision still applies
+**Status:** PREVIOUSLY REJECTED — See Review #{X} from {date}
+**Past Reason:** {brief quote from rejection log}
+**Current Action:** Skipping — past rejection still applies
 ```
-
-**This prevents:**
-- Re-debating already-decided issues
-- Inconsistent decisions across reviews
-- Wasted evaluation time on resolved topics
 
 ---
 
@@ -235,15 +227,23 @@ For EACH suggestion from external review:
 1. Apply changes using Edit tool
 2. Run verification tests
 3. Report results
-4. **THEN create record files:**
+4. **Create session record:**
 
 {{MODULE: ~/.claude/modules/code-review/session-review-file.md}}
 
+---
+
+## Step 8b: Log Rejected Findings (ALWAYS — regardless of whether changes were applied)
+
+**If any suggestions were REJECTED, log them to prevent re-raising in future reviews.**
+
 {{MODULE: ~/.claude/modules/code-review/append-review-log.md}}
 
-**If user skips implementation:**
-- Do NOT create any files
-- Evaluation was chat-only
+**Source field:** `external:{reviewer/tool name}`
+
+This runs whether the user applied changes, viewed patches, or chose "Done". The rejection log is independent of code changes — its purpose is avoiding cyclical reviews.
+
+**Skip only if:** ISSUE_KEY is "none" or no TASK_FOLDER exists.
 
 ---
 

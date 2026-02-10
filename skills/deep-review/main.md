@@ -20,7 +20,8 @@ TodoWrite({
     {content: "Prepare agent context (pre-load modules)", status: "pending", activeForm: "Preparing agent context"},
     {content: "Launch 7 review agents in parallel", status: "pending", activeForm: "Running parallel review agents"},
     {content: "Synthesize results from all agents", status: "pending", activeForm: "Synthesizing review results"},
-    {content: "Present unified deep review report", status: "pending", activeForm: "Generating deep review report"}
+    {content: "Present unified deep review report", status: "pending", activeForm: "Generating deep review report"},
+    {content: "Log rejected findings to review history", status: "pending", activeForm: "Logging rejected findings"}
   ]
 })
 ```
@@ -501,6 +502,54 @@ If agents give contradictory advice:
 
 ---
 
+## Step 7: Log Rejected Findings
+
+**Mark todo in_progress: "Log rejected findings"**
+
+**Skip this step if ISSUE_KEY is "none" or TASK_FOLDER doesn't exist** — there's nowhere to write the log.
+
+### 7.1 Collect User Rejections
+
+After presenting the report, ask the user:
+
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "Any findings to dismiss as false positive or won't-fix? (List numbers, or select below)",
+    header: "Rejections",
+    multiSelect: false,
+    options: [
+      {label: "No rejections", description: "All findings are valid — nothing to log as rejected."},
+      {label: "Dismiss some findings", description: "I'll tell you which finding numbers to reject."},
+      {label: "Skip logging", description: "Don't write to review log this time."}
+    ]
+  }]
+})
+```
+
+**If "Dismiss some findings":** Ask user for finding numbers and rejection reasons. Collect these as **user-rejected** items.
+
+**If "Skip logging":** Mark todo complete and stop.
+
+### 7.2 Compile All Rejected Items
+
+Combine two sources of rejected findings:
+
+1. **Synthesis-dismissed** — findings from Step 5.4 marked "Verified: no — dismissed" (false positives caught by cross-validation)
+2. **User-dismissed** — findings the user just marked as false positive or won't-fix
+
+### 7.3 Write to Review Log
+
+{{MODULE: ~/.claude/modules/code-review/append-review-log.md}}
+
+**Source field:** `deep-review`
+
+Write all rejected items to the log. If no items were rejected (neither synthesis nor user), still append the review header with "No findings rejected" so future reviews know this code was reviewed.
+
+**Mark todo complete: "Log rejected findings"**
+
+---
+
 ## Execution Constraints
 
 **You MUST:**
@@ -512,6 +561,7 @@ If agents give contradictory advice:
 - Cross-validate EVERY finding by reading actual code — not just CRITICAL (Step 5.4)
 - Deduplicate findings across agents (Step 5.2)
 - Present unified report in chat only (Step 6)
+- Log rejected/dismissed findings to review history (Step 7)
 - Track all phases with TodoWrite
 
 **You MUST NOT:**
@@ -520,6 +570,7 @@ If agents give contradictory advice:
 - Skip synthesis (don't just concatenate agent outputs)
 - Auto-dismiss previously reviewed items (let user decide)
 - Make any code changes (entire review is read-only, except auto-fix in Step 2)
+- Log accepted findings — the review log only tracks rejections
 
 ---
 

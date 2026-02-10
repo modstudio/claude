@@ -174,15 +174,21 @@ AskUserQuestion({
 
 1. Apply code changes using Edit tool
 2. Run verification (lint/tests if quick)
-3. **Then** create record files:
+3. **Then** create session record:
 
 {{MODULE: ~/.claude/modules/code-review/session-review-file.md}}
 
+---
+
+## Step 7b: Log Rejected Findings
+
+**ALWAYS log rejected findings — regardless of whether changes were applied.**
+
 {{MODULE: ~/.claude/modules/code-review/append-review-log.md}}
 
-**If user chose "Done":**
-- Do NOT create any files
-- Evaluation was informational only
+**Source field:** `external:{reviewer/tool name}`
+
+Skip only if: ISSUE_KEY is "none" or no TASK_FOLDER exists.
 
 ---
 
@@ -211,8 +217,8 @@ AskUserQuestion({
 
 ### Chat Output
 - Verdicts go to chat, not files
-- Files only created when changes applied
-- Keep it lightweight
+- Session record only created when changes applied
+- Rejection log always written if there are rejections
 
 ### Independence
 - I am NOT a rubber stamp
@@ -223,11 +229,12 @@ AskUserQuestion({
 
 ## Quick Reference
 
-**Files created (only if changes applied):**
-- `${TASK_FOLDER}/logs/review-{timestamp}.md` - Session record
-- `${TASK_FOLDER}/logs/review.md` - Cumulative log (append)
+**Session record** (only if changes applied):
+- `${TASK_FOLDER}/logs/review-{timestamp}.md`
+
+**Rejection log** (always, if any rejections):
+- `${TASK_FOLDER}/logs/review.md` — append rejected findings only
 
 **No files created if:**
-- User chooses "Done"
-- No changes applied
-- Evaluation was informational
+- No ISSUE_KEY or TASK_FOLDER
+- Zero rejections and no changes applied
