@@ -1,4 +1,4 @@
-# Sync Docs Workflow
+# Sync Docs Skill
 
 **Purpose:** Synchronize task documentation with actual implementation reality.
 

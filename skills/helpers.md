@@ -1,6 +1,6 @@
-# Workflow Helpers
+# Skill Helpers
 
-**Common functions and variables used across all workflows**
+**Common functions and variables used across all skills**
 
 ---
 
@@ -25,11 +25,11 @@ TASK_DOCS_DIR="./.task-docs"  # Default from global.yaml: storage.task_docs_dir
 
 ### Task Docs Folder Management
 
-**IMPORTANT**: The `.task-docs` folder is PROJECT-LOCAL and stored in `{PROJECT_ROOT}/.task-docs/`.
+**IMPORTANT**: The task docs folder (`${PROJECT_TASK_DOCS_DIR}`) is PROJECT-LOCAL.
 
-- Add `.task-docs` to your `.gitignore` to prevent committing task artifacts
-- The folder must exist in your project directory for workflows to function
-- If no `.task-docs` folder is found, the agent will report and ask for guidance
+- Add the task docs folder to your `.gitignore` to prevent committing task artifacts
+- The folder must exist in your project directory for skills to function
+- If no task docs folder is found, the agent will report and ask for guidance
 
 #### Get Task Docs Root
 
@@ -196,21 +196,21 @@ fi
 
 ---
 
-## Workflow Documentation Patterns
+## Skill Documentation Patterns
 
 ### In Markdown Documentation
 
-When referencing `.task-docs` in workflow documentation files:
+When referencing task docs in skill documentation files, always use the `${PROJECT_TASK_DOCS_DIR}` variable:
 
 **✅ Correct patterns:**
 ```markdown
-- `.task-docs/{ISSUE_KEY}-{slug}/`            # Project-local location
-- `$(get_task_docs_dir)/{ISSUE_KEY}-{slug}/` # Using helper function
-- `{PROJECT_ROOT}/.task-docs/`                # Explicit project-local
+- `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`  # Variable reference (preferred)
+- `$(get_task_docs_dir)/{ISSUE_KEY}-{slug}/`       # Using helper function
 ```
 
 **❌ Incorrect patterns (DO NOT USE):**
 ```markdown
+- `.task-docs/{ISSUE_KEY}-{slug}/`    # Wrong - hardcodes default, misleads readers
 - `~/.task-docs/{ISSUE_KEY}-{slug}/`  # Wrong - implies global location
 - `$HOME/.task-docs/`                 # Wrong - global location
 - `/Users/username/.task-docs/`       # Hardcoded path
@@ -280,9 +280,9 @@ echo "$DOCS"
 
 ---
 
-## Integration with Workflows
+## Integration with Skills
 
-### Task Planning Workflow
+### Task Planning Skill
 
 ```bash
 # Phase 0: Load config
@@ -302,7 +302,7 @@ if [ -n "$ISSUE_KEY" ]; then
 fi
 ```
 
-### Code Review Workflow
+### Code Review Skill
 
 ```bash
 # Find task documentation for current branch
@@ -331,9 +331,9 @@ All helpers use configuration from:
 
 ## Benefits of Centralization
 
-1. **Single Source of Truth**: Change `.task-docs` location in ONE place
-2. **Consistency**: All workflows use the same patterns
-3. **Easy Updates**: Modify config, not every workflow file
+1. **Single Source of Truth**: Change `${PROJECT_TASK_DOCS_DIR}` location in ONE place
+2. **Consistency**: All skills use the same patterns
+3. **Easy Updates**: Modify config, not every skill file
 4. **Portability**: Easy to backup, sync, or migrate
 
 ---
@@ -368,7 +368,7 @@ Check `~/.task-docs/STAR-1234-*/` for documentation
 
 **After:**
 ```markdown
-Check `.task-docs/STAR-1234-*/` for documentation (project-local, see `~/.claude/workflows/helpers.md`)
+Check `${PROJECT_TASK_DOCS_DIR}/STAR-1234-*/` for documentation
 ```
 
 ---

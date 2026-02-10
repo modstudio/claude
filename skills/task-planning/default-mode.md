@@ -1,4 +1,4 @@
-# Default Mode - Planning Workflow
+# Default Mode - Planning Skill
 
 **Purpose:** Plan a task before implementation
 
@@ -40,7 +40,7 @@ TodoWrite({
 
 ---
 
-## Workflow Overview
+## Skill Overview
 
 ```
 1. quick-context → ISSUE_KEY?, FOLDER_EXISTS?

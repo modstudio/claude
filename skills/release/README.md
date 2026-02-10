@@ -1,11 +1,11 @@
-# Release Workflow
+# Release Skill
 
-CI/CD release workflow with multi-level validation and automatic project detection.
+CI/CD release skill with multi-level validation and automatic project detection.
 
 ## Quick Start
 
 ```bash
-# Invoke release workflow
+# Invoke release skill
 /release-g
 
 # Select release level:
@@ -23,10 +23,10 @@ CI/CD release workflow with multi-level validation and automatic project detecti
 ├── commands/
 │   └── release-g.md          ← Orchestrator (level selection)
 │
-└── workflows/
+└── skills/
     └── release/
         ├── README.md          ← This file (reference docs)
-        └── main.md            ← Release workflow implementation
+        └── main.md            ← Release skill implementation
 ```
 
 ---
@@ -35,7 +35,7 @@ CI/CD release workflow with multi-level validation and automatic project detecti
 
 ### 1. Project Detection
 
-Workflow automatically detects which project you're in:
+Skill automatically detects which project you're in:
 
 ```bash
 cd ~/Projects/starship
@@ -136,7 +136,7 @@ Step 2: Ask user to select release level
 
 ## Safety Guards
 
-The workflow includes multiple safety checks:
+The skill includes multiple safety checks:
 
 ### Pre-Flight Checks
 - ✅ Verify not on protected branch (master/main/develop)
@@ -162,7 +162,7 @@ The workflow includes multiple safety checks:
 
 ### PR Creation
 
-The workflow automatically:
+The skill automatically:
 - Creates PR if it doesn't exist
 - Updates PR if it already exists
 - Removes AI attribution from commit messages
@@ -192,7 +192,7 @@ Includes:
 
 ### Waiting for CI/CD
 
-The workflow polls for CI/CD completion:
+The skill polls for CI/CD completion:
 
 ```bash
 # Wait for feature branch CI
@@ -226,7 +226,7 @@ test_commands:
 
 ## YouTrack Integration
 
-If YouTrack MCP is enabled, the workflow can:
+If YouTrack MCP is enabled, the skill can:
 
 - Extract issue key from branch name using project pattern
 - Update issue status after successful release
@@ -239,7 +239,7 @@ If YouTrack MCP is enabled, the workflow can:
 
 ## Issue Key Extraction
 
-The workflow extracts the issue key from the current branch:
+The skill extracts the issue key from the current branch:
 
 ```bash
 # Branch examples:
@@ -354,7 +354,7 @@ ISSUE_KEY=$(git branch --show-current | grep -oE "${PROJECT_CONTEXT.issue_tracki
 
 ## Integration with Other Workflows
 
-The release workflow integrates with:
+The release skill integrates with:
 - `/plan-task-g` - Task planning creates task docs (in `$PROJECT_TASK_DOCS_DIR`) referenced in PRs
   - Storage location configured in `~/.claude/config/global.yaml`
 - `/code-review-g` - Code review before release
@@ -416,18 +416,18 @@ mcp_tools:
 
 ---
 
-## Workflow Details
+## Skill Details
 
 **Entry point**: `commands/release-g.md` (orchestrator)
 
-**Implementation**: `workflows/release/main.md`
+**Implementation**: `skills/release/main.md`
 
-**The workflow is sequential** (not multi-mode like code-review):
+**The skill is sequential** (not multi-mode like code-review):
 - User selects level (1, 2, or 3)
-- Workflow executes that level and all prerequisite levels
+- Skill executes that level and all prerequisite levels
 - Levels build on each other (1 → 2 → 3)
 
-**Why one workflow file**:
+**Why one skill file**:
 - Levels are sequential steps, not independent modes
 - Each level depends on previous level
 - Shared state throughout execution

@@ -14,7 +14,7 @@
 ## Assumptions
 
 - Task has been implemented (code changes exist)
-- `.task-docs/{ISSUE_KEY}-{slug}/` folder exists with planning docs
+- `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` folder exists with planning docs
 - Knowledge base location is configured in project YAML (`PROJECT_KB_LOCATION`)
 - User wants to update docs to reflect implementation changes
 

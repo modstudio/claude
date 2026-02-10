@@ -1,4 +1,4 @@
-# Update Documentation Workflow
+# Update Documentation Skill
 
 Update knowledge base documentation to reflect implementation changes from tasks or direct article edits.
 
@@ -30,18 +30,18 @@ Update knowledge base documentation to reflect implementation changes from tasks
 │       ├── summary.md                   <- Summary document template
 │       └── review-checklist.md          <- Review checklist template
 │
-└── workflows/
+└── skills/
     └── update-docs/
         ├── README.md                    <- This file
         ├── task-mode.md                 <- Task-based documentation updates
         └── article-mode.md              <- Direct article updates
 ```
 
-**Output Location**: Project-local `.task-docs/{ISSUE_KEY}-{slug}/docs-updates/`
+**Output Location**: Project-local `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/docs-updates/`
 
 **Output Files Created:**
 ```
-.task-docs/{ISSUE_KEY}-{slug}/
+${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 └── docs-updates/
     ├── {Article-Name-1}.md              <- Updated article content
     ├── {Article-Name-2}.md              <- Updated article content
@@ -55,7 +55,7 @@ Update knowledge base documentation to reflect implementation changes from tasks
 
 ### 1. Mode Detection
 
-Workflow automatically detects which mode based on user input:
+Skill automatically detects which mode based on user input:
 
 ```bash
 /update-docs-g STAR-1234
@@ -89,7 +89,7 @@ User -> /update-docs-g [input]
 Phase 0: Load project context
 Step 1: Auto-detect mode
 Step 2: Confirm mode with user
-Step 3: Execute selected mode workflow
+Step 3: Execute selected mode skill
     |
   [Task Mode] -> task-mode.md
   [Article Mode] -> article-mode.md
@@ -104,7 +104,7 @@ Step 3: Execute selected mode workflow
 
 **When to use**: After completing a task, to update docs affected by implementation
 
-**Flow**: 7-phase workflow
+**Flow**: 7-phase skill
 1. Discovery - Get task folder, analyze implementation
 2. Article Search - Find relevant knowledge base articles
 3. Impact Analysis - Determine which articles need updates
@@ -121,7 +121,7 @@ Step 3: Execute selected mode workflow
 
 **When to use**: Direct updates to specific article(s) without task context
 
-**Flow**: 5-phase workflow
+**Flow**: 5-phase skill
 1. Article Selection - User specifies article(s)
 2. Article Fetch - Read current content
 3. Change Analysis - Understand what needs updating
@@ -201,4 +201,4 @@ Every documentation update MUST:
 
 ---
 
-**Workflow Version:** 1.0.0
+**Skill Version:** 1.0.0

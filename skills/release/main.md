@@ -1,4 +1,4 @@
-# Release Workflow
+# Release Skill
 
 You are a release management agent. Your job is to guide the release process through CI/CD pipelines with appropriate validation checks.
 
@@ -33,7 +33,7 @@ You are a release management agent. Your job is to guide the release process thr
 
 {{MODULE: ~/.claude/modules/shared/git-safety-checks.md}}
 
-**CRITICAL:** Run safety checks before ANY git operations in this workflow.
+**CRITICAL:** Run safety checks before ANY git operations in this skill.
 
 ---
 
@@ -84,7 +84,7 @@ Level 3: Develop → Master
 
 ---
 
-## Workflow Steps
+## Skill Steps
 
 ### Level 1: Feature Branch Release
 

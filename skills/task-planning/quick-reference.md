@@ -1,6 +1,6 @@
-# Task Planning Workflow - Quick Reference
+# Task Planning Skill - Quick Reference
 
-**Full Documentation**: See `~/.claude/workflows/task-planning/`
+**Full Documentation**: See `~/.claude/skills/task-planning/`
 
 ---
 
@@ -54,7 +54,7 @@ Every task has these documents in `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/`
 
 ---
 
-## Workflow Phases
+## Skill Phases
 
 | Phase | Status | Key Actions |
 |-------|--------|-------------|
@@ -265,6 +265,6 @@ Contains all 6 document templates ready to copy.
 
 ---
 
-**Full Documentation**: `~/.claude/workflows/task-planning/`
+**Full Documentation**: `~/.claude/skills/task-planning/`
 **Templates**: `~/.claude/templates/task-planning/`
 **Slash Command**: `/plan-task [{ISSUE_KEY}]`

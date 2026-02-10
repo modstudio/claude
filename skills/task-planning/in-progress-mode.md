@@ -1,4 +1,4 @@
-# In Progress Mode - Reconciliation Workflow
+# In Progress Mode - Reconciliation Skill
 
 **Purpose:** Sync documentation with implementation reality
 
@@ -38,7 +38,7 @@ TodoWrite({
 
 ---
 
-## Workflow Overview
+## Skill Overview
 
 ```
 1. gather-implementation-state → commits, changed files, git state

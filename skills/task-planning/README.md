@@ -1,6 +1,6 @@
-# Task Planning Workflows
+# Task Planning Skills
 
-Task planning workflows with multi-project support via YAML configuration and two fundamental modes.
+Task planning skills with multi-project support via YAML configuration and two fundamental modes.
 
 **Uses Claude's Plan Mode discipline**: Read-only exploration → User approval → Implementation
 
@@ -12,7 +12,7 @@ Task planning workflows with multi-project support via YAML configuration and tw
 
 # Auto-detects mode based on context
 # Asks you to confirm mode selection
-# Executes the appropriate workflow
+# Executes the appropriate skill
 ```
 
 **See also:** `~/.claude/docs/task-planning-overview.md` for a high-level conceptual overview.
@@ -21,7 +21,7 @@ Task planning workflows with multi-project support via YAML configuration and tw
 
 ## Plan Mode Discipline
 
-**All planning workflows follow Claude's Plan Mode discipline.**
+**All planning skills follow Claude's Plan Mode discipline.**
 
 See `~/.claude/modules/shared/plan-mode-discipline.md` for detailed guidance.
 
@@ -38,7 +38,7 @@ See `~/.claude/modules/shared/plan-mode-discipline.md` for detailed guidance.
    - Do NOT modify project source code
    - Do NOT create git branches
    - Do NOT install dependencies
-   - **Exception:** Task docs folder (`.task-docs/`) may be created and populated during planning to track progress
+   - **Exception:** Task docs folder (`${PROJECT_TASK_DOCS_DIR}/`) may be created and populated during planning to track progress
 
 2. **Parallel research:**
    - Launch multiple search tools in parallel
@@ -76,18 +76,20 @@ See `~/.claude/modules/shared/plan-mode-discipline.md` for detailed guidance.
 │       ├── alephbeis.yaml                 ← Alephbeis config
 │       └── generic.yaml                   ← Fallback config
 │
-└── workflows/
+└── skills/
     ├── project-context.md                 ← Multi-project loader
     └── task-planning/
         ├── README.md                      ← This file
-        ├── default-mode.md                ← Planning workflow (existing + new tasks)
-        ├── in-progress-mode.md            ← Reconciliation workflow
+        ├── default-mode.md                ← Planning skill (existing + new tasks)
+        ├── in-progress-mode.md            ← Reconciliation skill
+        ├── sync-docs.md                   ← Sync docs with implementation
+        ├── config.md                      ← Configuration documentation
         └── quick-reference.md             ← Quick lookup guide
 ```
 
 **Storage Configuration**: Project-local `${PROJECT_TASK_DOCS_DIR}` folder (must exist in project directory)
 
-**Project Files (Created by Workflows):**
+**Project Files (Created by Skills):**
 ```
 ${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 ├── 00-status.md                  ← Status & Overview (index)
@@ -99,7 +101,7 @@ ${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
     ├── decisions.md              ← Decision Log (ADR-style)
     └── review.md                 ← External review feedback
 ```
-*Where `${PROJECT_TASK_DOCS_DIR}` defaults to `./.task-docs/` - PROJECT-LOCAL in the project directory (add to .gitignore)*
+*`${PROJECT_TASK_DOCS_DIR}` is PROJECT-LOCAL in the project directory (add to .gitignore)*
 
 ---
 
@@ -107,7 +109,7 @@ ${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/
 
 ### 1. Project Detection
 
-Workflow automatically detects which project you're in:
+Skill automatically detects which project you're in:
 
 ```bash
 cd ~/Projects/starship
@@ -142,9 +144,9 @@ Loads project-specific settings from `~/.claude/config/projects/{project}.yaml`:
 User → /plan-task-g
     ↓
 Phase 0: Load project context (from YAML)
-Step 1: Auto-detect mode (checks branch, .task-docs, commits)
+Step 1: Auto-detect mode (checks branch, task docs folder, commits)
 Step 2: Confirm mode with user
-Step 3: Execute selected mode workflow
+Step 3: Execute selected mode skill
     ↓
   [Default] → default-mode.md (planning - handles existing + new tasks)
   [In Progress] → in-progress-mode.md (reconciliation)
@@ -208,7 +210,7 @@ Default mode handles all planning scenarios through two branch points:
 - Default: Plan → then implement
 - In Progress: Already implemented → sync docs with reality
 
-**Flow**: Reconciliation workflow
+**Flow**: Reconciliation skill
 1. Gather implementation state (commits, changed files, git state)
 2. Read existing documentation
 3. Compare and identify discrepancies
@@ -391,14 +393,14 @@ All tasks use this standardized structure in `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KE
 
 **What to Commit to Git**
 
-**Recommendation**: `.task-docs/` should be **gitignored**
+**Recommendation**: `${PROJECT_TASK_DOCS_DIR}/` should be **gitignored**
 - Personal working directory
 - Single developer use case
 - Avoid clutter in repository
 
 **Alternative**: Commit if team wants visibility
-- Add `.task-docs/` to version control
-- Update `.gitignore` to allow `.task-docs/`
+- Add `${PROJECT_TASK_DOCS_DIR}/` to version control
+- Update `.gitignore` accordingly
 
 ---
 
@@ -410,10 +412,10 @@ All tasks use this standardized structure in `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KE
    - Proactively search for `${PROJECT_TASK_DOCS_DIR}/STAR-2233*` (glob pattern to find matching directory)
    - Auto-detect appropriate mode
    - Suggest mode to user
-   - If not found, offer to run planning workflow
+   - If not found, offer to run planning skill
 
 2. **When user asks to start a task**:
-   - Always suggest planning workflow first
+   - Always suggest planning skill first
    - Don't start coding without planning phase
    - Auto-detect and suggest mode
 
@@ -491,14 +493,14 @@ All tasks use this standardized structure in `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KE
 
 ---
 
-## Integration with Other Workflows
+## Integration with Other Skills
 
-The task planning workflows can be called by:
+The task planning skills can be called by:
 - `/plan-task-g` (mode selector - primary entry point)
-- Project-specific custom workflows
+- Project-specific custom skills
 - Other slash commands
 
-All workflows use the same:
+All skills use the same:
 - Project context detection
 - YAML configuration
 - Storage conventions
@@ -611,7 +613,7 @@ cd ~/Projects/my-project
 
 | Mode | Use Case | When Suggested | Output |
 |------|----------|----------------|--------|
-| **Default** | Planning any task | User wants to plan, start fresh, or resume planning | Standardized docs in `.task-docs/` |
+| **Default** | Planning any task | User wants to plan, start fresh, or resume planning | Standardized docs in `${PROJECT_TASK_DOCS_DIR}/` |
 | **In Progress** | Reconciliation | Code exists without matching docs, docs stale | Synced docs matching implementation |
 
 ---
@@ -623,19 +625,19 @@ cd ~/Projects/my-project
 - ✅ **Consistent structure** - Same docs every time
 - ✅ **Progress tracking** - Always know where you are
 - ✅ **Context preservation** - Never lose requirements
-- ✅ **Flexible workflow** - Choose the right mode for the situation
+- ✅ **Flexible skill** - Choose the right mode for the situation
 
 ### For Multiple Projects
-- ✅ **One workflow** - Works everywhere
+- ✅ **One skill** - Works everywhere
 - ✅ **Project-specific** - Standards, commands, patterns
-- ✅ **Easy maintenance** - Update YAML, not workflow
+- ✅ **Easy maintenance** - Update YAML, not skill
 - ✅ **Extensible** - Add projects easily
 
 ### For Teams
 - ✅ **Share configs** - YAML files are portable
 - ✅ **Consistent standards** - Same structure, formats
 - ✅ **Knowledge transfer** - Docs explain decisions
-- ✅ **Onboarding** - New developers can read `.task-docs/` docs
+- ✅ **Onboarding** - New developers can read task docs
 
 ---
 

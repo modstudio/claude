@@ -82,13 +82,13 @@ ISSUE_KEY=$(echo "$BRANCH" | grep -oE "${PROJECT_CONFIG.issue_tracking.regex}")
 
 ### Step 5: Output Context
 
-Provide structured context to calling workflow.
+Provide structured context to calling skill.
 
 ---
 
 ## Output Format
 
-When this workflow executes, it returns:
+When this skill executes, it returns:
 
 ```markdown
 # Project Context: {PROJECT_NAME}
@@ -152,8 +152,8 @@ When this workflow executes, it returns:
 {end for}
 
 **For this task:**
-- External Review: `.task-docs/{ISSUE_KEY}-{slug}/logs/review.md`
-- Decisions: `.task-docs/{ISSUE_KEY}-{slug}/logs/decisions.md`
+- External Review: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/review.md`
+- Decisions: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/logs/decisions.md`
 
 ---
 
@@ -264,16 +264,16 @@ When this workflow executes, it returns:
 
 ---
 
-## For Workflow Authors
+## For Skill Authors
 
-When your workflow needs project context:
+When your skill needs project context:
 
 ### Usage Pattern
 
 ```markdown
 ## Phase 0: Load Project Context
 
-Execute `/project-context` workflow.
+Execute `/project-context` skill.
 
 **Returns:** Project configuration object with all settings.
 
@@ -286,7 +286,7 @@ Execute `/project-context` workflow.
 - MCP tool availability: `PROJECT.mcp_tools.*`
 ```
 
-### Example: External Review Workflow
+### Example: External Review Skill
 
 ```bash
 # 1. Load project context
@@ -301,8 +301,8 @@ for file in "${PROJECT_CONFIG.standards.files[@]}"; do
 done
 
 # 4. Use project storage location for review log
-REVIEW_FILE=".task-docs/STAR-2233-Feature/logs/review.md"
-# Result: .task-docs/STAR-2233-Feature/logs/review.md
+REVIEW_FILE="${PROJECT_TASK_DOCS_DIR}/STAR-2233-Feature/logs/review.md"
+# Result: ${PROJECT_TASK_DOCS_DIR}/STAR-2233-Feature/logs/review.md
 
 # 5. Run project-specific tests
 eval "${PROJECT_CONFIG.test_commands.unit}"
@@ -389,7 +389,7 @@ citation_format:
   style: string            # Citation template
 
 storage:
-  location: string          # Always ".task-docs/{ISSUE_KEY}/"
+  location: string          # "${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}/"
   files:
     external_review: string # Filename
     specification: string   # Filename
@@ -464,7 +464,7 @@ If no project matches, `generic.yaml` is used with auto-detection:
 │       └── logs/
 │           ├── decisions.md
 │           └── review.md
-└── workflows/
+└── skills/
     ├── project-context.md  ← This file (loader)
     └── code-review/
         └── external.md

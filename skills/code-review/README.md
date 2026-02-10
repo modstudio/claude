@@ -1,6 +1,6 @@
-# Code Review Workflows
+# Code Review Skills
 
-Modular code review workflows with multi-project support via YAML configuration.
+Modular code review skills with multi-project support via YAML configuration.
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ Modular code review workflows with multi-project support via YAML configuration.
 
 ### Modular Design
 
-The code review workflow follows a modular architecture similar to task-planning:
+The code review skill follows a modular architecture similar to task-planning:
 
 ```
 commands/code-review-g.md (entry point)
@@ -29,10 +29,11 @@ commands/code-review-g.md (entry point)
   ├── modules/shared/quick-context.md (detect context)
   │
   └── Select Mode:
-      ├── workflows/code-review/report.md
-      ├── workflows/code-review/quick.md
-      ├── workflows/code-review/interactive.md
-      └── workflows/code-review/external.md
+      ├── skills/code-review/report.md
+      ├── skills/code-review/quick.md
+      ├── skills/code-review/interactive.md
+      ├── skills/code-review/external.md
+      └── skills/code-review/bug-zapper.md
           │
           └── Each calls shared modules:
               ├── modules/shared/full-context.md (Code Review Mode)
@@ -130,6 +131,19 @@ commands/code-review-g.md (entry point)
 
 **Output:** Accept/Modify/Reject decisions with reasoning
 
+### 5. Bug Zapper
+
+**Best for:** Deep bug hunting via static analysis
+
+**Process:**
+1. Detect context and get user approval
+2. Load review history (skip previously rejected suggestions)
+3. Gather full context and build dependency map
+4. 7-phase analysis: dependency chains, existence verification, type mismatches, null safety, logic errors, resource/state bugs, copy-paste bugs
+5. Generate bug report with severity ratings
+
+**Output:** Comprehensive bug report with CRITICAL/MAJOR/MINOR findings, fix suggestions, and file:line references
+
 ---
 
 ## File Structure
@@ -153,33 +167,34 @@ commands/code-review-g.md (entry point)
 │   │   ├── severity-levels.md
 │   │   └── citation-standards.md
 │   │
-│   └── shared/                       ← Cross-workflow
+│   └── shared/                       ← Cross-skill
 │       ├── quick-context.md
 │       ├── full-context.md           ← Includes "For Code Review Mode" section
 │       ├── standards-loading.md
 │       └── ...
 │
-├── workflows/
+├── skills/
 │   └── code-review/
 │       ├── README.md                 ← This file
 │       ├── report.md                 ← Full review controller
 │       ├── quick.md                  ← Quick review controller
 │       ├── interactive.md            ← Interactive controller
-│       └── external.md               ← External evaluation controller
+│       ├── external.md               ← External evaluation controller
+│       └── bug-zapper.md             ← Bug hunting (static analysis)
 ```
 
 ---
 
 ## Mode Comparison
 
-| Feature | Report | Quick | Interactive | External |
-|---------|--------|-------|-------------|----------|
-| Automated | Yes | Yes | No (STOP points) | Yes |
-| Auto-fix | Yes | Yes | No | No |
-| Architecture | Full | Critical only | Full | N/A |
-| Tests | All | Modified | All | Optional |
-| Time | 10-20 min | 5-10 min | 30+ min | Varies |
-| Best for | PRs | Bug fixes | Complex | Feedback |
+| Feature | Report | Quick | Interactive | External | Bug Zapper |
+|---------|--------|-------|-------------|----------|------------|
+| Automated | Yes | Yes | No (STOP points) | Yes | Yes |
+| Auto-fix | Yes | Yes | No | No | No |
+| Architecture | Full | Critical only | Full | N/A | N/A |
+| Tests | All | Modified | All | Optional | No (static) |
+| Time | 10-20 min | 5-10 min | 30+ min | Varies | 15-30 min |
+| Best for | PRs | Bug fixes | Complex | Feedback | Bug hunting |
 
 ---
 
@@ -311,7 +326,7 @@ grep test_commands ~/.claude/config/projects/*.yaml
 ~/.claude/lib/bin/gather-context
 
 # Check task docs exist
-ls .task-docs/
+ls ${PROJECT_TASK_DOCS_DIR}/
 ```
 
 ---

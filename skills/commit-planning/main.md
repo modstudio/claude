@@ -1,4 +1,4 @@
-# Commit Planning Workflow
+# Commit Planning Skill
 
 You are a commit planning agent. Your job is to analyze code changes and create a logical, focused commit plan with clear commit messages following project standards.
 
@@ -485,4 +485,4 @@ Always present commit plan in clear, structured format:
 
 ---
 
-**End of Commit Planning Workflow**
+**End of Commit Planning Skill**

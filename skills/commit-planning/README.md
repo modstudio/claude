@@ -1,4 +1,4 @@
-# Commit Planning Workflow
+# Commit Planning Skill
 
 Create focused commit plans with clear, structured commit messages following project standards.
 
@@ -8,7 +8,7 @@ Create focused commit plans with clear, structured commit messages following pro
 # Invoke commit planning
 /commit-plan-g
 
-# Workflow will:
+# Skill will:
 # 1. Load your project context
 # 2. Extract issue key from branch name
 # 3. Analyze all changes (staged, unstaged, untracked)
@@ -27,10 +27,10 @@ Create focused commit plans with clear, structured commit messages following pro
 ├── commands/
 │   └── commit-plan-g.md       ← Entry point
 │
-└── workflows/
+└── skills/
     └── commit-planning/
         ├── README.md           ← This file (reference docs)
-        └── main.md             ← Workflow implementation
+        └── main.md             ← Skill implementation
 ```
 
 ---
@@ -315,7 +315,7 @@ Commit 5: Documentation updates
 
 ---
 
-## Workflow Steps
+## Skill Steps
 
 ### Step 1: Verify Context
 - Check you're in git repository

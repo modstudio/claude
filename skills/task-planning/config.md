@@ -1,14 +1,14 @@
 # Task Planning Configuration
 
-**Central configuration for task planning workflows**
+**Central configuration for task planning skills**
 
 ---
 
 ## Storage Configuration
 
-### `.task-docs` Folder Location
+### `${PROJECT_TASK_DOCS_DIR}` Folder Location
 
-**IMPORTANT**: The `.task-docs` folder is PROJECT-LOCAL and stored in the project directory.
+**IMPORTANT**: The task docs folder (`${PROJECT_TASK_DOCS_DIR}`) is PROJECT-LOCAL and stored in the project directory.
 
 ```bash
 # Get task docs directory using helper function
@@ -24,27 +24,27 @@ find "$PROJECT_TASK_DOCS_DIR" -type d -name "${ISSUE_KEY}*"
 ### Why Project-Local?
 
 - **Project-Specific**: Task documentation stays with the relevant project
-- **Gitignored**: Add `.task-docs` to `.gitignore` to keep it out of version control
+- **Gitignored**: Add the task docs folder to `.gitignore` to keep it out of version control
 - **Context-Aware**: Tasks are automatically associated with their codebase
 - **Independent**: Each project has its own task workspace
 
 ### Setup Requirements
 
-**Each project must have a `.task-docs` folder:**
+**Each project must have a task docs folder:**
 
 ```bash
-# Create .task-docs folder in project root
+# Create task docs folder in project root (using default name)
 mkdir .task-docs
 
 # Add to .gitignore
 echo '.task-docs' >> .gitignore
 ```
 
-If the `.task-docs` folder is missing, workflows will report an error and ask for guidance.
+If the task docs folder is missing, skills will report an error and ask for guidance.
 
 ---
 
-## How to Use in Workflows
+## How to Use in Skills
 
 ### In Bash Scripts
 
@@ -54,9 +54,9 @@ If the `.task-docs` folder is missing, workflows will report an error and ask fo
 # Load configuration using helper
 TASK_DOCS_DIR=$(get_task_docs_dir)
 
-# Check if .task-docs folder exists
+# Check if task docs folder exists
 if [ -z "$PROJECT_TASK_DOCS_DIR" ]; then
-  echo "ERROR: No .task-docs folder found in project directory"
+  echo "ERROR: No task docs folder found in project directory"
   echo "Please create one: mkdir .task-docs && echo '.task-docs' >> .gitignore"
   exit 1
 fi
@@ -73,9 +73,10 @@ ls -la "$PROJECT_TASK_DOCS_DIR/"
 
 ### In Documentation
 
-When referencing `.task-docs` folders in workflow docs:
-- Use: `.task-docs/{ISSUE_KEY}-{slug}/` (project-local)
+When referencing task docs in skill documentation:
+- Use: `${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}-{slug}/` (variable reference - preferred)
 - Use: `$(get_task_docs_dir)/{ISSUE_KEY}-{slug}/` (using helper)
+- Don't use: `.task-docs/{ISSUE_KEY}-{slug}/` (hardcodes default, misleads readers)
 - Don't use: `~/.task-docs/` or `$HOME/.task-docs/` (implies global location)
 
 ### In Commands
@@ -101,11 +102,10 @@ Each project can specify its storage location in its YAML file:
 ```yaml
 # ~/.claude/config/projects/myproject.yaml
 storage:
-  location: ".task-docs/{ISSUE_KEY}/"  # Default: project-local
-  # This will be resolved to: {PROJECT_ROOT}/.task-docs/{ISSUE_KEY}/
+  location: "${PROJECT_TASK_DOCS_DIR}/{ISSUE_KEY}/"
 ```
 
-The `get_task_docs_dir()` helper function automatically detects the project-local `.task-docs` folder.
+The `get_task_docs_dir()` helper function automatically detects the project-local task docs folder.
 
 ---
 
@@ -114,7 +114,7 @@ The `get_task_docs_dir()` helper function automatically detects the project-loca
 **If moving from global to project-local:**
 
 ```bash
-# For each project, create .task-docs folder
+# For each project, create task docs folder
 cd ~/Projects/myproject
 mkdir .task-docs
 echo '.task-docs' >> .gitignore
@@ -132,12 +132,12 @@ ls -la .task-docs/
 ## Best Practices
 
 1. **Always use `get_task_docs_dir()`** - Don't hardcode paths
-2. **Check for errors** - Verify `.task-docs` folder exists before operations
+2. **Check for errors** - Verify task docs folder exists before operations
 3. **Use find command** - More reliable than glob for searching
-4. **Add to .gitignore** - Keep `.task-docs` out of version control
-5. **Report missing folder** - If `.task-docs` doesn't exist, inform user and ask for guidance
+4. **Add to .gitignore** - Keep task docs out of version control
+5. **Report missing folder** - If folder doesn't exist, inform user and ask for guidance
 
 ---
 
 **Last Updated**: 2025-11-17
-**Purpose**: Single source of truth for `.task-docs` storage location
+**Purpose**: Single source of truth for `${PROJECT_TASK_DOCS_DIR}` storage location
