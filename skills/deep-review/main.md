@@ -100,6 +100,26 @@ Group files by type — this determines which bug-hunter agents get which files:
 
 Store the file list — it will be passed to all agents.
 
+### Compute Diff Metrics
+
+Count and store these metrics — they drive agent resource allocation in Step 4:
+
+```bash
+# Count files by type
+git diff ${PROJECT_BASE_BRANCH:-develop}..HEAD --name-only | wc -l        # total_files
+git diff ${PROJECT_BASE_BRANCH:-develop}..HEAD --name-only | grep '\.php$' | wc -l  # backend_files
+git diff ${PROJECT_BASE_BRANCH:-develop}..HEAD --name-only | grep -E '\.(vue|js|ts|jsx|tsx)$' | wc -l  # frontend_files
+git diff ${PROJECT_BASE_BRANCH:-develop}..HEAD --name-only | grep -iE 'test|spec' | wc -l  # test_files
+
+# Count total lines changed
+git diff ${PROJECT_BASE_BRANCH:-develop}..HEAD --stat | tail -1  # total_lines (additions + deletions)
+
+# Check for security-sensitive files
+git diff ${PROJECT_BASE_BRANCH:-develop}..HEAD --name-only | grep -iE 'auth|login|password|token|permission|gate|policy|middleware|csrf|encrypt|secret|api.*key' | wc -l  # security_files
+```
+
+Store as: `total_files`, `backend_files`, `frontend_files`, `test_files`, `total_lines`, `security_files`
+
 **Mark todo complete: "Gather full review context"**
 
 ---
@@ -125,6 +145,7 @@ Read and store the content of all module files that agents will need. This pre-l
 Read these files and store their content:
 1. `~/.claude/modules/code-review/severity-levels.md`
 2. `~/.claude/modules/code-review/citation-standards.md`
+3. `~/.claude/modules/code-review/self-verification.md`
 
 ### Agent-Specific Modules
 
@@ -183,7 +204,7 @@ NEVER use Edit or Write tools.
 [Pre-loaded module content specific to this agent]
 
 ## Shared Standards
-[Content from severity-levels.md + citation-standards.md]
+[Content from severity-levels.md + citation-standards.md + self-verification.md]
 
 ## Project Standards
 [Content from $PROJECT_STANDARDS_DIR files, if any]
@@ -207,11 +228,51 @@ PROJECT_BASE_BRANCH={value}
 PROJECT_TEST_CMD_UNIT={value}
 PROJECT_TEST_CMD_ALL={value}
 
+## Resource Guidance
+RESOURCE GUIDANCE: You have approximately {max_turns} turns to complete this review.
+There are {file_count} files totaling ~{line_count} changed lines in your scope.
+Prioritize files by likely impact. If you are running low on turns, summarize
+remaining files rather than skipping them entirely.
+
 Begin: Read each changed file listed above and apply your review checklist.
 You can read ANY file in the repo — do not wait for permission on reads.
+IMPORTANT: Before writing your final output, you MUST run the Self-Verification
+Gate from the Shared Standards above. Re-read the actual code for every finding,
+verify evidence, confirm scope, and drop anything that doesn't hold up.
 Report findings in the structured format defined in your role.
-End with your summary counts (CRITICAL: N, MAJOR: N, MINOR: N).
+End with your summary counts (CRITICAL: N, MAJOR: N, MINOR: N) and your
+self-verification line (N reported, M dropped).
 ```
+
+### Dynamic Agent Configuration
+
+Use the diff metrics from Step 1 to set `model` and `max_turns` per agent.
+
+**Model selection rules:**
+
+| Agent | Default Model | Upgrade to Opus When |
+|-------|--------------|---------------------|
+| bug-hunter-backend | sonnet | `backend_files > 20` |
+| bug-hunter-frontend | sonnet | never |
+| arch-reviewer | sonnet | never |
+| correctness-reviewer | sonnet | `security_files > 0` OR `total_lines > 500` |
+| quality-reviewer | sonnet | never |
+| test-reviewer | sonnet | never |
+| dead-code-reviewer | sonnet | never |
+
+**max_turns formula per agent:**
+
+| Agent | Formula | Ceiling |
+|-------|---------|---------|
+| bug-hunter-backend | `15 + backend_files * 3` | 75 |
+| bug-hunter-frontend | `15 + frontend_files * 3` | 60 |
+| arch-reviewer | `15 + total_files * 2` | 50 |
+| correctness-reviewer | `20 + total_files * 3` | 80 |
+| quality-reviewer | `10 + total_files * 2` | 40 |
+| test-reviewer | `15 + test_files * 4` | 60 |
+| dead-code-reviewer | `10 + total_files * 2` | 40 |
+
+Apply `min(formula, ceiling)` for each agent. Include the computed `max_turns` value in both the Task call parameter AND the prompt's Resource Guidance section.
 
 ### Launch All 7 Agents
 
@@ -221,7 +282,8 @@ End with your summary counts (CRITICAL: N, MAJOR: N, MINOR: N).
 // Agent 1: Bug Hunter (Backend — PHP/Laravel)
 Task({
   subagent_type: "general-purpose",
-  model: "sonnet",
+  model: /* "sonnet" or "opus" per model selection rules */,
+  max_turns: /* computed from formula */,
   description: "Bug Hunter Backend: Review PHP files for bugs",
   prompt: /* constructed prompt with bug-hunter-backend role + bugs-review + bug-categories modules, ONLY backend files */
 })
@@ -230,6 +292,7 @@ Task({
 Task({
   subagent_type: "general-purpose",
   model: "sonnet",
+  max_turns: /* computed from formula */,
   description: "Bug Hunter Frontend: Review Vue/JS/TS files for bugs",
   prompt: /* constructed prompt with bug-hunter-frontend role + bugs-review + bug-categories modules, ONLY frontend files */
 })
@@ -238,6 +301,7 @@ Task({
 Task({
   subagent_type: "general-purpose",
   model: "sonnet",
+  max_turns: /* computed from formula */,
   description: "Arch Reviewer: Review N files for architecture",
   prompt: /* constructed prompt with arch-reviewer role + architecture-review + review-rules modules */
 })
@@ -245,7 +309,8 @@ Task({
 // Agent 4: Correctness & Security Reviewer
 Task({
   subagent_type: "general-purpose",
-  model: "sonnet",
+  model: /* "sonnet" or "opus" per model selection rules */,
+  max_turns: /* computed from formula */,
   description: "Correctness Reviewer: Review N files for correctness/security",
   prompt: /* constructed prompt with correctness-reviewer role + correctness-review + performance-security modules */
 })
@@ -254,6 +319,7 @@ Task({
 Task({
   subagent_type: "general-purpose",
   model: "sonnet",
+  max_turns: /* computed from formula */,
   description: "Quality Reviewer: Review N files for code quality",
   prompt: /* constructed prompt with quality-reviewer role + code-quality-review module */
 })
@@ -262,6 +328,7 @@ Task({
 Task({
   subagent_type: "general-purpose",
   model: "sonnet",
+  max_turns: /* computed from formula */,
   description: "Test Reviewer: Review N files for test quality + run tests",
   prompt: /* constructed prompt with test-reviewer role + test-review module + test commands */
 })
@@ -270,6 +337,7 @@ Task({
 Task({
   subagent_type: "general-purpose",
   model: "sonnet",
+  max_turns: /* computed from formula */,
   description: "Dead Code Reviewer: Find unused code and refactor remnants",
   prompt: /* constructed prompt with dead-code-reviewer role + dead-code-review module */
 })
@@ -433,16 +501,16 @@ If agents give contradictory advice:
 
 ## Review Agent Coverage
 
-| Agent | Role | Findings | Critical | Major | Minor | Status |
-|-------|------|----------|----------|-------|-------|--------|
-| bug-hunter-backend | PHP/Laravel bugs | N | N | N | N | Complete/Failed/Timeout |
-| bug-hunter-frontend | Vue/JS/TS bugs | N | N | N | N | Complete/Failed/Timeout |
-| arch-reviewer | Architecture | N | N | N | N | Complete/Failed/Timeout |
-| correctness-reviewer | Correctness/Security | N | N | N | N | Complete/Failed/Timeout |
-| quality-reviewer | Code quality | N | N | N | N | Complete/Failed/Timeout |
-| test-reviewer | Tests | N | N | N | N | Complete/Failed/Timeout |
-| dead-code-reviewer | Dead code | N | N | N | N | Complete/Failed/Timeout |
-| **TOTAL** | | **N** | **N** | **N** | **N** | |
+| Agent | Model | Turns | Findings | Critical | Major | Minor | Self-Verified | Status |
+|-------|-------|-------|----------|----------|-------|-------|---------------|--------|
+| bug-hunter-backend | sonnet/opus | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| bug-hunter-frontend | sonnet | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| arch-reviewer | sonnet | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| correctness-reviewer | sonnet/opus | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| quality-reviewer | sonnet | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| test-reviewer | sonnet | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| dead-code-reviewer | sonnet | N | N | N | N | N | N reported, M dropped | Complete/Failed/Timeout |
+| **TOTAL** | | | **N** | **N** | **N** | **N** | | |
 
 ## Test Results
 [From test-reviewer agent output]
@@ -556,6 +624,8 @@ Write all rejected items to the log. If no items were rejected (neither synthesi
 - Pre-load ALL module content before launching agents (Step 3)
 - Launch ALL 7 agents in a single response (Step 4)
 - Include the PERMISSION POLICY block in every agent prompt (auto-approve reads)
+- Include self-verification.md content in every agent prompt (agents fact-check their own findings)
+- Compute diff metrics in Step 1 and use them to set max_turns and model per agent (Step 4)
 - Send only relevant files to each bug-hunter (backend files → backend, frontend files → frontend)
 - Run frontend-backend contract check during synthesis (Step 5.3)
 - Cross-validate EVERY finding by reading actual code — not just CRITICAL (Step 5.4)
