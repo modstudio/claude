@@ -76,15 +76,11 @@ documentation:
     style: ".ai/rules/10-coding-style.md"
     testing: ".ai/rules/30-testing.md"
 
-  # Knowledge base configuration (YouTrack docs)
+  # Knowledge base configuration (YouTrack articles)
   knowledge_base:
-    location: "storage/app/youtrack_docs"
-
-    # Source type: gitignored (docs fetched from YouTrack API, stored locally but not committed)
-    source: "gitignored"
-
-    # Access method: bash (use Read tool to access files)
-    access_method: "bash"
+    source: "mcp"
+    access_method: "youtrack_mcp"
+    note: "Articles accessed via mcp_tools.youtrack (search_articles, get_article)"
 
 mcp_tools:
   laravel_boost:
@@ -116,6 +112,8 @@ mcp_tools:
       - update_issue
       - add_issue_comment
       - get_issue_comments
+      - search_articles
+      - get_article
 
 tech_stack:
   backend:

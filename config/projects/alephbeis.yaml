@@ -71,15 +71,11 @@ documentation:
     style: ".ai/rules/codestyle.md"
     testing: ".ai/rules/testing.md"
 
-  # Knowledge base configuration (project examples)
+  # Knowledge base configuration (YouTrack articles)
   knowledge_base:
-    location: ".ai/examples"
-
-    # Source type: git (docs committed to repository)
-    source: "git"
-
-    # Access method: bash (use Read tool to access files)
-    access_method: "bash"
+    source: "mcp"
+    access_method: "youtrack_mcp"
+    note: "Articles accessed via mcp_tools.youtrack (search_articles, get_article)"
 
 mcp_tools:
   laravel_boost:
@@ -115,6 +111,8 @@ mcp_tools:
       - update_issue
       - add_issue_comment
       - get_issue_comments
+      - search_articles
+      - get_article
 
 tech_stack:
   backend:

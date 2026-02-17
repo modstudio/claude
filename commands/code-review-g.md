@@ -35,7 +35,7 @@ Present the detected context as a table.
 
 ### Step 2: Select Review Mode
 
-**MANDATORY: Use AskUserQuestion to present ALL 5 options:**
+**MANDATORY: Use AskUserQuestion to present ALL 6 options:**
 
 ```javascript
 AskUserQuestion({
@@ -46,6 +46,7 @@ AskUserQuestion({
     options: [
       {label: "Report Review (Recommended)", description: "Comprehensive automated review with detailed report. Best for feature branches."},
       {label: "Bug Zapper", description: "Hunt for actual bugs - traces dependencies, verifies existence, finds type mismatches. Not about style."},
+      {label: "Architecture Review", description: "Deep architecture analysis with leanness check. DDD, Laravel practices, over-engineering detection."},
       {label: "Quick Review", description: "Fast checklist for small PRs (<500 lines). Checks critical issues and runs modified tests."},
       {label: "Interactive Review", description: "Manual step-by-step with STOP points. Best for complex changes."},
       {label: "External Review Evaluation", description: "Evaluate external review against project standards."}
@@ -97,6 +98,26 @@ Follow the appropriate skill based on user selection:
 
 **Best for:** Finding actual bugs before they crash in production
 
+#### Architecture Review
+**Skill:** `~/.claude/skills/code-review/arch-review.md`
+**Standalone command:** `/arch-review-g`
+
+**Modules used:**
+- `shared/quick-context.md` - Quick context detection
+- `architecture-review.md` - DDD and structure checks
+- `leanness-review.md` - Over-engineering detection
+
+**Focus areas:**
+- DDD structure and domain boundaries
+- Laravel best practices (via Boost MCP)
+- Inline documentation compliance
+- Leanness analysis (over-engineering)
+- Pattern consistency
+
+**NOT about:** Bugs, style, tests, security
+
+**Best for:** Reviewing architecture decisions, checking for over-engineering, planning mode validation
+
 #### Quick Review
 **Skill:** `~/.claude/skills/code-review/quick.md`
 
@@ -136,7 +157,8 @@ commands/code-review-g.md (entry point)
   │
   └── Select Mode:
       ├── skills/code-review/report.md
-      ├── skills/code-review/bug-zapper.md    <- Bug hunting mode
+      ├── skills/code-review/bug-zapper.md         <- Bug hunting mode
+      ├── skills/code-review/arch-review.md        <- Architecture + leanness
       ├── skills/code-review/quick.md
       ├── skills/code-review/interactive.md
       └── skills/code-review/external.md
@@ -145,6 +167,7 @@ commands/code-review-g.md (entry point)
               ├── modules/shared/full-context.md (Code Review Mode)
               ├── modules/code-review/auto-fix-phase.md
               ├── modules/code-review/architecture-review.md
+              ├── modules/code-review/leanness-review.md       <- Over-engineering detection
               ├── modules/code-review/correctness-review.md
               ├── modules/code-review/code-quality-review.md
               ├── modules/code-review/bugs-review.md           <- Bug detection patterns
@@ -167,6 +190,7 @@ commands/code-review-g.md (entry point)
 |------|-----------|-------|--------|
 | Report | Yes | Everything | Comprehensive report |
 | Bug Zapper | Yes | Actual bugs only | Bug list with fixes |
+| Architecture | Yes | Structure + leanness | Architecture report |
 | Quick | Yes | Critical issues | Pass/Fail report |
 | Interactive | Manual | Everything | Step-by-step findings |
 | External | Yes | Evaluating feedback | Accept/Reject analysis |
