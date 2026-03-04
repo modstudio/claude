@@ -7,7 +7,7 @@ tools:
   - Glob
   - Bash
 model: sonnet
-maxTurns: 30
+maxTurns: 100
 ---
 
 # Correctness & Security Reviewer Agent

@@ -172,6 +172,15 @@ For each changed file, note:
 
 ---
 
+## Parallelization (Optional)
+
+When analyzing >15 changed files, consider spawning specialized agents in parallel
+instead of doing all phases sequentially.
+
+{{MODULE: ~/.claude/modules/shared/agent-resource-allocation.md}}
+
+---
+
 ## Phase 1: Dependency Chain Analysis
 
 **For EACH changed file, complete this checklist:**

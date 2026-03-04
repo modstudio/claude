@@ -246,33 +246,9 @@ self-verification line (N reported, M dropped).
 
 ### Dynamic Agent Configuration
 
-Use the diff metrics from Step 1 to set `model` and `max_turns` per agent.
+{{MODULE: ~/.claude/modules/shared/agent-resource-allocation.md}}
 
-**Model selection rules:**
-
-| Agent | Default Model | Upgrade to Opus When |
-|-------|--------------|---------------------|
-| bug-hunter-backend | sonnet | `backend_files > 20` |
-| bug-hunter-frontend | sonnet | never |
-| arch-reviewer | sonnet | never |
-| correctness-reviewer | sonnet | `security_files > 0` OR `total_lines > 500` |
-| quality-reviewer | sonnet | never |
-| test-reviewer | sonnet | never |
-| dead-code-reviewer | sonnet | never |
-
-**max_turns formula per agent:**
-
-| Agent | Formula | Ceiling |
-|-------|---------|---------|
-| bug-hunter-backend | `15 + backend_files * 3` | 75 |
-| bug-hunter-frontend | `15 + frontend_files * 3` | 60 |
-| arch-reviewer | `15 + total_files * 2` | 50 |
-| correctness-reviewer | `20 + total_files * 3` | 80 |
-| quality-reviewer | `10 + total_files * 2` | 40 |
-| test-reviewer | `15 + test_files * 4` | 60 |
-| dead-code-reviewer | `10 + total_files * 2` | 40 |
-
-Apply `min(formula, ceiling)` for each agent. Include the computed `max_turns` value in both the Task call parameter AND the prompt's Resource Guidance section.
+Include the computed `max_turns` value in both the Task call parameter AND the prompt's Resource Guidance section.
 
 ### Launch All 7 Agents
 

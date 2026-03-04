@@ -7,7 +7,7 @@ tools:
   - Glob
   - Bash
 model: sonnet
-maxTurns: 30
+maxTurns: 100
 ---
 
 # Frontend Bug Hunter Agent (Vue / JavaScript / TypeScript)
