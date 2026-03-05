@@ -28,3 +28,7 @@ stats-cache.json
 /paste-cache/
 /tasks/
 /image-cache/
+/teams/
+/backups/
+/telemetry/
+.credentials.json
